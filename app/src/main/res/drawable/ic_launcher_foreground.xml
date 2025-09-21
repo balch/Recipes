@@ -1,30 +1,108 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path android:pathData="M31,63.928c0,0 6.4,-11 12.1,-13.1c7.2,-2.6 26,-1.4 26,-1.4l38.1,38.1L107,108.928l-32,-1L31,63.928z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:endX="85.84757"
-                android:endY="92.4963"
-                android:startX="42.9492"
-                android:startY="49.59793"
-                android:type="linear">
-                <item
-                    android:color="#44000000"
-                    android:offset="0.0" />
-                <item
-                    android:color="#00000000"
-                    android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
+    
+    <!-- Cooking pot body -->
     <path
-        android:fillColor="#FFFFFF"
-        android:fillType="nonZero"
-        android:pathData="M65.3,45.828l3.8,-6.6c0.2,-0.4 0.1,-0.9 -0.3,-1.1c-0.4,-0.2 -0.9,-0.1 -1.1,0.3l-3.9,6.7c-6.3,-2.8 -13.4,-2.8 -19.7,0l-3.9,-6.7c-0.2,-0.4 -0.7,-0.5 -1.1,-0.3C38.8,38.328 38.7,38.828 38.9,39.228l3.8,6.6C36.2,49.428 31.7,56.028 31,63.928h46C76.3,56.028 71.8,49.428 65.3,45.828zM43.4,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2c-0.3,-0.7 -0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C45.3,56.528 44.5,57.328 43.4,57.328L43.4,57.328zM64.6,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2s-0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C66.5,56.528 65.6,57.328 64.6,57.328L64.6,57.328z"
+        android:fillColor="#6D4C41"
+        android:pathData="M35,45 L73,45 L73,70 Q73,75 68,75 L40,75 Q35,75 35,70 Z" />
+    
+    <!-- Pot rim -->
+    <path
+        android:fillColor="#5D4037"
+        android:pathData="M33,43 L75,43 Q77,43 77,45 Q77,47 75,47 L33,47 Q31,47 31,45 Q31,43 33,43 Z" />
+    
+    <!-- Pot handles -->
+    <path
+        android:fillColor="#5D4037"
+        android:pathData="M28,48 Q25,48 25,51 Q25,54 28,54 L31,54 L31,48 Z" />
+    <path
+        android:fillColor="#5D4037"
+        android:pathData="M77,48 L80,48 Q83,48 83,51 Q83,54 80,54 L77,54 Z" />
+    
+    <!-- Pot lid -->
+    <path
+        android:fillColor="#8D6E63"
+        android:pathData="M32,42 Q32,39 54,39 Q76,39 76,42 Q76,45 54,45 Q32,45 32,42 Z" />
+    
+    <!-- Lid handle -->
+    <path
+        android:fillColor="#5D4037"
+        android:pathData="M51,40 Q51,37 54,37 Q57,37 57,40 Q57,43 54,43 Q51,43 51,40 Z" />
+    
+    <!-- Steam lines -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M48,35 Q48,32 50,32 Q52,32 52,35"
+        android:strokeWidth="1.5"
+        android:strokeColor="#FFD54F" />
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M54,33 Q54,30 56,30 Q58,30 58,33"
+        android:strokeWidth="1.5"
+        android:strokeColor="#FFD54F" />
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M60,35 Q60,32 62,32 Q64,32 64,35"
+        android:strokeWidth="1.5"
+        android:strokeColor="#FFD54F" />
+    
+    <!-- Recipe list lines on the right side -->
+    <path
+        android:fillColor="#66BB6A"
+        android:pathData="M78,52 L95,52"
+        android:strokeWidth="2.5"
+        android:strokeColor="#66BB6A" />
+    <path
+        android:fillColor="#66BB6A"
+        android:pathData="M78,57 L92,57"
+        android:strokeWidth="2.5"
+        android:strokeColor="#66BB6A" />
+    <path
+        android:fillColor="#66BB6A"
+        android:pathData="M78,62 L94,62"
+        android:strokeWidth="2.5"
+        android:strokeColor="#66BB6A" />
+    <path
+        android:fillColor="#66BB6A"
+        android:pathData="M78,67 L90,67"
+        android:strokeWidth="2.5"
+        android:strokeColor="#66BB6A" />
+    
+    <!-- List bullet points -->
+    <path
+        android:fillColor="#FF8A65"
+        android:pathData="M73.5,52 Q73.5,50.5 75,50.5 Q76.5,50.5 76.5,52 Q76.5,53.5 75,53.5 Q73.5,53.5 73.5,52 Z" />
+    <path
+        android:fillColor="#FF8A65"
+        android:pathData="M73.5,57 Q73.5,55.5 75,55.5 Q76.5,55.5 76.5,57 Q76.5,58.5 75,58.5 Q73.5,58.5 73.5,57 Z" />
+    <path
+        android:fillColor="#FF8A65"
+        android:pathData="M73.5,62 Q73.5,60.5 75,60.5 Q76.5,60.5 76.5,62 Q76.5,63.5 75,63.5 Q73.5,63.5 73.5,62 Z" />
+    <path
+        android:fillColor="#FF8A65"
+        android:pathData="M73.5,67 Q73.5,65.5 75,65.5 Q76.5,65.5 76.5,67 Q76.5,68.5 75,68.5 Q73.5,68.5 73.5,67 Z" />
+    
+    <!-- Small food elements around the pot -->
+    <!-- Carrot -->
+    <path
+        android:fillColor="#FF5722"
+        android:pathData="M20,58 L18,63 Q18,65 20,65 Q22,65 22,63 L20,58 Z" />
+    <path
+        android:fillColor="#66BB6A"
+        android:pathData="M19,58 L19,55 M20,58 L20,56 M21,58 L21,55"
         android:strokeWidth="1"
-        android:strokeColor="#00000000" />
+        android:strokeColor="#66BB6A" />
+    
+    <!-- Tomato -->
+    <path
+        android:fillColor="#F44336"
+        android:pathData="M21,72 Q21,68 25,68 Q29,68 29,72 Q29,76 25,76 Q21,76 21,72 Z" />
+    <path
+        android:fillColor="#66BB6A"
+        android:pathData="M23,68 Q25,70 27,68"
+        android:strokeWidth="1.5"
+        android:strokeColor="#66BB6A" />
 </vector>
