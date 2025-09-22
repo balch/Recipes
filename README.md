@@ -17,8 +17,9 @@ The latest incarnation for my reference app is called Recipes.
 |  <img src="screenshots/darkmode-category.png" width="200" alt="Dark Mode Category">  |  <img src="screenshots/darkmode-cuisine.png" width="200" alt="Dark Mode Cuisine">  |  <img src="screenshots/darkmode-detail-list.png" width="200" alt="Dark Mode Detail List">  |  <img src="screenshots/darkmode-detail-step.png" width="200" alt="Dark Mode Detail Step By Step">  |
 | <img src="screenshots/lightmode-category.png" width="200" alt="Light Mode Category"> | <img src="screenshots/lightmode-desert.png" width="200" alt="Light Mode Category"> | <img src="screenshots/lightmode-detail-list.png" width="200" alt="Light Mode Detail List"> | <img src="screenshots/lightmode-detail-step.png" width="200" alt="Light Mode Detail Step By Step"> |
 
+https://github.com/user-attachments/assets/cac97b4d-723e-4d29-a6a2-46b2f1368478
 
-### Notable Dependencies
+### Dependencies
 | Dependency               | Description             | 
 |--------------------------|-------------------------|
 | [TheMealDB](https://www.themealdb.com/api.php) | Free, easy to use, API for Food Recipes |
