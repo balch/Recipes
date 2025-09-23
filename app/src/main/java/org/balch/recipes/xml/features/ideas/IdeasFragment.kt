@@ -10,7 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import org.balch.recipes.databinding.FragmentIdeasBinding
@@ -53,7 +53,7 @@ class IdeasFragment : Fragment() {
         binding.recyclerView.apply {
             adapter = categoryAdapter
             // a more reasonable column count
-            layoutManager = GridLayoutManager(context, 2)
+            layoutManager = LinearLayoutManager(context)
         }
     }
 

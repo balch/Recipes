@@ -49,7 +49,7 @@ class DetailFragment : Fragment() {
                 return DetailsViewModel(
                     detailType = detailType,
                     repository = repository,
-                    dispatcherProvider =dispatcherProvider
+                    dispatcherProvider = dispatcherProvider
                 ) as T
             }
         }

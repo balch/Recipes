@@ -13,9 +13,10 @@
         android:contentDescription="Recipe Image"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-    />
+        tools:src="@drawable/ic_launcher_foreground"
+        />
 
-    <androidx.core.widget.ContentLoadingProgressBar
+    <org.balch.recipes.xml.widgets.FoodLoadingIndicatorView
         android:id="@+id/progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -24,6 +25,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        tools:visibility="visible"
     />
 
     <TextView

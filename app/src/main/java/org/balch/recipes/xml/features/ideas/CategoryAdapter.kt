@@ -3,18 +3,19 @@ package org.balch.recipes.xml.features.ideas
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil3.load
 import org.balch.recipes.R
 import org.balch.recipes.core.models.Category
+import org.balch.recipes.databinding.ItemCategoryBinding
 
 class CategoryAdapter : ListAdapter<Category, CategoryAdapter.CategoryViewHolder>(CategoryDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.list_item_category, parent, false)
+            .inflate(R.layout.item_category, parent, false)
         return CategoryViewHolder(view)
     }
 
@@ -23,10 +24,11 @@ class CategoryAdapter : ListAdapter<Category, CategoryAdapter.CategoryViewHolder
     }
 
     class CategoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val nameTextView: TextView = itemView.findViewById(R.id.category_name)
+        private val binding = ItemCategoryBinding.bind(itemView)
 
         fun bind(category: Category) {
-            nameTextView.text = category.name
+            binding.recipeImage.load(category.thumbnail)
+            binding.categoryName.text = category.name
         }
     }
 }
