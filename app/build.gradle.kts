@@ -39,6 +39,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
 
     testOptions {
@@ -68,6 +69,7 @@ dependencies {
     implementation(libs.haze)
     implementation(libs.haze.materials)
     implementation(libs.coil.compose)
+    implementation(libs.coil.base)
     implementation(libs.coil.network.okhttp)
     implementation(libs.okhttp)
 
@@ -92,6 +94,9 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.legacy.support.v4)
+    implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.fragment.ktx)
     ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit)
