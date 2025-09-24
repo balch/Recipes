@@ -2,18 +2,20 @@ package org.balch.recipes.xml.features.search
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil3.load
 import org.balch.recipes.core.models.MealDescriptor
-import org.balch.recipes.databinding.FragmentSearchItemBinding
+import org.balch.recipes.databinding.ItemSearchBinding
 
-class SearchAdapter : ListAdapter<MealDescriptor, SearchAdapter.ViewHolder>(MealDiffCallback()) {
+class SearchAdapter(
+    private val onItemClicked: (MealDescriptor) -> Unit
+) : ListAdapter<MealDescriptor, SearchAdapter.ViewHolder>(MealDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
-            FragmentSearchItemBinding.inflate(
+            ItemSearchBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
@@ -26,18 +28,15 @@ class SearchAdapter : ListAdapter<MealDescriptor, SearchAdapter.ViewHolder>(Meal
         holder.bind(item)
     }
 
-    inner class ViewHolder(binding: FragmentSearchItemBinding) :
+    inner class ViewHolder(private val binding: ItemSearchBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        private val idView: TextView = binding.itemNumber
-        private val contentView: TextView = binding.content
 
         fun bind(item: MealDescriptor) {
-            idView.text = item.id
-            contentView.text = item.name
-        }
-
-        override fun toString(): String {
-            return super.toString() + " '" + contentView.text + "'"
+            binding.root.setOnClickListener {
+                onItemClicked(item)
+            }
+            binding.recipeImage.load(item.thumbnail)
+            binding.content.text = item.name
         }
     }
 }

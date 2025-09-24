@@ -23,7 +23,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/search_view"
-        tools:listitem="@layout/fragment_search_item" />
+        tools:listitem="@layout/item_search" />
 
     <org.balch.recipes.xml.widgets.FoodLoadingIndicatorView
         android:id="@+id/progress_bar"

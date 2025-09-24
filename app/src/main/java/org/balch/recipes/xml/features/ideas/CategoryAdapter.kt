@@ -11,7 +11,9 @@ import org.balch.recipes.R
 import org.balch.recipes.core.models.Category
 import org.balch.recipes.databinding.ItemCategoryBinding
 
-class CategoryAdapter : ListAdapter<Category, CategoryAdapter.CategoryViewHolder>(CategoryDiffCallback()) {
+class CategoryAdapter(
+    private val onItemClicked: (Category) -> Unit
+) : ListAdapter<Category, CategoryAdapter.CategoryViewHolder>(CategoryDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -20,7 +22,11 @@ class CategoryAdapter : ListAdapter<Category, CategoryAdapter.CategoryViewHolder
     }
 
     override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val category = getItem(position)
+        holder.bind(category)
+        holder.itemView.setOnClickListener {
+            onItemClicked(category)
+        }
     }
 
     class CategoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

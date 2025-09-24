@@ -1,5 +1,6 @@
 package org.balch.recipes.xml.features.search
 
+import android.R.attr.category
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,14 +16,19 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.balch.recipes.R
 import org.balch.recipes.core.coroutines.DispatcherProvider
+import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.core.repository.RecipeRepository
 import org.balch.recipes.databinding.FragmentSearchBinding
 import org.balch.recipes.features.search.SearchUiState
 import org.balch.recipes.features.search.SearchViewModel
+import org.balch.recipes.xml.features.details.DetailFragment
 import javax.inject.Inject
 
 
@@ -51,7 +57,7 @@ class SearchFragment : Fragment() {
                 return SearchViewModel(
                     searchType = searchType,
                     repository = repository,
-                    dispatcherProvider =dispatcherProvider
+                    dispatcherProvider = dispatcherProvider,
                 ) as T
             }
         }
@@ -74,7 +80,7 @@ class SearchFragment : Fragment() {
 
         setupRecyclerView()
         observeUiState()
-        setupSearchView()
+//        setupSearchView()
 
         binding.retryButton.setOnClickListener {
             // Retry logic can be implemented in the ViewModel
@@ -82,10 +88,20 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        searchAdapter = SearchAdapter()
+        searchAdapter = SearchAdapter(
+            onItemClicked = { mealDescriptor ->
+                parentFragmentManager.beginTransaction()
+                    .replace(
+                        R.id.root_layout,
+                        DetailFragment.newInstance(DetailType.Lookup(mealDescriptor.id))
+                    )
+                    .addToBackStack(null)
+                    .commit()
+            }
+        )
         binding.recyclerView.apply {
             adapter = searchAdapter
-            layoutManager = GridLayoutManager(context, 2)
+            layoutManager = LinearLayoutManager(context)
         }
     }
 
@@ -109,9 +125,11 @@ class SearchFragment : Fragment() {
 
     private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 viewModel.uiState.collect { state ->
-                    handleState(state)
+                    withContext(dispatcherProvider.main) {
+                        handleState(state)
+                    }
                 }
             }
         }

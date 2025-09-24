@@ -138,7 +138,7 @@ class SearchViewModel @AssistedInject constructor(
             .flowOn(dispatcherProvider.default)
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds),
+                started = SharingStarted.Eagerly,
                 initialValue = initialUiState
             )
 

@@ -13,9 +13,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import org.balch.recipes.R
+import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.databinding.FragmentIdeasBinding
 import org.balch.recipes.features.ideas.IdeasUiState
 import org.balch.recipes.features.ideas.IdeasViewModel
+import org.balch.recipes.xml.features.search.SearchFragment
 
 /**
  * A fragment representing a list of Items.
@@ -49,7 +52,18 @@ class IdeasFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        categoryAdapter = CategoryAdapter()
+        categoryAdapter = CategoryAdapter(
+            onItemClicked = { category ->
+                parentFragmentManager.beginTransaction()
+                    .replace(
+                        R.id.root_layout,
+                        SearchFragment.newInstance(SearchType.Category(category.name))
+                    )
+                    .addToBackStack(null)
+                    .commit()
+            }
+        )
+
         binding.recyclerView.apply {
             adapter = categoryAdapter
             // a more reasonable column count
