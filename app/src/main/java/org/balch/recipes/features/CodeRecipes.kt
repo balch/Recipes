@@ -54,7 +54,7 @@ class CodeRecipes @Inject constructor() {
             area = CodeArea.Navigation,
             title = "Bottom Navigation",
             description = """
-                    - Wrap `NavigationBar` in `Scaffold`\n"+ 
+                    - Wrap `NavigationBar` in `Scaffold` 
                     - Use `AnimatedVisibility` to control visibility of `NavigationBar`
                     - `TopLevelRoute` represent displayable items in `NavigationBarItem`
                     - Manage `backstack` in the `NavigationBar`
@@ -340,6 +340,39 @@ class CodeRecipes @Inject constructor() {
         ),
     )
 
-    fun getRandomRecipes(count: Int): List<CodeRecipe> =
-        recipes.shuffled().take(count)
+    private val randomRecipes = mutableListOf<CodeRecipe>(
+        *recipes.shuffled().toTypedArray()
+    )
+
+    /**
+     * Retrieves a specified number of random `CodeRecipe` objects.
+     * The method attempts to return the requested count of recipes
+     * and refills the pool of available random recipes if necessary.
+     *
+     * @param count The number of `CodeRecipe` objects to retrieve.
+     * @return A list of `CodeRecipe` objects, with a size of up to the specified count.
+     */
+    fun getRandomRecipes(count: Int): List<CodeRecipe> {
+        val recipes = mutableListOf<CodeRecipe>()
+        repeat(count) {
+            randomRecipes.removeLastOrNull()?.let {
+                recipes.add(it)
+            }
+        }
+
+        val underrunCount = recipes.size - count
+        if (underrunCount > 0 || randomRecipes.isEmpty()) {
+            randomRecipes.addAll(recipes.shuffled())
+            if (underrunCount > 0) {
+                repeat(underrunCount) {
+                    randomRecipes.removeLastOrNull()?.let {
+                        recipes.add(it)
+                    }
+                }
+            }
+        }
+
+        return recipes
+    }
+
 }
