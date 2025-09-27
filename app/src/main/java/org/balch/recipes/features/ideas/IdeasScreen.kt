@@ -1,5 +1,6 @@
 package org.balch.recipes.features.ideas
 
+import android.R.attr.textStyle
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +20,8 @@ import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -59,8 +62,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import coil3.util.CoilUtils.result
 import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
@@ -71,10 +74,11 @@ import org.balch.recipes.core.models.Area
 import org.balch.recipes.core.models.Category
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.Ingredient
-import org.balch.recipes.core.models.UniqueItem
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.widgets.FoodLoadingIndicator
+import org.balch.recipes.ui.widgets.MarkdownCodeSnippet
+import kotlin.math.abs
 import kotlin.random.Random
 
 /**
@@ -272,7 +276,8 @@ private fun IdeasLayout(
                             .hazeSource(state = hazeState),
                         paddingValues = innerPadding,
                         onCategoryClick = onCategoryClick,
-                        onCodeRecipeClick = onCodeRecipeClick
+                        onCodeRecipeClick = onCodeRecipeClick,
+                        hazeState = hazeState,
                     )
                 }
 
@@ -290,7 +295,8 @@ private fun IdeasLayout(
                             .hazeSource(state = hazeState),
                         paddingValues = innerPadding,
                         onAreaClick = onAreaClick,
-                        onCodeRecipeClick = onCodeRecipeClick
+                        onCodeRecipeClick = onCodeRecipeClick,
+                        hazeState = hazeState,
                     )
                 }
 
@@ -308,7 +314,8 @@ private fun IdeasLayout(
                             .hazeSource(state = hazeState),
                         paddingValues = innerPadding,
                         onIngredientClick = onIngredientClick,
-                        onCodeRecipeClick = onCodeRecipeClick
+                        onCodeRecipeClick = onCodeRecipeClick,
+                        hazeState = hazeState,
                     )
                 }
             }
@@ -489,6 +496,7 @@ private fun ErrorState(
 @Composable
 private fun ResultsGrid(
     items: List<GridItem>,
+    hazeState: HazeState,
     onScrollChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
@@ -540,7 +548,7 @@ private fun ResultsGrid(
                 is GridItem.CodeRecipeItem -> {
                     CodeRecipeCard(
                         codeRecipe = item.codeRecipe,
-                        onClick = { onCodeRecipeClick(item.codeRecipe) }
+                        onClick = { onCodeRecipeClick(item.codeRecipe) },
                     )
                 }
             }
@@ -626,7 +634,7 @@ private fun AreaCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val color = getHazeColorForIndex(Math.abs((Random.nextInt())))
+    val color = getHazeColorForIndex(abs((Random.nextInt())))
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -669,7 +677,7 @@ private fun IngredientCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val color = getHazeColorForIndex(Math.abs((Random.nextInt())))
+    val color = getHazeColorForIndex(abs((Random.nextInt())))
 
     Card(
         modifier = modifier
@@ -711,18 +719,16 @@ private fun IngredientCard(
 private fun CodeRecipeCard(
     codeRecipe: CodeRecipe,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val color = codeRecipe.area.color
-
     Card(
         modifier = modifier
-            .height(120.dp)
-            .alpha(.9f)
             .padding(horizontal = 12.dp, vertical = 6.dp)
+            .height(140.dp)
             .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
     ) {
         Box(
             modifier = Modifier
@@ -752,25 +758,24 @@ private fun CodeRecipeCard(
                             color.copy(alpha = 0.2f),
                             RoundedCornerShape(4.dp)
                         )
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                        .padding(vertical = 2.dp)
                 )
 
-                // Title
-                Text(
+                BasicText(
+                    autoSize = TextAutoSize.StepBased(maxFontSize = 16.sp),
                     text = codeRecipe.title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleSmall
+                        .copy(MaterialTheme.colorScheme.onSurface),
                 )
-                Text(
-                    modifier = Modifier
-                            .verticalScroll(rememberScrollState()),
 
+                BasicText(
+                    modifier = Modifier.height(160.dp)
+                        .verticalScroll(rememberScrollState()),
                     text = codeRecipe.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodySmall
+                        .copy(MaterialTheme.colorScheme.onSurface),
                 )
             }
         }
