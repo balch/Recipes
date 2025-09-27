@@ -24,7 +24,6 @@ import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.repository.RecipeRepository
 import org.balch.recipes.features.CodeRecipes
 import javax.inject.Inject
-import kotlin.random.Random
 
 /**
  * ViewModel responsible for managing and providing UI state for the "Ideas" screen,
@@ -129,8 +128,8 @@ sealed interface IdeasUiState {
     val codeRecipes: List<CodeRecipe>
         get() = emptyList()
 
-    val isTabLevelState: Boolean
-        get() = false
+    val isTopLevelState: Boolean
+        get() = true
 
     data object Loading : IdeasUiState
     data class Error(val message: String) : IdeasUiState
@@ -142,17 +141,17 @@ sealed interface IdeasUiState {
         val areas: List<Area>,
         override val imageUrl: String?,
         override val codeRecipes: List<CodeRecipe>,
-        override val isTabLevelState: Boolean = true,
+        override val isTopLevelState: Boolean = true,
     ) : IdeasUiState
     data class Ingredients(
         val ingredients: List<Ingredient>,
         override val imageUrl: String?,
         override val codeRecipes: List<CodeRecipe>,
-        override val isTabLevelState: Boolean = true,
+        override val isTopLevelState: Boolean = false,
     ) : IdeasUiState
     data class CodeRecipes(
         override val imageUrl: String?,
         override val codeRecipes: List<CodeRecipe>,
-        override val isTabLevelState: Boolean = true,
+        override val isTopLevelState: Boolean = false,
     ) : IdeasUiState
 }

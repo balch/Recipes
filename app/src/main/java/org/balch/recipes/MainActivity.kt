@@ -108,7 +108,13 @@ class MainActivity : ComponentActivity() {
                                 val isSelected = topLevelRoute == backStackManager.peek()
                                 NavigationBarItem(
                                     selected = isSelected,
-                                    onClick = { backStackManager.push(topLevelRoute) },
+                                    onClick = {
+                                        // pop the current screen off the backstack if it not the root
+                                        if (backStackManager.peek() != TOP_LEVEL_ROUTES[0]) {
+                                            backStackManager.pop()
+                                        }
+                                        backStackManager.push(topLevelRoute)
+                                    },
                                     icon = {
                                         Icon(
                                             imageVector = topLevelRoute.icon,

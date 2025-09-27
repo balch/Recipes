@@ -118,6 +118,7 @@ class CodeRecipes @Inject constructor() {
                     - Use `AnimatedVisibility` to control visibility of `NavigationBar`
                     - `TopLevelRoute` represent displayable items in `NavigationBarItem`
                     - Manage `backstack` in the `NavigationBar`
+                       - Pop the current screen off the backstack if it not the root
                 """.trimIndent(),
                 fileName = "MainActivity.kt",
                 codeSnippet = """
@@ -137,7 +138,13 @@ class CodeRecipes @Inject constructor() {
                                     val isSelected = topLevelRoute == backStackManager.peek()
                                     NavigationBarItem(
                                         selected = isSelected,
-                                        onClick = { backStackManager.push(topLevelRoute) },
+                                        onClick = {
+                                            // pop the current screen off the backstack if it not the root
+                                            if (backStackManager.peek() != TOP_LEVEL_ROUTES[0]) {
+                                                backStackManager.pop()
+                                            }
+                                            backStackManager.push(topLevelRoute)
+                                        },
                                         icon = {
                                             Icon(
                                                 imageVector = topLevelRoute.icon,
@@ -205,8 +212,8 @@ class CodeRecipes @Inject constructor() {
                 area = CodeArea.Navigation3,
                 title = "backstack",
                 description = """
-                    - You own the backstack.
-                    - Simple push/pop works for simple applications
+                    - In **Nav3**, you own the backstack.
+                    - Push/Pop works for simple applications
                 """.trimIndent(),
                 fileName = "BackstackManager.kt",
                 codeSnippet = """
@@ -236,7 +243,7 @@ class CodeRecipes @Inject constructor() {
                 area = CodeArea.Architecture,
                 title = "ViewModel creation",
                 description = """
-                - Use `HiltViewModel` and `assistedFactory` to creat unique ViewModel per screen to push on the backstack.
+                - Use `HiltViewModel` and `assistedFactory` to create unique ViewModel per screen to push on the backstack.
                 - Define Factory using `@AssistedFactory` annotation
                 - Use Factory to create ViewModels to pass to Screens via `hiltViewModel`                
                 """.trimIndent(),
@@ -271,7 +278,7 @@ class CodeRecipes @Inject constructor() {
                 area = CodeArea.Theme,
                 title = """Markdown Render🎨💰""",
                 description = """
-                 - Simple Markdown Composable that renders beautiful code in Android(and other platforms)
+                 - Simple Markdown Composable that renders beautiful code in Android (and other platforms)
                  - Support Light/Dark Theme and Code Markdown syntax
                  - Thank you **Mike Penz**!!
                 """.trimIndent(),
@@ -413,7 +420,7 @@ class CodeRecipes @Inject constructor() {
                     viewModel: IdeasViewModel
                 ) {
                     // Return to categories if this is not a top level tob
-                    BackHandler(enabled = !uiState.isTabLevelState) {
+                    BackHandler(enabled = !uiState.isTopLevelState) {
                         viewModel.changeBrowsableType(BrowsableType.Category)
                     }
                 

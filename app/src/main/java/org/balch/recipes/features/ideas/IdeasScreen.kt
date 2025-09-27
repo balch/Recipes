@@ -100,7 +100,7 @@ fun IdeasScreen(
     val uiState: IdeasUiState by viewModel.uiState.collectAsState()
 
     // Return to categories if this is not a top level tob
-    BackHandler(enabled = !uiState.isTabLevelState) {
+    BackHandler(enabled = !uiState.isTopLevelState) {
         viewModel.changeBrowsableType(BrowsableType.Category)
     }
 
