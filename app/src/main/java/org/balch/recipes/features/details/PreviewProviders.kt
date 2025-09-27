@@ -4,9 +4,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import org.balch.recipes.core.models.CodeArea
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.Meal
-import org.balch.recipes.core.models.MealSummary
-import org.balch.recipes.core.models.SearchType
-import org.balch.recipes.features.search.SearchUiState
 
 class DetailStateProvider : PreviewParameterProvider<UiState> {
     override val values = mutableListOf(
@@ -53,7 +50,7 @@ class DetailCodeRecipeProvider : PreviewParameterProvider<UiState.ShowCodeRecipe
         ),
         UiState.ShowCodeRecipe(
             CodeRecipe(
-                area = CodeArea.Navigation,
+                area = CodeArea.Navigation3,
                 title = "Navigation Title",
                 description = "`Navigation` Description",
                 codeSnippet = "print('Hello, Navigation!')"

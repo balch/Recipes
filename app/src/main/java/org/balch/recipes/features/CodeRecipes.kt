@@ -51,7 +51,7 @@ class CodeRecipes @Inject constructor() {
                 """.trimIndent()
         ),
         CodeRecipe(
-            area = CodeArea.Navigation,
+            area = CodeArea.Navigation3,
             title = "Bottom Navigation",
             description = """
                     - Wrap `NavigationBar` in `Scaffold` 
@@ -93,7 +93,7 @@ class CodeRecipes @Inject constructor() {
                     """.trimIndent()
         ),
         CodeRecipe(
-            area = CodeArea.Navigation,
+            area = CodeArea.Navigation3,
             title = "entryDecorators",
             description = "- Define `entryDecorators` to provide state management and to facilitate ViewModel creation.",
             fileName = "MainActivity.kt",
@@ -112,10 +112,10 @@ class CodeRecipes @Inject constructor() {
                 """.trimIndent()
         ),
         CodeRecipe(
-            area = CodeArea.Navigation,
+            area = CodeArea.Navigation3,
             title = "entryProvider DSL syntax",
             description = """
-                - For simple apps, the `entryProvider` DSL syntax
+                - Use `entryProvider` DSL syntax for simple App Nav
                 - Provides a convenient way to create ViewModels and Screens on the backstack
                 """.trimIndent(),
             fileName = "MainActivity.kt",
@@ -142,7 +142,7 @@ class CodeRecipes @Inject constructor() {
             """.trimIndent()
         ),
         CodeRecipe(
-            area = CodeArea.Navigation,
+            area = CodeArea.Navigation3,
             title = "backstack",
             description = """
                     - You own the backstack.
@@ -209,9 +209,11 @@ class CodeRecipes @Inject constructor() {
         ),
         CodeRecipe(
             area = CodeArea.Theme,
-            title = "Markdown Render for the win",
+            title = """Markdown Render🎨💰""",
             description = """
-                 - Simple Markdown Composable that renders beautiful code in Android (and other platforms).
+                 - Simple Markdown Composable that renders beautiful code in _root_ide_package_.io.ktor.client.engine.android.Android(
+                and other platforms
+            ).
                  - Support Light/Dark Theme and Code Markdown syntax
                  - Thank you **Mike Penz**!!
                 """.trimIndent(),
@@ -338,6 +340,162 @@ class CodeRecipes @Inject constructor() {
                 ```
                 """.trimIndent()
         ),
+        CodeRecipe(
+            area = CodeArea.Navigation3,
+            title = "Enable `BackHandler` per screen",
+            description = """
+                - Conditionally enable `BackHandler` 
+                - Use to return to initial Screen state before exiting app/screen
+                """.trimIndent(),
+            codeSnippet = """
+                @Composable
+                fun IdeasScreen(
+                    modifier: Modifier = Modifier,
+                    viewModel: IdeasViewModel = hiltViewModel(),
+                ) {
+                    val uiState: IdeasUiState by viewModel.uiState.collectAsState()
+                
+                    // Return to categories if we are in an area or ingredient
+                    BackHandler(enabled = uiState is IdeasUiState.Ingredients
+                                || uiState is IdeasUiState.Areas) {
+                        viewModel.changeBrowsableType(BrowsableType.Category)
+                    }
+                
+                    IdeasLayout(
+                        uiState = uiState,
+                        onBrowsableTypeChange = viewModel::changeBrowsableType,
+                        modifier = modifier
+                    )
+                }               
+                """.trimIndent(),
+            fileName = "IdeasScreen.kt"
+        ),
+        CodeRecipe(
+            area = CodeArea.Theme,
+            title = "glassmorphism blur with Haze",
+            description = """
+                - Use **Haze** to create iOS-like glassmorphism blur 
+                - Save the `hazeState` via `rememberHazeState`
+                - Make the `NavDisplay` contents the source to blur by calling `hazeSource()`
+                - Apply blur effect to `NavigationBar` by calling `hazeEffect()`
+                   - For progressive blur use `HazeProgressive.verticalGradient`
+                - Each Screen manages its own blur effect for the `TopAppBar`
+                - Thank you **Chris Banes**!!
+            """.trimIndent(),
+            codeSnippet = """
+                @Composable
+                private fun MainContent() {
+                    val hazeState = rememberHazeState()
+            
+                    RecipesTheme {
+                        Scaffold(
+                            bottomBar = {
+                                NavigationBar(
+                                    containerColor = Color.Transparent,
+                                    contentColor = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier
+                                        .hazeEffect(state = hazeState, style = LocalHazeStyle.current) {
+                                            HazeProgressive.verticalGradient(
+                                                startIntensity = 1f,
+                                                endIntensity = 0f,
+                                            )
+                                        },
+                                    ) {
+                                    // ...
+                                    }
+                                }
+                            }
+                        ) { innerPadding ->
+                            NavDisplay(
+                                modifier = Modifier.hazeSource(state = hazeState),
+                                entryProvider = entryProvider {
+                                    entry<Ideas> {
+                                        IdeasScreen(
+                                        // ...
+                                        )
+                                    }
+                                    entry<SearchRoute> { searchRoute ->
+                                        // ...
+                                    }
+                                    entry<Search> {
+                                        // ...
+                                    }
+                                    entry<DetailRoute> { detailRoute ->
+                                        // ...
+                                    }
+                                    entry<Info> { InfoScreen() }
+                                },
+                            )
+                        }
+                    }
+                }                
+            """.trimIndent(),
+            fileName = "MainActivity.kt"
+        ),
+        CodeRecipe(
+            area = CodeArea.Navigation3,
+            title = "Bottom Nav Auto Hide",
+            description = """
+               - Calculate `showNavigationBar` from `firstVisibleIndex` and scroll direction
+               - Use `showNavigationBar` in `AnimatedVisibility` to control visibility of `NavigationBar`
+               - Delegate scroll handling to each Screen via `onScrollChange`
+                  - Set `firstVisibleIndex` in handler to emit new `showNavigationBar` state 
+            """.trimIndent(),
+            codeSnippet = """
+                @Composable
+                private fun MainContent() {
+                    var previousVisibleIndex by remember { mutableIntStateOf(0) }
+                    var firstVisibleIndex by remember { mutableIntStateOf(0) }
+                    var showNavigationBar by remember { mutableStateOf(true) }
+                    LaunchedEffect(firstVisibleIndex) {
+                        showNavigationBar = firstVisibleIndex == 0 || firstVisibleIndex < previousVisibleIndex
+                        previousVisibleIndex = firstVisibleIndex
+                    }
+            
+                    RecipesTheme {
+                        Scaffold(
+                            bottomBar = {
+                                AnimatedVisibility(
+                                    visible = showNavigationBar && backStackManager.peek() is TopLevelRoute,
+                                    enter = slideInVertically { it },
+                                    exit = slideOutVertically { it },
+                                ) {
+                                    NavigationBar(
+                                        // ...
+                                    )
+                                }
+                            }
+                        ) { innerPadding ->
+                            NavDisplay(
+                                entryProvider = entryProvider {
+                                    entry<Ideas> {
+                                        IdeasScreen(
+                                            onScrollChange = { firstVisibleIndex = it }
+                                            // ...
+                                        )
+                                    }
+                                    entry<SearchRoute> { searchRoute ->
+                                        SearchScreen(
+                                            onScrollChange = { firstVisibleIndex = it },
+                                            // ...
+                                        )
+                                    }
+                                    entry<Search> {
+                                        SearchScreen(
+                                            onScrollChange = { firstVisibleIndex = it },
+                                            // ...
+                                        )
+                                    }
+                                    // ...
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+            """.trimIndent(),
+            fileName = "MainActivity.kt"
+        )
     )
 
     private val randomRecipes = mutableListOf<CodeRecipe>(
@@ -348,31 +506,44 @@ class CodeRecipes @Inject constructor() {
      * Retrieves a specified number of random `CodeRecipe` objects.
      * The method attempts to return the requested count of recipes
      * and refills the pool of available random recipes if necessary.
+     * All shuffled recipes are displayed before reshuffling occurs.
      *
      * @param count The number of `CodeRecipe` objects to retrieve.
      * @return A list of `CodeRecipe` objects, with a size of up to the specified count.
      */
     fun getRandomRecipes(count: Int): List<CodeRecipe> {
-        val randos = mutableListOf<CodeRecipe>()
-        repeat(count) {
-            randomRecipes.removeLastOrNull()?.let {
-                randos.add(it)
+        // Handle edge cases
+        if (count <= 0) {
+            return emptyList()
+        }
+        
+        val result = mutableListOf<CodeRecipe>()
+        var remaining = count
+        
+        // First, try to get recipes from the current shuffled pool
+        while (remaining > 0 && randomRecipes.isNotEmpty()) {
+            randomRecipes.removeLastOrNull()?.let { recipe ->
+                result.add(recipe)
+                remaining--
             }
         }
-
-        val underrunCount = recipes.size - count
-        if (underrunCount > 0 || randomRecipes.isEmpty()) {
-            randomRecipes.addAll(recipes.shuffled())
-            if (underrunCount > 0) {
-                repeat(underrunCount) {
-                    randomRecipes.removeLastOrNull()?.let {
-                        randos.add(it)
-                    }
-                }
+        
+        // If we still need more recipes and have exhausted the current pool,
+        // reshuffle and continue
+        while (remaining > 0) {
+            // Reshuffle the pool only when it's empty
+            if (randomRecipes.isEmpty()) {
+                randomRecipes.addAll(recipes.shuffled())
+            }
+            
+            // Take more recipes from the newly shuffled pool
+            randomRecipes.removeLastOrNull()?.let { recipe ->
+                result.add(recipe)
+                remaining--
             }
         }
-
-        return randos
+        
+        return result
     }
 
 }

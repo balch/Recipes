@@ -1,6 +1,7 @@
 package org.balch.recipes.features.ideas
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -76,6 +77,7 @@ import org.balch.recipes.core.models.Category
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.models.color
+import org.balch.recipes.features.details.UiState
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.widgets.FoodLoadingIndicator
@@ -92,64 +94,6 @@ sealed interface GridItem {
     data class CodeRecipeItem(val codeRecipe: CodeRecipe) : GridItem
 }
 
-/**
- * Creates an interesting mix of regular items and code recipes for the staggered grid
- */
-private fun <T> createInterestingMix(
-    regularItems: List<T>,
-    codeRecipes: List<CodeRecipe>,
-    itemWrapper: (T) -> GridItem
-): List<GridItem> {
-    if (codeRecipes.isEmpty()) {
-        return regularItems.map(itemWrapper)
-    }
-    
-    val result = mutableListOf<GridItem>()
-    val regularGridItems = regularItems.map(itemWrapper)
-    val codeGridItems = codeRecipes.map { GridItem.CodeRecipeItem(it) }
-
-    val firstOrSecond = if (Random.nextBoolean()) 0 else 1
-
-    // Calculate insertion positions to create interesting distribution
-    val insertPositions = listOf(
-            firstOrSecond,
-            firstOrSecond + 2 + firstOrSecond,
-            firstOrSecond + 3 + firstOrSecond,
-        )
-    
-    // Build the mixed list
-    var codeIndex = 0
-    regularGridItems.forEachIndexed { index, item ->
-        if (index in insertPositions && codeIndex < codeGridItems.size) {
-            result.add(codeGridItems[codeIndex])
-            codeIndex++
-        }
-        result.add(item)
-    }
-    
-    // Add any remaining code recipes at the end
-    while (codeIndex < codeGridItems.size) {
-        result.add(codeGridItems[codeIndex])
-        codeIndex++
-    }
-    
-    return result
-}
-
-/**
- * Selects a theme color based on the item index for glass-like haze effects
- */
-@Composable
-private fun getColorForIndex(index: Int): Color {
-    val colorSet = listOf(
-        MaterialTheme.colorScheme.primary,
-        MaterialTheme.colorScheme.secondary,
-        MaterialTheme.colorScheme.tertiary,
-        MaterialTheme.colorScheme.inversePrimary
-    )
-    return colorSet[index % (colorSet.size-1)]
-}
-
 @Composable
 fun IdeasScreen(
     modifier: Modifier = Modifier,
@@ -160,7 +104,14 @@ fun IdeasScreen(
     onCodeRecipeClick: (CodeRecipe) -> Unit,
     onScrollChange: (Int) -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState: IdeasUiState by viewModel.uiState.collectAsState()
+
+    // Return to categories if we are in an area or ingredient
+    BackHandler(enabled = uiState is IdeasUiState.Ingredients
+                || uiState is IdeasUiState.Areas) {
+        viewModel.changeBrowsableType(BrowsableType.Category)
+    }
+
     IdeasLayout(
         uiState = uiState,
         onRetry = viewModel::retry,
@@ -776,3 +727,62 @@ private fun CodeRecipeCard(
         }
     }
 }
+
+/**
+ * Creates an interesting mix of regular items and code recipes for the staggered grid
+ */
+private fun <T> createInterestingMix(
+    regularItems: List<T>,
+    codeRecipes: List<CodeRecipe>,
+    itemWrapper: (T) -> GridItem
+): List<GridItem> {
+    if (codeRecipes.isEmpty()) {
+        return regularItems.map(itemWrapper)
+    }
+
+    val result = mutableListOf<GridItem>()
+    val regularGridItems = regularItems.map(itemWrapper)
+    val codeGridItems = codeRecipes.map { GridItem.CodeRecipeItem(it) }
+
+    val firstOrSecond = if (Random.nextBoolean()) 0 else 1
+
+    // Calculate insertion positions to create interesting distribution
+    val insertPositions = listOf(
+        firstOrSecond,
+        firstOrSecond + 2 + firstOrSecond,
+        firstOrSecond + 3 + firstOrSecond,
+    )
+
+    // Build the mixed list
+    var codeIndex = 0
+    regularGridItems.forEachIndexed { index, item ->
+        if (index in insertPositions && codeIndex < codeGridItems.size) {
+            result.add(codeGridItems[codeIndex])
+            codeIndex++
+        }
+        result.add(item)
+    }
+
+    // Add any remaining code recipes at the end
+    while (codeIndex < codeGridItems.size) {
+        result.add(codeGridItems[codeIndex])
+        codeIndex++
+    }
+
+    return result
+}
+
+/**
+ * Selects a theme color based on the item index for glass-like haze effects
+ */
+@Composable
+private fun getColorForIndex(index: Int): Color {
+    val colorSet = listOf(
+        MaterialTheme.colorScheme.primary,
+        MaterialTheme.colorScheme.secondary,
+        MaterialTheme.colorScheme.tertiary,
+        MaterialTheme.colorScheme.inversePrimary
+    )
+    return colorSet[index % (colorSet.size-1)]
+}
+

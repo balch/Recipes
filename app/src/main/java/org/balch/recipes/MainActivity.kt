@@ -77,12 +77,12 @@ class MainActivity : ComponentActivity() {
     private fun MainContent() {
         val hazeState = rememberHazeState()
 
-        var previousViibleIndex by remember { mutableIntStateOf(0) }
+        var previousVisibleIndex by remember { mutableIntStateOf(0) }
         var firstVisibleIndex by remember { mutableIntStateOf(0) }
         var showNavigationBar by remember { mutableStateOf(true) }
         LaunchedEffect(firstVisibleIndex) {
-            showNavigationBar = firstVisibleIndex == 0 || firstVisibleIndex < previousViibleIndex
-            previousViibleIndex = firstVisibleIndex
+            showNavigationBar = firstVisibleIndex == 0 || firstVisibleIndex < previousVisibleIndex
+            previousVisibleIndex = firstVisibleIndex
         }
 
         RecipesTheme {

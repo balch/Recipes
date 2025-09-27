@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 
 enum class CodeArea {
     Theme,
-    Navigation,
+    Navigation3,
     Architecture,
     Testing
 }
@@ -20,7 +20,7 @@ enum class CodeArea {
 fun CodeArea.color(): Color {
     return when (this) {
         CodeArea.Theme -> MaterialTheme.colorScheme.primary           // Warm orange - perfect for theme-related content
-        CodeArea.Navigation -> MaterialTheme.colorScheme.secondary    // Fresh green - represents movement/navigation
+        CodeArea.Navigation3 -> MaterialTheme.colorScheme.secondary    // Fresh green - represents movement/navigation
         CodeArea.Architecture -> MaterialTheme.colorScheme.tertiary   // Accent yellow - represents structure/foundation
         CodeArea.Testing -> MaterialTheme.colorScheme.error           // Bright red - for errors/testing
     }
