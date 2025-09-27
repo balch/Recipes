@@ -88,6 +88,11 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.adaptive.navigation3)
+
+    implementation(libs.markdown.m3)
+    implementation(libs.markdown.android)
+    implementation(libs.markdown.code)
+
     ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit)

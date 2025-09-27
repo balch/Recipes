@@ -17,6 +17,7 @@ import org.balch.recipes.core.models.Category
 import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.repository.RecipeRepository
+import org.balch.recipes.features.CodeRecipes
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -34,9 +35,10 @@ class IdeasViewModelTest {
     private val dispatcherProvider = TestDispatcherProvider(StandardTestDispatcher())
 
     private val repository = mock<RecipeRepository>()
+    private val codeRecipes = mock<CodeRecipes>()
 
     private val viewModel by lazy {
-        IdeasViewModel(repository, dispatcherProvider)
+        IdeasViewModel(repository, codeRecipes, dispatcherProvider)
     }
 
     private val testCategories = listOf(

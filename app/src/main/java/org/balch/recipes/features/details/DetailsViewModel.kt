@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import org.balch.recipes.core.coroutines.DispatcherProvider
+import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.repository.RecipeRepository
@@ -46,8 +47,8 @@ class DetailsViewModel @AssistedInject constructor(
     private val logger = logging("DetailsViewModel")
 
     private val initialUiState: UiState =
-        if (detailType is DetailType.Content) {
-            UiState.Show(detailType.meal)
+        if (detailType is DetailType.MealContent) {
+            UiState.ShowMeal(detailType.meal)
         } else {
             UiState.Loading
         }.also {
@@ -57,26 +58,30 @@ class DetailsViewModel @AssistedInject constructor(
     val uiState: StateFlow<UiState> =
         flow {
             when (detailType) {
-                is DetailType.Content -> {
+                is DetailType.MealContent -> {
                     emit(initialUiState)
                 }
 
-                is DetailType.Lookup -> {
+                is DetailType.MealLookup -> {
                     emit(UiState.Loading)
                     repository.getMealById(detailType.mealId)
-                        .onSuccess { emit(UiState.Show(it)) }
+                        .onSuccess { emit(UiState.ShowMeal(it)) }
                         .onFailure { emit(UiState.Error(it.message ?: "Unknown Error")) }
                 }
 
-                is DetailType.Random -> {
+                is DetailType.MealRandom -> {
                     emit(UiState.Loading)
                     repository.getRandomMeal()
-                        .onSuccess { emit(UiState.Show(it)) }
+                        .onSuccess { emit(UiState.ShowMeal(it)) }
                         .onFailure { emit(UiState.Error(it.message ?: "Unknown Error")) }
+                }
+
+                is DetailType.CodeRecipeContent -> {
+                    emit(UiState.ShowCodeRecipe(detailType.codeRecipe))
                 }
             }
         }
-            .onEach { logger.d { "UIState: ${it.javaClass.simpleName} - ${it.let { if (it is UiState.Show) "meal: ${it.meal.name}" else ""}}"} }
+            .onEach { logger.d { "UIState: ${it.javaClass.simpleName} - ${it.let { if (it is UiState.ShowMeal) "meal: ${it.meal.name}" else ""}}"} }
             .flowOn(dispatcherProvider.default)
             .stateIn(
                 scope = viewModelScope,
@@ -93,5 +98,6 @@ class DetailsViewModel @AssistedInject constructor(
 sealed interface UiState {
     data object Loading : UiState
     data class Error(val message: String) : UiState
-    data class Show(val meal: Meal) : UiState
+    data class ShowMeal(val meal: Meal) : UiState
+    data class ShowCodeRecipe(val codeRecipe: CodeRecipe) : UiState
 }

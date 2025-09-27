@@ -152,6 +152,11 @@ class MainActivity : ComponentActivity() {
                                         SearchRoute(SearchType.Ingredient(ingredient.name))
                                     )
                                 },
+                                onCodeRecipeClick = { codeRecipe ->
+                                    backStackManager.push(
+                                        DetailRoute(DetailType.CodeRecipeContent(codeRecipe))
+                                    )
+                                },
                                 onScrollChange = { firstVisibleIndex = it }
                             )
                         }
@@ -172,14 +177,14 @@ class MainActivity : ComponentActivity() {
                                 onMealLookup = { id ->
                                     backStackManager.push(
                                         DetailRoute(
-                                            DetailType.Lookup(
+                                            DetailType.MealLookup(
                                                 id
                                             )
                                         )
                                     )
                                 },
                                 onScrollChange = { firstVisibleIndex = it },
-                                onRandomMeal = { backStackManager.push(DetailRoute(DetailType.Random)) }
+                                onRandomMeal = { backStackManager.push(DetailRoute(DetailType.MealRandom)) }
                             )
                         }
                         entry<Search> {
@@ -195,14 +200,14 @@ class MainActivity : ComponentActivity() {
                                 onMealLookup = { id ->
                                     backStackManager.push(
                                         DetailRoute(
-                                            DetailType.Lookup(
+                                            DetailType.MealLookup(
                                                 id
                                             )
                                         )
                                     )
                                 },
                                 onScrollChange = { firstVisibleIndex = it },
-                                onRandomMeal = { backStackManager.push(DetailRoute(DetailType.Random)) }
+                                onRandomMeal = { backStackManager.push(DetailRoute(DetailType.MealRandom)) }
                             )
                         }
                         entry<DetailRoute> { detailRoute ->

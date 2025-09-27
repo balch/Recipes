@@ -19,9 +19,12 @@ import org.balch.recipes.BrowsableType
 import org.balch.recipes.core.coroutines.DispatcherProvider
 import org.balch.recipes.core.models.Area
 import org.balch.recipes.core.models.Category
+import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.repository.RecipeRepository
+import org.balch.recipes.features.CodeRecipes
 import javax.inject.Inject
+import kotlin.random.Random
 
 /**
  * ViewModel responsible for managing and providing UI state for the "Ideas" screen,
@@ -30,12 +33,13 @@ import javax.inject.Inject
  * This class interacts with the `RecipeRepository` to fetch data and uses a combination of
  * flows and coroutines to update the UI state dynamically based on user interactions.
  *
- * @constructor Injects the required dependencies: `repository` for data access
- * and `dispatcherProvider` for coroutine context management.
+ * @constructor Injects the required dependencies: `repository` for data access,
+ * `codeRecipes` for code recipe examples, and `dispatcherProvider` for coroutine context management.
  */
 @HiltViewModel
 class IdeasViewModel @Inject constructor(
     private val repository: RecipeRepository,
+    private val codeRecipes: CodeRecipes,
     dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
 
@@ -67,10 +71,16 @@ class IdeasViewModel @Inject constructor(
 
     private suspend fun deriveState(browsableType: BrowsableType): IdeasUiState =
         try {
+            // Randomly select 1 or 3 CodeRecipes to sprinkle into the grid
+            val randomCodeRecipes = codeRecipes.getRandomRecipes(3)
+            
             when (browsableType) {
                 BrowsableType.Category -> {
                     val categories = repository.getCategories()
-                    IdeasUiState.Categories(categories.getOrThrow())
+                    IdeasUiState.Categories(
+                        categories = categories.getOrThrow(),
+                        codeRecipes = randomCodeRecipes
+                    )
                 }
                 BrowsableType.Area -> {
                     val areasJob = viewModelScope.async { repository.getAreas() }
@@ -78,7 +88,8 @@ class IdeasViewModel @Inject constructor(
 
                     IdeasUiState.Areas(
                         areas = areasJob.await().getOrThrow(),
-                        imageUrl = randomMealJob.await().getOrNull()?.thumbnail
+                        imageUrl = randomMealJob.await().getOrNull()?.thumbnail,
+                        codeRecipes = randomCodeRecipes
                     )
                 }
                 BrowsableType.Ingredient -> {
@@ -87,7 +98,8 @@ class IdeasViewModel @Inject constructor(
 
                     IdeasUiState.Ingredients(
                         ingredients = ingredientsJob.await().getOrThrow(),
-                        imageUrl = randomMealJob.await().getOrNull()?.thumbnail
+                        imageUrl = randomMealJob.await().getOrNull()?.thumbnail,
+                        codeRecipes = randomCodeRecipes
                     )
                 }
             }
@@ -108,16 +120,23 @@ class IdeasViewModel @Inject constructor(
 sealed interface IdeasUiState {
     val imageUrl: String?
         get() = null
+    val codeRecipes: List<CodeRecipe>
+        get() = emptyList()
 
     data object Loading : IdeasUiState
     data class Error(val message: String) : IdeasUiState
-    data class Categories(val categories: List<Category>) : IdeasUiState
+    data class Categories(
+        val categories: List<Category>,
+        override val codeRecipes: List<CodeRecipe>
+    ) : IdeasUiState
     data class Areas(
         val areas: List<Area>,
-        override val imageUrl: String?
+        override val imageUrl: String?,
+        override val codeRecipes: List<CodeRecipe>
     ) : IdeasUiState
     data class Ingredients(
         val ingredients: List<Ingredient>,
-        override val imageUrl: String?
+        override val imageUrl: String?,
+        override val codeRecipes: List<CodeRecipe>
     ) : IdeasUiState
 }

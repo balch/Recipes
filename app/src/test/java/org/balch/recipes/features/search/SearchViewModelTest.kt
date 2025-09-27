@@ -143,7 +143,11 @@ class SearchViewModelTest {
 
         viewModel.uiState.test {
             awaitItem().assertValidShowState(searchType)
-            awaitItem().assertValidShowState(searchType, testMealDescriptors, false)
+            awaitItem().assertValidShowState(
+                searchType = searchType,
+                meals = testMealDescriptors,
+                isFetching = false
+            )
         }
     }
 
@@ -194,7 +198,11 @@ class SearchViewModelTest {
 
         viewModel.uiState.test {
             awaitItem().assertValidShowState(searchType)
-            awaitItem().assertValidShowState(searchType, testMeals, false)
+            awaitItem().assertValidShowState(
+                searchType = searchType,
+                meals = testMeals,
+                isFetching = false
+            )
 
             viewModel.clearSearch()
             awaitItem().assertWelcomeState()
