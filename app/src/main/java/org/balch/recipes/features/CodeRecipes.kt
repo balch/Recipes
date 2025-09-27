@@ -347,17 +347,16 @@ class CodeRecipes @Inject constructor() {
                 - Conditionally enable `BackHandler` 
                 - Use to return to initial Screen state before exiting app/screen
                 """.trimIndent(),
-            codeSnippet = """
+            codeSnippet = """     
+                ```                          
                 @Composable
                 fun IdeasScreen(
                     modifier: Modifier = Modifier,
-                    viewModel: IdeasViewModel = hiltViewModel(),
+                    viewModel: IdeasViewModel
                 ) {
                     val uiState: IdeasUiState by viewModel.uiState.collectAsState()
-                
                     // Return to categories if we are in an area or ingredient
-                    BackHandler(enabled = uiState is IdeasUiState.Ingredients
-                                || uiState is IdeasUiState.Areas) {
+                    BackHandler(enabled = uiState is IdeasUiState.Ingredients || uiState is IdeasUiState.Areas) {
                         viewModel.changeBrowsableType(BrowsableType.Category)
                     }
                 
@@ -366,7 +365,8 @@ class CodeRecipes @Inject constructor() {
                         onBrowsableTypeChange = viewModel::changeBrowsableType,
                         modifier = modifier
                     )
-                }               
+                }          
+                ```
                 """.trimIndent(),
             fileName = "IdeasScreen.kt"
         ),
@@ -383,6 +383,7 @@ class CodeRecipes @Inject constructor() {
                 - Thank you **Chris Banes**!!
             """.trimIndent(),
             codeSnippet = """
+                ```
                 @Composable
                 private fun MainContent() {
                     val hazeState = rememberHazeState()
@@ -429,6 +430,7 @@ class CodeRecipes @Inject constructor() {
                         }
                     }
                 }                
+            ```
             """.trimIndent(),
             fileName = "MainActivity.kt"
         ),
@@ -442,6 +444,7 @@ class CodeRecipes @Inject constructor() {
                   - Set `firstVisibleIndex` in handler to emit new `showNavigationBar` state 
             """.trimIndent(),
             codeSnippet = """
+                ```
                 @Composable
                 private fun MainContent() {
                     var previousVisibleIndex by remember { mutableIntStateOf(0) }
@@ -493,6 +496,7 @@ class CodeRecipes @Inject constructor() {
                     }
                 }
             }
+            ```
             """.trimIndent(),
             fileName = "MainActivity.kt"
         )
