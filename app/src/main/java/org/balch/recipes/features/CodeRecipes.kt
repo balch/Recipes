@@ -211,9 +211,7 @@ class CodeRecipes @Inject constructor() {
             area = CodeArea.Theme,
             title = """Markdown Render🎨💰""",
             description = """
-                 - Simple Markdown Composable that renders beautiful code in _root_ide_package_.io.ktor.client.engine.android.Android(
-                and other platforms
-            ).
+                 - Simple Markdown Composable that renders beautiful code in Android(and other platforms)
                  - Support Light/Dark Theme and Code Markdown syntax
                  - Thank you **Mike Penz**!!
                 """.trimIndent(),
