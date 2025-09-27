@@ -353,10 +353,10 @@ class CodeRecipes @Inject constructor() {
      * @return A list of `CodeRecipe` objects, with a size of up to the specified count.
      */
     fun getRandomRecipes(count: Int): List<CodeRecipe> {
-        val recipes = mutableListOf<CodeRecipe>()
+        val randos = mutableListOf<CodeRecipe>()
         repeat(count) {
             randomRecipes.removeLastOrNull()?.let {
-                recipes.add(it)
+                randos.add(it)
             }
         }
 
@@ -366,13 +366,13 @@ class CodeRecipes @Inject constructor() {
             if (underrunCount > 0) {
                 repeat(underrunCount) {
                     randomRecipes.removeLastOrNull()?.let {
-                        recipes.add(it)
+                        randos.add(it)
                     }
                 }
             }
         }
 
-        return recipes
+        return randos
     }
 
 }
