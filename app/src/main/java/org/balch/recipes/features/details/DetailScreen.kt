@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,8 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.NavigateBefore
 import androidx.compose.material.icons.automirrored.filled.NavigateNext
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -64,12 +62,10 @@ import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.widgets.FoodLoadingIndicator
-import org.balch.recipes.ui.widgets.WebViewScreen
 
 enum class StepViewMode {
     List, StepByStep
@@ -103,9 +99,6 @@ fun DetailLayout(
         ?.instructions?.split("\r\n", "\n", ". ")
         ?.map { it.trim() }
         ?.filter { it.isNotEmpty() }
-        ?.mapIndexed { index, step ->
-            if (step.matches(Regex("^\\d+\\."))) step else "${index + 1}. $step"
-        }
         ?: emptyList()
 
     Scaffold(
@@ -255,8 +248,8 @@ fun MealDetailItem(
                 }
             }
 
-            items(instructionSteps) { step ->
-                RecipeInstructionListStepCard(modifier, step)
+            itemsIndexed(instructionSteps) { index, step ->
+                RecipeInstructionListStepCard(modifier, step, index)
             }
         } else {
             item { CrossfadeIngredients(modifier, meal, showCompactIngredients) }
@@ -503,6 +496,7 @@ private fun RecipeInstructionsHeader(
 private fun RecipeInstructionListStepCard(
     modifier: Modifier,
     step: String,
+    index: Int
 ) {
     Card(
         modifier = modifier
@@ -513,7 +507,7 @@ private fun RecipeInstructionListStepCard(
         )
     ) {
         Text(
-            text = step,
+            text = "${index+1}. $step",
             style = MaterialTheme.typography.bodyMedium,
             modifier = modifier.padding(16.dp)
         )
