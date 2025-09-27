@@ -15,6 +15,7 @@ class CodeRecipes @Inject constructor() {
             fileName = "RecipesTheme.kt",
             codeSnippet =
 """
+```
 val colorScheme = when {
     dynamicColor && Build.VERSION.SDK_INT >= Build
     .VERSION_CODES.S -> {
@@ -24,7 +25,8 @@ val colorScheme = when {
     darkTheme -> DarkColorScheme
     else -> LightColorScheme
 }
-"""
+```
+""".trimIndent()
         ),
         CodeRecipe(
             area = CodeArea.Theme,
@@ -33,6 +35,7 @@ val colorScheme = when {
             description = "Create annotation with sn `@Preview` for each theme",
             codeSnippet =
                 """
+```
 val colorScheme = when {
     dynamicColor && Build.VERSION.SDK_INT >= Build
     .VERSION_CODES.S -> {
@@ -42,7 +45,8 @@ val colorScheme = when {
     darkTheme -> DarkColorScheme
     else -> LightColorScheme
 }
-"""
+```
+""".trimIndent()
         ),
         CodeRecipe(
             area = CodeArea.Navigation,
@@ -51,6 +55,7 @@ val colorScheme = when {
             fileName = "MainActivity.kt",
             codeSnippet =
                 """
+```
 val colorScheme = when {
     dynamicColor && Build.VERSION.SDK_INT >= Build
     .VERSION_CODES.S -> {
@@ -60,7 +65,8 @@ val colorScheme = when {
     darkTheme -> DarkColorScheme
     else -> LightColorScheme
 }
-"""
+```
+""".trimIndent()
         ),
         CodeRecipe(
             area = CodeArea.Navigation,
@@ -69,6 +75,7 @@ val colorScheme = when {
             fileName = "MainActivity.kt",
             codeSnippet =
                 """
+```
 val colorScheme = when {
     dynamicColor && Build.VERSION.SDK_INT >= Build
     .VERSION_CODES.S -> {
@@ -78,7 +85,8 @@ val colorScheme = when {
     darkTheme -> DarkColorScheme
     else -> LightColorScheme
 }
-"""
+```
+""".trimIndent()
         ),
         CodeRecipe(
             area = CodeArea.Navigation,
@@ -87,6 +95,7 @@ val colorScheme = when {
             fileName = "MainActivity.kt",
             codeSnippet =
                 """
+```
 val colorScheme = when {
     dynamicColor && Build.VERSION.SDK_INT >= Build
     .VERSION_CODES.S -> {
@@ -96,7 +105,8 @@ val colorScheme = when {
     darkTheme -> DarkColorScheme
     else -> LightColorScheme
 }
-"""
+```
+""".trimIndent()
         ),
         CodeRecipe(
             area = CodeArea.Navigation,
@@ -105,6 +115,7 @@ val colorScheme = when {
             fileName = "BackstackManager.kt",
             codeSnippet =
                 """
+```
 val colorScheme = when {
     dynamicColor && Build.VERSION.SDK_INT >= Build
     .VERSION_CODES.S -> {
@@ -114,7 +125,8 @@ val colorScheme = when {
     darkTheme -> DarkColorScheme
     else -> LightColorScheme
 }
-"""
+```
+""".trimIndent()
         ),
         CodeRecipe(
             area = CodeArea.Architecture,
@@ -123,6 +135,7 @@ val colorScheme = when {
             fileName = "SearchViewModel.kt",
             codeSnippet =
                 """
+```
 val colorScheme = when {
     dynamicColor && Build.VERSION.SDK_INT >= Build
     .VERSION_CODES.S -> {
@@ -132,7 +145,8 @@ val colorScheme = when {
     darkTheme -> DarkColorScheme
     else -> LightColorScheme
 }
-"""
+```
+""".trimIndent()
         ),
     )
 
