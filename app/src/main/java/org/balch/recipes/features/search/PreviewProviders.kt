@@ -46,10 +46,3 @@ class SearchStateProvider : PreviewParameterProvider<SearchUiState> {
         ),
     )
 }
-
-class SearchTypeProvider : PreviewParameterProvider<SearchType> {
-    override val values = sequenceOf(
-        SearchType.Category("Beef"),
-        SearchType.Search("chicken")
-    )
-}
