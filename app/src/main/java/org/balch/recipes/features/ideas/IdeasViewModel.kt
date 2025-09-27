@@ -102,6 +102,12 @@ class IdeasViewModel @Inject constructor(
                         codeRecipes = randomCodeRecipes
                     )
                 }
+                BrowsableType.CodeRecipe -> {
+                    IdeasUiState.CodeRecipes(
+                        imageUrl = null,
+                        codeRecipes = codeRecipes.sortedRecipes
+                    )
+                }
             }
         } catch (e: Exception) {
             logger.e(e) { "Error loading ideas" }
@@ -123,6 +129,9 @@ sealed interface IdeasUiState {
     val codeRecipes: List<CodeRecipe>
         get() = emptyList()
 
+    val isTabLevelState: Boolean
+        get() = false
+
     data object Loading : IdeasUiState
     data class Error(val message: String) : IdeasUiState
     data class Categories(
@@ -132,11 +141,18 @@ sealed interface IdeasUiState {
     data class Areas(
         val areas: List<Area>,
         override val imageUrl: String?,
-        override val codeRecipes: List<CodeRecipe>
+        override val codeRecipes: List<CodeRecipe>,
+        override val isTabLevelState: Boolean = true,
     ) : IdeasUiState
     data class Ingredients(
         val ingredients: List<Ingredient>,
         override val imageUrl: String?,
-        override val codeRecipes: List<CodeRecipe>
+        override val codeRecipes: List<CodeRecipe>,
+        override val isTabLevelState: Boolean = true,
+    ) : IdeasUiState
+    data class CodeRecipes(
+        override val imageUrl: String?,
+        override val codeRecipes: List<CodeRecipe>,
+        override val isTabLevelState: Boolean = true,
     ) : IdeasUiState
 }

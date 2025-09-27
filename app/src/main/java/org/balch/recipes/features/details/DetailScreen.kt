@@ -288,7 +288,7 @@ private fun TopBar(
             Text(
                 text = titleText,
                 style = MaterialTheme.typography.headlineSmall,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         },

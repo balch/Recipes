@@ -1,5 +1,6 @@
 package org.balch.recipes.features
 
+import com.diamondedge.logging.logging
 import org.balch.recipes.core.models.CodeArea
 import org.balch.recipes.core.models.CodeRecipe
 import javax.inject.Inject
@@ -7,13 +8,72 @@ import javax.inject.Singleton
 
 @Singleton
 class CodeRecipes @Inject constructor() {
-    private val recipes = listOf(
-        CodeRecipe(
-            area = CodeArea.Theme,
-            title = "colorScheme",
-            description = "- Use `isSystemInDarkTheme` and `dynamicColor` to control color scheme",
-            fileName = "RecipesTheme.kt",
-            codeSnippet = """
+
+    private val logger  = logging(this::class.simpleName)
+    val sortedRecipes by lazy {
+        recipes.sortedWith(
+            compareBy<CodeRecipe> { it.area.name }
+                .thenBy { it.title }
+        ).also { logger.v { "Sorted Recipes: $it" } }
+    }
+
+    /**
+     * Retrieves a specified number of random `CodeRecipe` objects.
+     * The method attempts to return the requested count of recipes
+     * and refills the pool of available random recipes if necessary.
+     * All shuffled recipes are displayed before reshuffling occurs.
+     *
+     * @param count The number of `CodeRecipe` objects to retrieve.
+     * @return A list of `CodeRecipe` objects, with a size of up to the specified count.
+     */
+    fun getRandomRecipes(count: Int): List<CodeRecipe> {
+        // Handle edge cases
+        if (count <= 0) {
+            return emptyList()
+        }
+
+        val result = mutableListOf<CodeRecipe>()
+        var remaining = count
+
+        // First, try to get recipes from the current shuffled pool
+        while (remaining > 0 && randomRecipes.isNotEmpty()) {
+            randomRecipes.removeLastOrNull()?.let { recipe ->
+                result.add(recipe)
+                remaining--
+            }
+        }
+
+        // If we still need more recipes and have exhausted the current pool,
+        // reshuffle and continue
+        while (remaining > 0) {
+            // Reshuffle the pool only when it's empty
+            if (randomRecipes.isEmpty()) {
+                randomRecipes.addAll(recipes.shuffled())
+                logger.d { "Reshuffled Code Recipes Pool" }
+            }
+
+            // Take more recipes from the newly shuffled pool
+            randomRecipes.removeLastOrNull()?.let { recipe ->
+                result.add(recipe)
+                remaining--
+            }
+        }
+
+        return result.also { logger.v { "Random Recipes: $it" } }
+    }
+
+    private val randomRecipes = mutableListOf(
+        *recipes.shuffled().toTypedArray()
+    )
+
+    companion object {
+        private val recipes = listOf(
+            CodeRecipe(
+                area = CodeArea.Theme,
+                title = "colorScheme",
+                description = "- Use `isSystemInDarkTheme` and `dynamicColor` to control color scheme",
+                fileName = "RecipesTheme.kt",
+                codeSnippet = """
                 ```
                 val colorScheme = when {
                     dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
@@ -25,16 +85,16 @@ class CodeRecipes @Inject constructor() {
                 }
                 ```
                 """.trimIndent()
-        ),
-        CodeRecipe(
-            area = CodeArea.Theme,
-            title = "colorScheme",
-            fileName = "ThemePreview.kt",
-            description = """
+            ),
+            CodeRecipe(
+                area = CodeArea.Theme,
+                title = "colorScheme",
+                fileName = "ThemePreview.kt",
+                description = """
                 - Create annotation with an `@Preview` for each theme
                 - Use `@ThemePreview` on Screens and Widgets
                  """.trimIndent(),
-            codeSnippet = """
+                codeSnippet = """
                 ```
                 @Preview(
                     uiMode = Configuration.UI_MODE_NIGHT_YES,
@@ -49,18 +109,18 @@ class CodeRecipes @Inject constructor() {
                 annotation class ThemePreview
                 ```
                 """.trimIndent()
-        ),
-        CodeRecipe(
-            area = CodeArea.Navigation3,
-            title = "Bottom Navigation",
-            description = """
+            ),
+            CodeRecipe(
+                area = CodeArea.Navigation3,
+                title = "Bottom Navigation",
+                description = """
                     - Wrap `NavigationBar` in `Scaffold` 
                     - Use `AnimatedVisibility` to control visibility of `NavigationBar`
                     - `TopLevelRoute` represent displayable items in `NavigationBarItem`
                     - Manage `backstack` in the `NavigationBar`
                 """.trimIndent(),
-            fileName = "MainActivity.kt",
-            codeSnippet = """
+                fileName = "MainActivity.kt",
+                codeSnippet = """
                 ```
                 Scaffold(
                     bottomBar = {
@@ -91,13 +151,13 @@ class CodeRecipes @Inject constructor() {
                     }
                     ```
                     """.trimIndent()
-        ),
-        CodeRecipe(
-            area = CodeArea.Navigation3,
-            title = "entryDecorators",
-            description = "- Define `entryDecorators` to provide state management and to facilitate ViewModel creation.",
-            fileName = "MainActivity.kt",
-            codeSnippet = """
+            ),
+            CodeRecipe(
+                area = CodeArea.Navigation3,
+                title = "entryDecorators",
+                description = "- Define `entryDecorators` to provide state management and to facilitate ViewModel creation.",
+                fileName = "MainActivity.kt",
+                codeSnippet = """
                 ```
                     // In order to add the `ViewModelStoreNavEntryDecorator`
                     // we also need to add the default `NavEntryDecorator`s as well. These provide
@@ -110,16 +170,16 @@ class CodeRecipes @Inject constructor() {
                     ),
                 ```                                
                 """.trimIndent()
-        ),
-        CodeRecipe(
-            area = CodeArea.Navigation3,
-            title = "entryProvider DSL syntax",
-            description = """
+            ),
+            CodeRecipe(
+                area = CodeArea.Navigation3,
+                title = "entryProvider DSL syntax",
+                description = """
                 - Use `entryProvider` DSL syntax for simple App Nav
                 - Provides a convenient way to create ViewModels and Screens on the backstack
                 """.trimIndent(),
-            fileName = "MainActivity.kt",
-            codeSnippet = """
+                fileName = "MainActivity.kt",
+                codeSnippet = """
                 ```
                     entryProvider = entryProvider {
                         entry<Ideas> {
@@ -140,16 +200,16 @@ class CodeRecipes @Inject constructor() {
                     }
                 ```
             """.trimIndent()
-        ),
-        CodeRecipe(
-            area = CodeArea.Navigation3,
-            title = "backstack",
-            description = """
+            ),
+            CodeRecipe(
+                area = CodeArea.Navigation3,
+                title = "backstack",
+                description = """
                     - You own the backstack.
                     - Simple push/pop works for simple applications
                 """.trimIndent(),
-            fileName = "BackstackManager.kt",
-            codeSnippet = """
+                fileName = "BackstackManager.kt",
+                codeSnippet = """
                 ```
                 @ActivityRetainedScoped
                 class BackStackManager @Inject constructor() {
@@ -171,17 +231,17 @@ class CodeRecipes @Inject constructor() {
                 }
                 ```
                 """.trimIndent()
-        ),
-        CodeRecipe(
-            area = CodeArea.Architecture,
-            title = "ViewModel creation",
-            description = """
+            ),
+            CodeRecipe(
+                area = CodeArea.Architecture,
+                title = "ViewModel creation",
+                description = """
                 - Use `HiltViewModel` and `assistedFactory` to creat unique ViewModel per screen to push on the backstack.
                 - Define Factory using `@AssistedFactory` annotation
                 - Use Factory to create ViewModels to pass to Screens via `hiltViewModel`                
                 """.trimIndent(),
-            fileName = "DetailsViewModel.kt",
-            codeSnippet = """
+                fileName = "DetailsViewModel.kt",
+                codeSnippet = """
                 ```
                 // ViewModel Definition
                 @HiltViewModel(assistedFactory = DetailsViewModel.Factory::class)
@@ -206,17 +266,17 @@ class CodeRecipes @Inject constructor() {
                     )
                 ```
             """.trimIndent()
-        ),
-        CodeRecipe(
-            area = CodeArea.Theme,
-            title = """Markdown Render🎨💰""",
-            description = """
+            ),
+            CodeRecipe(
+                area = CodeArea.Theme,
+                title = """Markdown Render🎨💰""",
+                description = """
                  - Simple Markdown Composable that renders beautiful code in Android(and other platforms)
                  - Support Light/Dark Theme and Code Markdown syntax
                  - Thank you **Mike Penz**!!
                 """.trimIndent(),
-            fileName = "MarkdownCodeSnippet.kt",
-            codeSnippet = """
+                fileName = "MarkdownCodeSnippet.kt",
+                codeSnippet = """
                 ```
                 @Composable
                 fun MarkdownCodeSnippet(
@@ -255,16 +315,16 @@ class CodeRecipes @Inject constructor() {
                 }
                 ```
                 """.trimIndent()
-        ),
-        CodeRecipe(
-            area = CodeArea.Testing,
-            title = "ViewModel Testing Setup",
-            description = """
+            ),
+            CodeRecipe(
+                area = CodeArea.Testing,
+                title = "ViewModel Testing Setup",
+                description = """
                 - Define `TestDispatcherProvider` to control ViewModel Flows
                 - Make sure the correct dispatcher is defined on the **Main Thread**
                 """.trimIndent(),
-            fileName = "DetailsViewModelTest.kt",
-            codeSnippet = """
+                fileName = "DetailsViewModelTest.kt",
+                codeSnippet = """
                 ```
                 @OptIn(ExperimentalCoroutinesApi::class)
                 class DetailsViewModelTest {
@@ -284,17 +344,17 @@ class CodeRecipes @Inject constructor() {
                 }
                 ```
                 """.trimIndent()
-        ),
-        CodeRecipe(
-            area = CodeArea.Testing,
-            title = "StateFlow Testing with Turbine",
-            description = """
+            ),
+            CodeRecipe(
+                area = CodeArea.Testing,
+                title = "StateFlow Testing with Turbine",
+                description = """
                 - Use `Turbine` for ViewModel stateFlow testing
                 - Ensures all emissions are accounted for
                 - May need to use `StandTestDispatcher` for Conflation issues when the ViewModel emits initial state too quickly. 
             """.trimIndent(),
-            fileName = "SearchViewModelTest.kt",
-            codeSnippet = """
+                fileName = "SearchViewModelTest.kt",
+                codeSnippet = """
                 ```
                 @Test
                 fun `clearSearch emits Welcome state`() = runTest {
@@ -316,13 +376,13 @@ class CodeRecipes @Inject constructor() {
                 }
                 ```
                 """.trimIndent()
-        ),
-        CodeRecipe(
-            area = CodeArea.Testing,
-            title = "Custom Test Assertions",
-            description = "- Create extension functions for custom assertions to improve test readability and reusability",
-            fileName = "DetailsViewModelTest.kt",
-            codeSnippet = """
+            ),
+            CodeRecipe(
+                area = CodeArea.Testing,
+                title = "Custom Test Assertions",
+                description = "- Create extension functions for custom assertions to improve test readability and reusability",
+                fileName = "DetailsViewModelTest.kt",
+                codeSnippet = """
                 ```
                 private fun UiState.assertValidShowState(meal: Meal) {
                     assertThat(this).isInstanceOf(UiState.ShowMeal::class.java)
@@ -337,24 +397,23 @@ class CodeRecipes @Inject constructor() {
                 }
                 ```
                 """.trimIndent()
-        ),
-        CodeRecipe(
-            area = CodeArea.Navigation3,
-            title = "Enable `BackHandler` per screen",
-            description = """
+            ),
+            CodeRecipe(
+                area = CodeArea.Navigation3,
+                title = "Enable `BackHandler` per screen",
+                description = """
                 - Conditionally enable `BackHandler` 
                 - Use to return to initial Screen state before exiting app/screen
                 """.trimIndent(),
-            codeSnippet = """     
+                codeSnippet = """     
                 ```                          
                 @Composable
                 fun IdeasScreen(
                     modifier: Modifier = Modifier,
                     viewModel: IdeasViewModel
                 ) {
-                    val uiState: IdeasUiState by viewModel.uiState.collectAsState()
-                    // Return to categories if we are in an area or ingredient
-                    BackHandler(enabled = uiState is IdeasUiState.Ingredients || uiState is IdeasUiState.Areas) {
+                    // Return to categories if this is not a top level tob
+                    BackHandler(enabled = !uiState.isTabLevelState) {
                         viewModel.changeBrowsableType(BrowsableType.Category)
                     }
                 
@@ -366,12 +425,12 @@ class CodeRecipes @Inject constructor() {
                 }          
                 ```
                 """.trimIndent(),
-            fileName = "IdeasScreen.kt"
-        ),
-        CodeRecipe(
-            area = CodeArea.Theme,
-            title = "glassmorphism blur with Haze",
-            description = """
+                fileName = "IdeasScreen.kt"
+            ),
+            CodeRecipe(
+                area = CodeArea.Theme,
+                title = "glassmorphism blur with Haze",
+                description = """
                 - Use **Haze** to create iOS-like glassmorphism blur 
                 - Save the `hazeState` via `rememberHazeState`
                 - Make the `NavDisplay` contents the source to blur by calling `hazeSource()`
@@ -380,7 +439,7 @@ class CodeRecipes @Inject constructor() {
                 - Each Screen manages its own blur effect for the `TopAppBar`
                 - Thank you **Chris Banes**!!
             """.trimIndent(),
-            codeSnippet = """
+                codeSnippet = """
                 ```
                 @Composable
                 private fun MainContent() {
@@ -430,18 +489,18 @@ class CodeRecipes @Inject constructor() {
                 }                
             ```
             """.trimIndent(),
-            fileName = "MainActivity.kt"
-        ),
-        CodeRecipe(
-            area = CodeArea.Navigation3,
-            title = "Bottom Nav Auto Hide",
-            description = """
+                fileName = "MainActivity.kt"
+            ),
+            CodeRecipe(
+                area = CodeArea.Navigation3,
+                title = "Bottom Nav Auto Hide",
+                description = """
                - Calculate `showNavigationBar` from `firstVisibleIndex` and scroll direction
                - Use `showNavigationBar` in `AnimatedVisibility` to control visibility of `NavigationBar`
                - Delegate scroll handling to each Screen via `onScrollChange`
                   - Set `firstVisibleIndex` in handler to emit new `showNavigationBar` state 
             """.trimIndent(),
-            codeSnippet = """
+                codeSnippet = """
                 ```
                 @Composable
                 private fun MainContent() {
@@ -496,56 +555,8 @@ class CodeRecipes @Inject constructor() {
             }
             ```
             """.trimIndent(),
-            fileName = "MainActivity.kt"
+                fileName = "MainActivity.kt"
+            )
         )
-    )
-
-    private val randomRecipes = mutableListOf<CodeRecipe>(
-        *recipes.shuffled().toTypedArray()
-    )
-
-    /**
-     * Retrieves a specified number of random `CodeRecipe` objects.
-     * The method attempts to return the requested count of recipes
-     * and refills the pool of available random recipes if necessary.
-     * All shuffled recipes are displayed before reshuffling occurs.
-     *
-     * @param count The number of `CodeRecipe` objects to retrieve.
-     * @return A list of `CodeRecipe` objects, with a size of up to the specified count.
-     */
-    fun getRandomRecipes(count: Int): List<CodeRecipe> {
-        // Handle edge cases
-        if (count <= 0) {
-            return emptyList()
-        }
-        
-        val result = mutableListOf<CodeRecipe>()
-        var remaining = count
-        
-        // First, try to get recipes from the current shuffled pool
-        while (remaining > 0 && randomRecipes.isNotEmpty()) {
-            randomRecipes.removeLastOrNull()?.let { recipe ->
-                result.add(recipe)
-                remaining--
-            }
-        }
-        
-        // If we still need more recipes and have exhausted the current pool,
-        // reshuffle and continue
-        while (remaining > 0) {
-            // Reshuffle the pool only when it's empty
-            if (randomRecipes.isEmpty()) {
-                randomRecipes.addAll(recipes.shuffled())
-            }
-            
-            // Take more recipes from the newly shuffled pool
-            randomRecipes.removeLastOrNull()?.let { recipe ->
-                result.add(recipe)
-                remaining--
-            }
-        }
-        
-        return result
     }
-
 }

@@ -9,23 +9,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells.Fixed
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
@@ -77,7 +71,6 @@ import org.balch.recipes.core.models.Category
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.models.color
-import org.balch.recipes.features.details.UiState
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.widgets.FoodLoadingIndicator
@@ -106,9 +99,8 @@ fun IdeasScreen(
 ) {
     val uiState: IdeasUiState by viewModel.uiState.collectAsState()
 
-    // Return to categories if we are in an area or ingredient
-    BackHandler(enabled = uiState is IdeasUiState.Ingredients
-                || uiState is IdeasUiState.Areas) {
+    // Return to categories if this is not a top level tob
+    BackHandler(enabled = !uiState.isTabLevelState) {
         viewModel.changeBrowsableType(BrowsableType.Category)
     }
 
@@ -174,6 +166,7 @@ private fun IdeasLayout(
                     is IdeasUiState.Categories -> BrowsableType.Category
                     is IdeasUiState.Areas -> BrowsableType.Area
                     is IdeasUiState.Ingredients -> BrowsableType.Ingredient
+                    is IdeasUiState.CodeRecipes -> BrowsableType.CodeRecipe
                     else -> BrowsableType.Category
                 },
                 onBrowsableTypeChange = onBrowsableTypeChange
@@ -260,6 +253,19 @@ private fun IdeasLayout(
                     )
                     ResultsGrid(
                         items = mixedItems,
+                        onScrollChange = onScrollChange,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .hazeSource(state = hazeState),
+                        paddingValues = innerPadding,
+                        onIngredientClick = onIngredientClick,
+                        onCodeRecipeClick = onCodeRecipeClick,
+                        centerCodeRecipes = true,
+                    )
+                }
+                is IdeasUiState.CodeRecipes -> {
+                    ResultsGrid(
+                        items = uiState.codeRecipes.map { GridItem.CodeRecipeItem(it) },
                         onScrollChange = onScrollChange,
                         modifier = Modifier
                             .fillMaxSize()
@@ -372,7 +378,12 @@ private fun IdeasDropDown(
             isSelected = browsableType == BrowsableType.Ingredient,
             onSelected = onSelected
         )
-    }
+        BrowsableTypeMenuItem(
+            browsableType = BrowsableType.CodeRecipe,
+            isSelected = browsableType == BrowsableType.CodeRecipe,
+            onSelected = onSelected
+        )
+     }
 }
 
 @Composable
@@ -680,7 +691,7 @@ private fun CodeRecipeCard(
     Card(
         modifier = modifier
             .padding(horizontal = 12.dp, vertical = 6.dp)
-            .height(120.dp)
+            .height(105.dp)
             .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp),
