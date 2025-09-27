@@ -11,7 +11,7 @@ class CodeRecipes @Inject constructor() {
         CodeRecipe(
             area = CodeArea.Theme,
             title = "colorScheme",
-            description = "Use `isSystemInDarkTheme` and `dynamicColor` to control color scheme",
+            description = "- Use `isSystemInDarkTheme` and `dynamicColor` to control color scheme",
             fileName = "RecipesTheme.kt",
             codeSnippet = """
                 ```
@@ -30,7 +30,10 @@ class CodeRecipes @Inject constructor() {
             area = CodeArea.Theme,
             title = "colorScheme",
             fileName = "ThemePreview.kt",
-            description = "Create annotation with sn `@Preview` for each theme",
+            description = """
+                - Create annotation with an `@Preview` for each theme
+                - Use `@ThemePreview` on Screens and Widgets
+                 """.trimIndent(),
             codeSnippet = """
                 ```
                 @Preview(
@@ -50,7 +53,12 @@ class CodeRecipes @Inject constructor() {
         CodeRecipe(
             area = CodeArea.Navigation,
             title = "Bottom Navigation",
-            description = "Wrap `NavigationBar` in `Scaffold` and `AnimatedVisibility` to position and display the `NavigationBarItem`",
+            description = """
+                    - Wrap `NavigationBar` in `Scaffold`\n"+ 
+                    - Use `AnimatedVisibility` to control visibility of `NavigationBar`
+                    - `TopLevelRoute` represent displayable items in `NavigationBarItem`
+                    - Manage `backstack` in the `NavigationBar`
+                """.trimIndent(),
             fileName = "MainActivity.kt",
             codeSnippet = """
                 ```
@@ -87,7 +95,7 @@ class CodeRecipes @Inject constructor() {
         CodeRecipe(
             area = CodeArea.Navigation,
             title = "entryDecorators",
-            description = "Define `entryDecorators` to provide state management and to facilitate ViewModel creation.",
+            description = "- Define `entryDecorators` to provide state management and to facilitate ViewModel creation.",
             fileName = "MainActivity.kt",
             codeSnippet = """
                 ```
@@ -106,7 +114,10 @@ class CodeRecipes @Inject constructor() {
         CodeRecipe(
             area = CodeArea.Navigation,
             title = "entryProvider DSL syntax",
-            description = "For simple apps, the `entryProvider` DSL syntax provides a convenient way to create ViewModels and push screens on the Backstack.",
+            description = """
+                - For simple apps, the `entryProvider` DSL syntax
+                - Provides a convenient way to create ViewModels and Screens on the backstack
+                """.trimIndent(),
             fileName = "MainActivity.kt",
             codeSnippet = """
                 ```
@@ -133,7 +144,10 @@ class CodeRecipes @Inject constructor() {
         CodeRecipe(
             area = CodeArea.Navigation,
             title = "backstack",
-            description = "You own the backstack. Simple push/pop works for simple applications",
+            description = """
+                    - You own the backstack.
+                    - Simple push/pop works for simple applications
+                """.trimIndent(),
             fileName = "BackstackManager.kt",
             codeSnippet = """
                 ```
@@ -161,7 +175,11 @@ class CodeRecipes @Inject constructor() {
         CodeRecipe(
             area = CodeArea.Architecture,
             title = "ViewModel creation",
-            description = "Use `HiltViewModel` and `assistedFactory` to creat unique ViewModel per screen to push on the backstack.",
+            description = """
+                - Use `HiltViewModel` and `assistedFactory` to creat unique ViewModel per screen to push on the backstack.
+                - Define Factory using `@AssistedFactory` annotation
+                - Use Factory to create ViewModels to pass to Screens via `hiltViewModel`                
+                """.trimIndent(),
             fileName = "DetailsViewModel.kt",
             codeSnippet = """
                 ```
@@ -188,6 +206,137 @@ class CodeRecipes @Inject constructor() {
                     )
                 ```
             """.trimIndent()
+        ),
+        CodeRecipe(
+            area = CodeArea.Theme,
+            title = "Markdown Render for the win",
+            description = """
+                 - Simple Markdown Composable that renders beautiful code in Android (and other platforms).
+                 - Support Light/Dark Theme and Code Markdown syntax
+                 - Thank you **Mike Penz**!!
+                """.trimIndent(),
+            fileName = "MarkdownCodeSnippet.kt",
+            codeSnippet = """
+                ```
+                @Composable
+                fun MarkdownCodeSnippet(
+                    codeSnippet: String,
+                    color: Color,
+                    modifier: Modifier = Modifier
+                ) {
+                    val isDarkTheme = isSystemInDarkTheme()
+                    val highlightsBuilder = remember(isDarkTheme) {
+                        Highlights.Builder()
+                            .theme(SyntaxThemes.atom(darkMode = isDarkTheme))
+                            .language(SyntaxLanguage.KOTLIN)
+                    }
+                    Markdown(
+                        modifier = modifier.padding(16.dp),
+                        content = codeSnippet,
+                        components = markdownComponents(
+                            codeBlock = {
+                                MarkdownHighlightedCodeBlock(
+                                    content = it.content,
+                                    node = it.node,
+                                    highlightsBuilder = highlightsBuilder,
+                                    showHeader = true, 
+                                )
+                            },
+                            codeFence = {
+                                MarkdownHighlightedCodeFence(
+                                    content = it.content,
+                                    node = it.node,
+                                    highlightsBuilder = highlightsBuilder,
+                                    showHeader = true,
+                                )
+                            },
+                        )
+                    )
+                }
+                ```
+                """.trimIndent()
+        ),
+        CodeRecipe(
+            area = CodeArea.Testing,
+            title = "ViewModel Testing Setup",
+            description = """
+                - Define `TestDispatcherProvider` to control ViewModel Flows
+                - Make sure the correct dispatcher is defined on the **Main Thread**
+                """.trimIndent(),
+            fileName = "DetailsViewModelTest.kt",
+            codeSnippet = """
+                ```
+                @OptIn(ExperimentalCoroutinesApi::class)
+                class DetailsViewModelTest {
+
+                    private val dispatcherProvider: TestDispatcherProvider = TestDispatcherProvider()
+                    private val repository = mock<RecipeRepository>()
+
+                    @Before
+                    fun setUp() {
+                        Dispatchers.setMain(dispatcherProvider.testDispatcher)
+                    }
+
+                    @After
+                    fun tearDown() {
+                        Dispatchers.resetMain()
+                    }
+                }
+                ```
+                """.trimIndent()
+        ),
+        CodeRecipe(
+            area = CodeArea.Testing,
+            title = "StateFlow Testing with Turbine",
+            description = """
+                - Use `Turbine` for ViewModel stateFlow testing
+                - Ensures all emissions are accounted for
+                - May need to use `StandTestDispatcher` for Conflation issues when the ViewModel emits initial state too quickly. 
+            """.trimIndent(),
+            fileName = "SearchViewModelTest.kt",
+            codeSnippet = """
+                ```
+                @Test
+                fun `clearSearch emits Welcome state`() = runTest {
+                    val searchType = SearchType.Search("pasta")
+                    whenBlocking { repository.searchMeals("pasta") } doReturn(Result.success(testMeals))
+                    val viewModel = getViewModel(searchType)
+            
+                    viewModel.uiState.test {
+                        awaitItem().assertValidShowState(searchType)
+                        awaitItem().assertValidShowState(
+                            searchType = searchType,
+                            meals = testMeals,
+                            isFetching = false
+                        )
+            
+                        viewModel.clearSearch()
+                        awaitItem().assertWelcomeState()
+                    }
+                }
+                ```
+                """.trimIndent()
+        ),
+        CodeRecipe(
+            area = CodeArea.Testing,
+            title = "Custom Test Assertions",
+            description = "- Create extension functions for custom assertions to improve test readability and reusability",
+            fileName = "DetailsViewModelTest.kt",
+            codeSnippet = """
+                ```
+                private fun UiState.assertValidShowState(meal: Meal) {
+                    assertThat(this).isInstanceOf(UiState.ShowMeal::class.java)
+                    val state = this as UiState.ShowMeal
+                    assertThat(state.meal).isEqualTo(meal)
+                }
+
+                private fun UiState.assertErrorState(message: String) {
+                    assertThat(this).isInstanceOf(UiState.Error::class.java)
+                    val state = this as UiState.Error
+                    assertThat(state.message).isEqualTo(message)
+                }
+                ```
+                """.trimIndent()
         ),
     )
 

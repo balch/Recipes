@@ -2,6 +2,8 @@ package org.balch.recipes.features.ideas
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import org.balch.recipes.core.models.Category
+import org.balch.recipes.core.models.CodeArea
+import org.balch.recipes.core.models.CodeRecipe
 
 class IdeasStateProvider : PreviewParameterProvider<IdeasUiState> {
     override val values = sequenceOf(
@@ -13,7 +15,12 @@ class IdeasStateProvider : PreviewParameterProvider<IdeasUiState> {
                 Category("2", "Category 2", "https://example.com/thumb2.jpg", "Description 2"),
                 Category("3", "Category 3", "https://example.com/thumb3.jpg", "Description 3"),
             ),
-            codeRecipes = emptyList()
+            codeRecipes = listOf(
+                CodeRecipe(CodeArea.Theme, "Code Recipe 1", "Description 1"),
+                CodeRecipe(CodeArea.Navigation, "Code Recipe 2", "Description 2"),
+                CodeRecipe(CodeArea.Architecture, "Code Recipe 3", "Description 3"),
+                CodeRecipe(CodeArea.Testing, "Code Recipe 4", "Description 4"),
+            )
         )
     )
 }

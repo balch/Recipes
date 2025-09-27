@@ -12,8 +12,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 private const val WEBVIEW_TAG = "recipeWebViewTag"
 
 @Composable
-fun WebViewScreen(url: String) {
-    Box(modifier = Modifier.fillMaxSize()) {
+fun WebViewScreen(
+    modifier: Modifier = Modifier,
+    url: String
+) {
+    Box(modifier = modifier.fillMaxSize()) {
 
         AndroidView(
             factory = { context ->
@@ -21,6 +24,11 @@ fun WebViewScreen(url: String) {
                     addView(
                         WebView(context).apply {
                             tag = WEBVIEW_TAG
+                            settings.javaScriptEnabled = true
+                            settings.domStorageEnabled = true
+                            settings.allowContentAccess = true
+                            settings.allowFileAccess = true
+                            settings.javaScriptCanOpenWindowsAutomatically = true
                             layoutParams = ViewGroup.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT

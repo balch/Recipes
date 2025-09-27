@@ -13,15 +13,16 @@ enum class CodeArea {
 
 /**
  * Returns the theme-aware color for this CodeArea based on the current MaterialTheme.
- * Automatically adapts between light and dark themes.
+ * Uses semantically appropriate colors that work well with the warm, food-themed palette
+ * and are guaranteed to be defined in both custom and dynamic color schemes.
  */
 @Composable
 fun CodeArea.color(): Color {
     return when (this) {
-        CodeArea.Theme -> MaterialTheme.colorScheme.inversePrimary
-        CodeArea.Navigation -> MaterialTheme.colorScheme.errorContainer
-        CodeArea.Architecture -> MaterialTheme.colorScheme.primaryContainer
-        CodeArea.Testing -> MaterialTheme.colorScheme.tertiary
+        CodeArea.Theme -> MaterialTheme.colorScheme.primary           // Warm orange - perfect for theme-related content
+        CodeArea.Navigation -> MaterialTheme.colorScheme.secondary    // Fresh green - represents movement/navigation
+        CodeArea.Architecture -> MaterialTheme.colorScheme.tertiary   // Accent yellow - represents structure/foundation
+        CodeArea.Testing -> MaterialTheme.colorScheme.surfaceVariant  // Subtle gray - represents testing/verification
     }
 }
 

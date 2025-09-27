@@ -75,7 +75,7 @@ private fun CodeRecipeAreaCard(
             Text(
                 text = codeRecipe.area.name,
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = MaterialTheme.colorScheme.inverseOnSurface,
                 fontWeight = FontWeight.SemiBold
             )
         }

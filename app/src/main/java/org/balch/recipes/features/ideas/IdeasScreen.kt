@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -276,6 +278,7 @@ private fun IdeasLayout(
                         paddingValues = innerPadding,
                         onCategoryClick = onCategoryClick,
                         onCodeRecipeClick = onCodeRecipeClick,
+                        centerCodeRecipes = false,
                     )
                 }
 
@@ -294,6 +297,7 @@ private fun IdeasLayout(
                         paddingValues = innerPadding,
                         onAreaClick = onAreaClick,
                         onCodeRecipeClick = onCodeRecipeClick,
+                        centerCodeRecipes = true,
                     )
                 }
 
@@ -312,6 +316,7 @@ private fun IdeasLayout(
                         paddingValues = innerPadding,
                         onIngredientClick = onIngredientClick,
                         onCodeRecipeClick = onCodeRecipeClick,
+                        centerCodeRecipes = true,
                     )
                 }
             }
@@ -492,6 +497,7 @@ private fun ErrorState(
 @Composable
 private fun ResultsGrid(
     items: List<GridItem>,
+    centerCodeRecipes: Boolean,
     onScrollChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
@@ -547,6 +553,7 @@ private fun ResultsGrid(
                         modifier = Modifier.alpha(0.9f),
                         codeRecipe = item.codeRecipe,
                         onClick = { onCodeRecipeClick(item.codeRecipe) },
+                        center = centerCodeRecipes,
                     )
                 }
             }
@@ -716,19 +723,20 @@ private fun CodeRecipeCard(
     codeRecipe: CodeRecipe,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    center: Boolean,
 ) {
     val color = codeRecipe.area.color()
     Card(
         modifier = modifier
             .padding(horizontal = 12.dp, vertical = 6.dp)
-            .height(140.dp)
+            .height(120.dp)
             .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp),
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
@@ -737,13 +745,13 @@ private fun CodeRecipeCard(
                         )
                     )
                 )
-                .padding(12.dp)
+                .padding(12.dp),
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = if (center) Arrangement.Center else Arrangement.Bottom,
+                horizontalAlignment = if (center) Alignment.CenterHorizontally else Alignment.Start
             ) {
-                // Area badge
                 Text(
                     text = codeRecipe.area.name.uppercase(),
                     style = MaterialTheme.typography.labelSmall,
@@ -757,20 +765,11 @@ private fun CodeRecipeCard(
                         .padding(vertical = 2.dp, horizontal = 6.dp)
                 )
 
-                BasicText(
+                Text(
                     autoSize = TextAutoSize.StepBased(maxFontSize = 14.sp),
                     text = codeRecipe.title,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
+                    textAlign = if (center) TextAlign.Center else TextAlign.Start,
                     style = MaterialTheme.typography.titleSmall
-                        .copy(MaterialTheme.colorScheme.onSurface),
-                )
-
-                BasicText(
-                    modifier = Modifier.height(160.dp)
-                        .verticalScroll(rememberScrollState()),
-                    text = codeRecipe.description,
-                    style = MaterialTheme.typography.bodySmall
                         .copy(MaterialTheme.colorScheme.onSurface),
                 )
             }
