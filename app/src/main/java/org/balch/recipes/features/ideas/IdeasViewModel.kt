@@ -141,7 +141,7 @@ sealed interface IdeasUiState {
         val areas: List<Area>,
         override val imageUrl: String?,
         override val codeRecipes: List<CodeRecipe>,
-        override val isTopLevelState: Boolean = true,
+        override val isTopLevelState: Boolean = false,
     ) : IdeasUiState
     data class Ingredients(
         val ingredients: List<Ingredient>,

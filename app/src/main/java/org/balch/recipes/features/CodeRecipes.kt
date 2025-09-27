@@ -70,7 +70,7 @@ class CodeRecipes @Inject constructor() {
         private val recipes = listOf(
             CodeRecipe(
                 area = CodeArea.Theme,
-                title = "colorScheme",
+                title = "ColorScheme",
                 description = "- Use `isSystemInDarkTheme` and `dynamicColor` to control color scheme",
                 fileName = "RecipesTheme.kt",
                 codeSnippet = """
@@ -88,7 +88,7 @@ class CodeRecipes @Inject constructor() {
             ),
             CodeRecipe(
                 area = CodeArea.Theme,
-                title = "colorScheme",
+                title = "ThemePreview",
                 fileName = "ThemePreview.kt",
                 description = """
                 - Create annotation with an `@Preview` for each theme
@@ -165,7 +165,7 @@ class CodeRecipes @Inject constructor() {
             ),
             CodeRecipe(
                 area = CodeArea.Navigation3,
-                title = "entryDecorators",
+                title = "EntryDecorators",
                 description = "- Define `entryDecorators` to provide state management and to facilitate ViewModel creation.",
                 fileName = "MainActivity.kt",
                 codeSnippet = """
@@ -184,7 +184,7 @@ class CodeRecipes @Inject constructor() {
             ),
             CodeRecipe(
                 area = CodeArea.Navigation3,
-                title = "entryProvider DSL syntax",
+                title = "EntryProvider DSL Syntax",
                 description = """
                 - Use `entryProvider` DSL syntax for simple App Nav
                 - Provides a convenient way to create ViewModels and Screens on the backstack
@@ -214,7 +214,7 @@ class CodeRecipes @Inject constructor() {
             ),
             CodeRecipe(
                 area = CodeArea.Navigation3,
-                title = "backstack",
+                title = "Nav3 Backstack Management",
                 description = """
                     - In **Nav3**, you own the backstack.
                     - Push/Pop works for simple applications
@@ -245,7 +245,7 @@ class CodeRecipes @Inject constructor() {
             ),
             CodeRecipe(
                 area = CodeArea.Architecture,
-                title = "ViewModel creation",
+                title = "Hilt ViewModel Factory",
                 description = """
                 - Use `HiltViewModel` and `assistedFactory` to create unique ViewModel per screen to push on the backstack.
                 - Define Factory using `@AssistedFactory` annotation
@@ -329,7 +329,7 @@ class CodeRecipes @Inject constructor() {
             ),
             CodeRecipe(
                 area = CodeArea.Testing,
-                title = "ViewModel Testing Setup",
+                title = "TestDispatcherProvider",
                 description = """
                 - Define `TestDispatcherProvider` to control ViewModel Flows
                 - Make sure the correct dispatcher is defined on the **Main Thread**
@@ -358,7 +358,7 @@ class CodeRecipes @Inject constructor() {
             ),
             CodeRecipe(
                 area = CodeArea.Testing,
-                title = "StateFlow Testing with Turbine",
+                title = "Turbine For StateFlow Testing",
                 description = """
                 - Use `Turbine` for ViewModel stateFlow testing
                 - Ensures all emissions are accounted for
@@ -390,7 +390,7 @@ class CodeRecipes @Inject constructor() {
             ),
             CodeRecipe(
                 area = CodeArea.Testing,
-                title = "Custom Test Assertions",
+                title = "Test Assertion Extensions",
                 description = "- Create extension functions for custom assertions to improve test readability and reusability",
                 fileName = "DetailsViewModelTest.kt",
                 codeSnippet = """
@@ -411,7 +411,7 @@ class CodeRecipes @Inject constructor() {
             ),
             CodeRecipe(
                 area = CodeArea.Navigation3,
-                title = "Enable `BackHandler` per screen",
+                title = "Enable BackHandler in Screens",
                 description = """
                 - Conditionally enable `BackHandler` 
                 - Use to return to initial Screen state before exiting app/screen
@@ -440,7 +440,7 @@ class CodeRecipes @Inject constructor() {
             ),
             CodeRecipe(
                 area = CodeArea.Theme,
-                title = "glassmorphism blur with Haze",
+                title = "Glass Blur with Haze",
                 description = """
                 - Use **Haze** to create iOS-like glassmorphism blur 
                 - Save the `hazeState` via `rememberHazeState`
@@ -504,7 +504,7 @@ class CodeRecipes @Inject constructor() {
             ),
             CodeRecipe(
                 area = CodeArea.Navigation3,
-                title = "Bottom Nav Auto Hide",
+                title = "Bottom Nav AutoHide",
                 description = """
                - Calculate `showNavigationBar` from `firstVisibleIndex` and scroll direction
                - Use `showNavigationBar` in `AnimatedVisibility` to control visibility of `NavigationBar`
