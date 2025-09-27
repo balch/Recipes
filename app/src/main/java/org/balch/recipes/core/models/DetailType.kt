@@ -1,7 +1,8 @@
 package org.balch.recipes.core.models
 
 sealed interface DetailType {
-    data class Lookup(val mealId: String) : DetailType
-    data class Content(val meal: Meal) : DetailType
-    data object Random : DetailType
+    data class MealLookup(val mealId: String) : DetailType
+    data class MealContent(val meal: Meal) : DetailType
+    data object MealRandom : DetailType
+    data class CodeRecipeContent(val codeRecipe: CodeRecipe) : DetailType
 }

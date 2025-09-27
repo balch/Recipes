@@ -24,6 +24,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.NavigateBefore
 import androidx.compose.material.icons.automirrored.filled.NavigateNext
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,15 +59,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.widgets.FoodLoadingIndicator
+import org.balch.recipes.ui.widgets.WebViewScreen
 
 enum class StepViewMode {
     List, StepByStep
@@ -95,7 +98,7 @@ fun DetailLayout(
     var stepViewMode by remember { mutableStateOf(StepViewMode.List) }
     var currentStepIndex by remember { mutableIntStateOf(0) }
 
-    val instructionSteps = (uiState as? UiState.Show)?.meal
+    val instructionSteps = (uiState as? UiState.ShowMeal)?.meal
         ?.instructions?.split("\r\n", "\n", ". ")
         ?.map { it.trim() }
         ?.filter { it.isNotEmpty() }
@@ -110,7 +113,8 @@ fun DetailLayout(
             .safeDrawingPadding(),
         topBar = {
             val titleText = when (uiState) {
-                is UiState.Show -> uiState.meal.name
+                is UiState.ShowMeal -> uiState.meal.name
+                is UiState.ShowCodeRecipe -> uiState.codeRecipe.title
                 is UiState.Loading -> "Loading..."
                 is UiState.Error -> "Error"
             }
@@ -154,8 +158,15 @@ fun DetailLayout(
                 .fillMaxSize()
         ) {
             when (uiState) {
-                is UiState.Show -> {
-                    DetailItem(
+                is UiState.ShowCodeRecipe -> {
+                    CodeDetailItem(
+                        modifier = modifier.hazeSource(hazeState),
+                        codeRecipe = uiState.codeRecipe,
+                    )
+                }
+
+                is UiState.ShowMeal -> {
+                    MealDetailItem(
                         modifier = modifier.hazeSource(hazeState),
                         meal = uiState.meal,
                         stepViewMode = stepViewMode,
@@ -189,9 +200,10 @@ fun DetailLayout(
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailItem(
+fun MealDetailItem(
     modifier: Modifier = Modifier,
     meal: Meal,
     stepViewMode: StepViewMode,
@@ -612,7 +624,7 @@ private fun DetailScreenPreview() {
     )
 
     RecipesTheme {
-        DetailItem(
+        MealDetailItem(
             meal = sampleMeal,
             stepViewMode = StepViewMode.List,
             instructionSteps = listOf("Step 1", "Step 2", "Step 3"),

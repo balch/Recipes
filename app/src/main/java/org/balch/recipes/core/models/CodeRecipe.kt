@@ -18,6 +18,6 @@ data class CodeRecipe(
     val area: CodeArea,
     val title: String,
     val description: String,
-    val githubRef: String? = null,
     val fileName: String? = null,
+    val codeSnippet: String? = null,
 )

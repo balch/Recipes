@@ -152,6 +152,7 @@ fun IdeasScreen(
     onCategoryClick: (Category) -> Unit,
     onAreaClick: (Area) -> Unit,
     onIngredientClick: (Ingredient) -> Unit,
+    onCodeRecipeClick: (CodeRecipe) -> Unit,
     onScrollChange: (Int) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -161,6 +162,7 @@ fun IdeasScreen(
         onAreaClick = onAreaClick,
         onCategoryClick = onCategoryClick,
         onIngredientClick = onIngredientClick,
+        onCodeRecipeClick = onCodeRecipeClick,
         onScrollChange = onScrollChange,
         onBrowsableTypeChange = viewModel::changeBrowsableType,
         modifier = modifier
@@ -180,6 +182,7 @@ private fun IdeasLayoutPreview(
             onBrowsableTypeChange = { },
             onAreaClick = { },
             onIngredientClick = { },
+            onCodeRecipeClick = { },
             onScrollChange = { }
         )
     }
@@ -194,6 +197,7 @@ private fun IdeasLayout(
     onAreaClick: (Area) -> Unit,
     onCategoryClick: (Category) -> Unit,
     onIngredientClick: (Ingredient) -> Unit,
+    onCodeRecipeClick: (CodeRecipe) -> Unit,
     onBrowsableTypeChange: (BrowsableType) -> Unit,
     onScrollChange: (Int) -> Unit,
 ) {
@@ -268,7 +272,7 @@ private fun IdeasLayout(
                             .hazeSource(state = hazeState),
                         paddingValues = innerPadding,
                         onCategoryClick = onCategoryClick,
-                        onCodeRecipeClick = { /* TODO: Handle CodeRecipe click */ }
+                        onCodeRecipeClick = onCodeRecipeClick
                     )
                 }
 
@@ -286,7 +290,7 @@ private fun IdeasLayout(
                             .hazeSource(state = hazeState),
                         paddingValues = innerPadding,
                         onAreaClick = onAreaClick,
-                        onCodeRecipeClick = { /* TODO: Handle CodeRecipe click */ }
+                        onCodeRecipeClick = onCodeRecipeClick
                     )
                 }
 
@@ -304,7 +308,7 @@ private fun IdeasLayout(
                             .hazeSource(state = hazeState),
                         paddingValues = innerPadding,
                         onIngredientClick = onIngredientClick,
-                        onCodeRecipeClick = { /* TODO: Handle CodeRecipe click */ }
+                        onCodeRecipeClick = onCodeRecipeClick
                     )
                 }
             }
