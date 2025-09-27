@@ -1,7 +1,6 @@
 package org.balch.recipes.features.search
 
 import app.cash.turbine.test
-import com.diamondedge.logging.KmLogging
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,7 +59,6 @@ class SearchViewModelTest {
 
     @Before
     fun setUp() {
-        KmLogging.clear()
         Dispatchers.setMain(dispatcherProvider.testDispatcher)
     }
 

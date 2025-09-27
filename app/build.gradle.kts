@@ -43,6 +43,7 @@ android {
 
     testOptions {
         unitTests {
+            isReturnDefaultValues = true
             isIncludeAndroidResources = true
             all {
                 it.systemProperty("mockito.mock.maker", "mock-maker-inline")

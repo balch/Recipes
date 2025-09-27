@@ -1,8 +1,6 @@
 package org.balch.recipes.features.ideas
 
 import app.cash.turbine.test
-import com.diamondedge.logging.KmLog
-import com.diamondedge.logging.KmLogging
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -72,7 +70,6 @@ class IdeasViewModelTest {
 
     @Before
     fun setUp() {
-        KmLogging.clear()
         Dispatchers.setMain(dispatcherProvider.testDispatcher)
     }
 

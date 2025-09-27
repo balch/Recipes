@@ -96,11 +96,7 @@ class CodeRecipesTest {
             }
             iterations++
         }
-        
-        // Debug information
-        println("[DEBUG_LOG] Total unique recipes seen before first duplicate: ${uniqueRecipesSeen.size}")
-        println("[DEBUG_LOG] Total iterations: $iterations")
-        
+
         // The key assertion: we should have seen a reasonable number of unique recipes
         // before any reshuffle occurred
         assertTrue("Should have seen multiple unique recipes before reshuffling", 
