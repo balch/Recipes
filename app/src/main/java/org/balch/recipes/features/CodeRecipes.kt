@@ -60,6 +60,6 @@ class CodeRecipes @Inject constructor() {
         ),
     )
 
-    fun getRandomRecipe(): CodeRecipe =
-        recipes.random()
+    fun getRandomRecipes(count: Int): List<CodeRecipe> =
+        recipes.shuffled().take(count)
 }

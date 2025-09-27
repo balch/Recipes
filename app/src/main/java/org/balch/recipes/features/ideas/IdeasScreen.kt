@@ -11,12 +11,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells.Fixed
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
@@ -56,6 +59,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import coil3.util.CoilUtils.result
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
@@ -65,12 +69,67 @@ import dev.chrisbanes.haze.rememberHazeState
 import org.balch.recipes.BrowsableType
 import org.balch.recipes.core.models.Area
 import org.balch.recipes.core.models.Category
+import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.models.UniqueItem
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.widgets.FoodLoadingIndicator
 import kotlin.random.Random
+
+/**
+ * Sealed interface representing items that can be displayed in the ideas grid
+ */
+sealed interface GridItem {
+    data class CategoryItem(val category: Category) : GridItem
+    data class AreaItem(val area: Area) : GridItem
+    data class IngredientItem(val ingredient: Ingredient) : GridItem
+    data class CodeRecipeItem(val codeRecipe: CodeRecipe) : GridItem
+}
+
+/**
+ * Creates an interesting mix of regular items and code recipes for the staggered grid
+ */
+private fun <T> createInterestingMix(
+    regularItems: List<T>,
+    codeRecipes: List<CodeRecipe>,
+    itemWrapper: (T) -> GridItem
+): List<GridItem> {
+    if (codeRecipes.isEmpty()) {
+        return regularItems.map(itemWrapper)
+    }
+    
+    val result = mutableListOf<GridItem>()
+    val regularGridItems = regularItems.map(itemWrapper)
+    val codeGridItems = codeRecipes.map { GridItem.CodeRecipeItem(it) }
+
+    val firstOrSecond = if (Random.nextBoolean()) 0 else 1
+
+    // Calculate insertion positions to create interesting distribution
+    val insertPositions = listOf(
+            firstOrSecond,
+            firstOrSecond + 2 + firstOrSecond,
+            firstOrSecond + 3 + firstOrSecond,
+        )
+    
+    // Build the mixed list
+    var codeIndex = 0
+    regularGridItems.forEachIndexed { index, item ->
+        if (index in insertPositions && codeIndex < codeGridItems.size) {
+            result.add(codeGridItems[codeIndex])
+            codeIndex++
+        }
+        result.add(item)
+    }
+    
+    // Add any remaining code recipes at the end
+    while (codeIndex < codeGridItems.size) {
+        result.add(codeGridItems[codeIndex])
+        codeIndex++
+    }
+    
+    return result
+}
 
 /**
  * Selects a theme color based on the item index for glass-like haze effects
@@ -196,51 +255,57 @@ private fun IdeasLayout(
                 }
 
                 is IdeasUiState.Categories -> {
+                    val mixedItems = createInterestingMix(
+                        regularItems = uiState.categories,
+                        codeRecipes = uiState.codeRecipes,
+                        itemWrapper = { GridItem.CategoryItem(it) }
+                    )
                     ResultsGrid(
-                        items = uiState.categories,
+                        items = mixedItems,
                         onScrollChange = onScrollChange,
                         modifier = Modifier
                             .fillMaxSize()
                             .hazeSource(state = hazeState),
                         paddingValues = innerPadding,
-                    ) { _, item ->
-                        CategoryCard(
-                            category = item,
-                            onClick = { onCategoryClick(item) }
-                        )
-                    }
+                        onCategoryClick = onCategoryClick,
+                        onCodeRecipeClick = { /* TODO: Handle CodeRecipe click */ }
+                    )
                 }
 
                 is IdeasUiState.Areas -> {
+                    val mixedItems = createInterestingMix(
+                        regularItems = uiState.areas,
+                        codeRecipes = uiState.codeRecipes,
+                        itemWrapper = { GridItem.AreaItem(it) }
+                    )
                     ResultsGrid(
-                        items = uiState.areas,
+                        items = mixedItems,
                         onScrollChange = onScrollChange,
                         modifier = Modifier
                             .fillMaxSize()
                             .hazeSource(state = hazeState),
                         paddingValues = innerPadding,
-                    ) { _, item ->
-                        AreaCard(
-                            area = item,
-                            onClick = { onAreaClick(item) },
-                        )
-                    }
+                        onAreaClick = onAreaClick,
+                        onCodeRecipeClick = { /* TODO: Handle CodeRecipe click */ }
+                    )
                 }
 
                 is IdeasUiState.Ingredients -> {
+                    val mixedItems = createInterestingMix(
+                        regularItems = uiState.ingredients,
+                        codeRecipes = uiState.codeRecipes,
+                        itemWrapper = { GridItem.IngredientItem(it) }
+                    )
                     ResultsGrid(
-                        items = uiState.ingredients,
+                        items = mixedItems,
                         onScrollChange = onScrollChange,
                         modifier = Modifier
                             .fillMaxSize()
                             .hazeSource(state = hazeState),
                         paddingValues = innerPadding,
-                    ) { _, item ->
-                        IngredientCard(
-                            ingredient = item,
-                            onClick = { onIngredientClick(item) },
-                        )
-                    }
+                        onIngredientClick = onIngredientClick,
+                        onCodeRecipeClick = { /* TODO: Handle CodeRecipe click */ }
+                    )
                 }
             }
         }
@@ -418,12 +483,15 @@ private fun ErrorState(
 }
 
 @Composable
-private fun <T: UniqueItem> ResultsGrid(
-    items: List<T>,
+private fun ResultsGrid(
+    items: List<GridItem>,
     onScrollChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    content: @Composable (Int, T) -> Unit,
+    onCategoryClick: (Category) -> Unit = {},
+    onAreaClick: (Area) -> Unit = {},
+    onIngredientClick: (Ingredient) -> Unit = {},
+    onCodeRecipeClick: (CodeRecipe) -> Unit = {},
 ) {
     val gridState = rememberLazyStaggeredGridState()
     LaunchedEffect(gridState.firstVisibleItemIndex) {
@@ -437,8 +505,42 @@ private fun <T: UniqueItem> ResultsGrid(
     ) {
         itemsIndexed(
             items = items,
-            key = { _, item -> item.id }
-        ) { index, item -> content(index, item) }
+            key = { index, item -> 
+                when (item) {
+                    is GridItem.CategoryItem -> "category_${item.category.id}"
+                    is GridItem.AreaItem -> "area_${item.area.id}"
+                    is GridItem.IngredientItem -> "ingredient_${item.ingredient.id}"
+                    is GridItem.CodeRecipeItem -> "code_${item.codeRecipe.hashCode()}"
+                }
+            }
+        ) { index, item ->
+            when (item) {
+                is GridItem.CategoryItem -> {
+                    CategoryCard(
+                        category = item.category,
+                        onClick = { onCategoryClick(item.category) }
+                    )
+                }
+                is GridItem.AreaItem -> {
+                    AreaCard(
+                        area = item.area,
+                        onClick = { onAreaClick(item.area) }
+                    )
+                }
+                is GridItem.IngredientItem -> {
+                    IngredientCard(
+                        ingredient = item.ingredient,
+                        onClick = { onIngredientClick(item.ingredient) }
+                    )
+                }
+                is GridItem.CodeRecipeItem -> {
+                    CodeRecipeCard(
+                        codeRecipe = item.codeRecipe,
+                        onClick = { onCodeRecipeClick(item.codeRecipe) }
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -597,6 +699,76 @@ private fun IngredientCard(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+        }
+    }
+}
+
+@Composable
+private fun CodeRecipeCard(
+    codeRecipe: CodeRecipe,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val color = codeRecipe.area.color
+
+    Card(
+        modifier = modifier
+            .height(120.dp)
+            .alpha(.9f)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .clickable { onClick() },
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            color.copy(alpha = 0.1f),
+                            color.copy(alpha = 0.3f)
+                        )
+                    )
+                )
+                .padding(12.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Area badge
+                Text(
+                    text = codeRecipe.area.name.uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = color,
+                    modifier = Modifier
+                        .background(
+                            color.copy(alpha = 0.2f),
+                            RoundedCornerShape(4.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                )
+
+                // Title
+                Text(
+                    text = codeRecipe.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    modifier = Modifier
+                            .verticalScroll(rememberScrollState()),
+
+                    text = codeRecipe.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
         }
     }
 }
