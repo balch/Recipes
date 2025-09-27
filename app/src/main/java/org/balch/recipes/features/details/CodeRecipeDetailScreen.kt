@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.balch.recipes.core.models.CodeArea
 import org.balch.recipes.core.models.CodeRecipe
+import org.balch.recipes.core.models.color
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.widgets.MarkdownCodeSnippet
@@ -38,23 +39,20 @@ fun CodeDetailItem(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Area/Category Card
         CodeRecipeAreaCard(
             codeRecipe = codeRecipe,
-            modifier = Modifier.fillMaxWidth()
         )
 
-        // Description Card
         MarkdownCodeSnippet(
             codeSnippet ="#### Description\n\n${codeRecipe.description}",
-            color = codeRecipe.area.color,
+            color = codeRecipe.area.color(),
             modifier = Modifier.fillMaxWidth()
         )
 
         if (codeRecipe.codeSnippet != null) {
             MarkdownCodeSnippet(
                 codeSnippet = codeRecipe.codeSnippet,
-                color = codeRecipe.area.color,
+                color = codeRecipe.area.color(),
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -64,45 +62,22 @@ fun CodeDetailItem(
 @Composable
 private fun CodeRecipeAreaCard(
     codeRecipe: CodeRecipe,
-    modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = codeRecipe.area.color.copy(alpha = 0.1f)
-        )
-    ) {
-        Column(
+    Row(modifier = Modifier.fillMaxWidth().padding(6.dp)) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+                .background(
+                    color = codeRecipe.area.color(),
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
             Text(
-                text = "Category",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = codeRecipe.area.name,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .background(
-                            color = codeRecipe.area.color,
-                            shape = RoundedCornerShape(4.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = codeRecipe.area.name,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = Color.White,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
         }
     }
 }

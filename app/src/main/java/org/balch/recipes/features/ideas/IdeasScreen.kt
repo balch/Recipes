@@ -1,6 +1,5 @@
 package org.balch.recipes.features.ideas
 
-import android.R.attr.textStyle
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells.Fixed
@@ -63,7 +63,6 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
@@ -74,10 +73,10 @@ import org.balch.recipes.core.models.Area
 import org.balch.recipes.core.models.Category
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.Ingredient
+import org.balch.recipes.core.models.color
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.widgets.FoodLoadingIndicator
-import org.balch.recipes.ui.widgets.MarkdownCodeSnippet
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -139,7 +138,7 @@ private fun <T> createInterestingMix(
  * Selects a theme color based on the item index for glass-like haze effects
  */
 @Composable
-private fun getHazeColorForIndex(index: Int): Color {
+private fun getColorForIndex(index: Int): Color {
     val colorSet = listOf(
         MaterialTheme.colorScheme.primary,
         MaterialTheme.colorScheme.secondary,
@@ -277,7 +276,6 @@ private fun IdeasLayout(
                         paddingValues = innerPadding,
                         onCategoryClick = onCategoryClick,
                         onCodeRecipeClick = onCodeRecipeClick,
-                        hazeState = hazeState,
                     )
                 }
 
@@ -296,7 +294,6 @@ private fun IdeasLayout(
                         paddingValues = innerPadding,
                         onAreaClick = onAreaClick,
                         onCodeRecipeClick = onCodeRecipeClick,
-                        hazeState = hazeState,
                     )
                 }
 
@@ -315,7 +312,6 @@ private fun IdeasLayout(
                         paddingValues = innerPadding,
                         onIngredientClick = onIngredientClick,
                         onCodeRecipeClick = onCodeRecipeClick,
-                        hazeState = hazeState,
                     )
                 }
             }
@@ -496,7 +492,6 @@ private fun ErrorState(
 @Composable
 private fun ResultsGrid(
     items: List<GridItem>,
-    hazeState: HazeState,
     onScrollChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
@@ -535,18 +530,21 @@ private fun ResultsGrid(
                 }
                 is GridItem.AreaItem -> {
                     AreaCard(
+                        modifier = Modifier.alpha(0.9f),
                         area = item.area,
                         onClick = { onAreaClick(item.area) }
                     )
                 }
                 is GridItem.IngredientItem -> {
                     IngredientCard(
+                        modifier = Modifier.alpha(0.9f),
                         ingredient = item.ingredient,
                         onClick = { onIngredientClick(item.ingredient) }
                     )
                 }
                 is GridItem.CodeRecipeItem -> {
                     CodeRecipeCard(
+                        modifier = Modifier.alpha(0.9f),
                         codeRecipe = item.codeRecipe,
                         onClick = { onCodeRecipeClick(item.codeRecipe) },
                     )
@@ -634,11 +632,10 @@ private fun AreaCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val color = getHazeColorForIndex(abs((Random.nextInt())))
+    val color = getColorForIndex(abs((Random.nextInt())))
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .alpha(.9f)
             .padding(horizontal = 12.dp, vertical = 6.dp)
             .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -677,12 +674,11 @@ private fun IngredientCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val color = getHazeColorForIndex(abs((Random.nextInt())))
+    val color = getColorForIndex(abs((Random.nextInt())))
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .alpha(.9f)
             .padding(horizontal = 12.dp, vertical = 6.dp)
             .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -721,7 +717,7 @@ private fun CodeRecipeCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val color = codeRecipe.area.color
+    val color = codeRecipe.area.color()
     Card(
         modifier = modifier
             .padding(horizontal = 12.dp, vertical = 6.dp)
@@ -752,19 +748,19 @@ private fun CodeRecipeCard(
                     text = codeRecipe.area.name.uppercase(),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
-                    color = color,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                     modifier = Modifier
                         .background(
-                            color.copy(alpha = 0.2f),
-                            RoundedCornerShape(4.dp)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                            RoundedCornerShape(2.dp)
                         )
-                        .padding(vertical = 2.dp)
+                        .padding(vertical = 2.dp, horizontal = 6.dp)
                 )
 
                 BasicText(
-                    autoSize = TextAutoSize.StepBased(maxFontSize = 16.sp),
+                    autoSize = TextAutoSize.StepBased(maxFontSize = 14.sp),
                     text = codeRecipe.title,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.titleSmall
                         .copy(MaterialTheme.colorScheme.onSurface),
