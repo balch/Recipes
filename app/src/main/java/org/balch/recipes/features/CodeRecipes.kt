@@ -119,6 +119,7 @@ class CodeRecipes @Inject constructor() {
                     - `TopLevelRoute` represent displayable items in `NavigationBarItem`
                     - Manage `backstack` in the `NavigationBar`
                        - Pop the current screen off the backstack if it not the root
+                       - Push the new route onto the backstack
                 """.trimIndent(),
                 fileName = "MainActivity.kt",
                 codeSnippet = """
@@ -143,7 +144,10 @@ class CodeRecipes @Inject constructor() {
                                             if (backStackManager.peek() != TOP_LEVEL_ROUTES[0]) {
                                                 backStackManager.pop()
                                             }
-                                            backStackManager.push(topLevelRoute)
+                                            // push the new route onto the backstack
+                                            if (backStackManager.peek() != topLevelRoute) {
+                                                backStackManager.push(topLevelRoute)
+                                            }
                                         },
                                         icon = {
                                             Icon(

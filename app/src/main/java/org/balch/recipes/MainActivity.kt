@@ -113,7 +113,10 @@ class MainActivity : ComponentActivity() {
                                         if (backStackManager.peek() != TOP_LEVEL_ROUTES[0]) {
                                             backStackManager.pop()
                                         }
-                                        backStackManager.push(topLevelRoute)
+                                        // push the new route onto the backstack
+                                        if (backStackManager.peek() != topLevelRoute) {
+                                            backStackManager.push(topLevelRoute)
+                                        }
                                     },
                                     icon = {
                                         Icon(
