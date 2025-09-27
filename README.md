@@ -12,10 +12,18 @@ Keeping up with the latest Android trends is always a challenge. One of the tech
 The latest incarnation for my reference app is called Recipes. 
 
 ### Screenshots
-|                                      Categories                                      |                                      Cuisine                                       |                                        Detail List                                         |                                        Detail Step By Step                                         |
-|:------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------:|
-|  <img src="screenshots/darkmode-category.png" width="200" alt="Dark Mode Category">  |  <img src="screenshots/darkmode-cuisine.png" width="200" alt="Dark Mode Cuisine">  |  <img src="screenshots/darkmode-detail-list.png" width="200" alt="Dark Mode Detail List">  |  <img src="screenshots/darkmode-detail-step.png" width="200" alt="Dark Mode Detail Step By Step">  |
-| <img src="screenshots/lightmode-category.png" width="200" alt="Light Mode Category"> | <img src="screenshots/lightmode-desert.png" width="200" alt="Light Mode Category"> | <img src="screenshots/lightmode-detail-list.png" width="200" alt="Light Mode Detail List"> | <img src="screenshots/lightmode-detail-step.png" width="200" alt="Light Mode Detail Step By Step"> |
+
+#### Meal Recipes
+|                                      Categories                                      |                                       Cuisine                                       |                                        Detail List                                         |                                        Detail Step By Step                                         |
+|:------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------:|
+|  <img src="screenshots/darkmode-category.png" width="200" alt="Dark Mode Category">  | <img src="screenshots/darkmode-ingredient.png" width="200" alt="Dark Mode Cuisine"> |  <img src="screenshots/darkmode-detail-list.png" width="200" alt="Dark Mode Detail List">  |  <img src="screenshots/darkmode-detail-step.png" width="200" alt="Dark Mode Detail Step By Step">  |
+| <img src="screenshots/lightmode-category.png" width="200" alt="Light Mode Category"> | <img src="screenshots/lightmode-cuisine.png" width="200" alt="Light Mode Category"> | <img src="screenshots/lightmode-detail-list.png" width="200" alt="Light Mode Detail List"> | <img src="screenshots/lightmode-detail-step.png" width="200" alt="Light Mode Detail Step By Step"> |
+
+#### Code Recipes
+|                                    Code Recipes                                    |                                        Code Recipe Detail                                         |
+|:----------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------:|
+| <img src="screenshots/darkmode-code.png" width="200" alt="Dark Mode Code Recipes"> |  <img src="screenshots/darkmode-code-detail.png" width="200" alt="Dark Mode Code Recipe Detail">  |
+|  <img src="screenshots/lightmode-code.png" width="200" alt="Light Mode Recipes">   | <img src="screenshots/lightmode-code-detail.png" width="200" alt="Light Mode Code Recipe Detail"> |
 
 https://github.com/user-attachments/assets/cac97b4d-723e-4d29-a6a2-46b2f1368478
 
