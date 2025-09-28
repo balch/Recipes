@@ -41,6 +41,7 @@ fun CodeDetailItem(
         ) {
             CodeRecipeAreaBadge(
                 codeRecipe = codeRecipe,
+                largeFont = true,
                 modifier = modifier
                     .padding(start = 12.dp, top = 16.dp),
             )
