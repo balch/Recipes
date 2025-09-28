@@ -74,6 +74,7 @@ import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.models.color
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
+import org.balch.recipes.ui.widgets.CodeRecipeAreaBadge
 import org.balch.recipes.ui.widgets.FoodLoadingIndicator
 import kotlin.math.abs
 import kotlin.random.Random
@@ -121,7 +122,7 @@ fun IdeasScreen(
 @ThemePreview
 @Composable
 private fun IdeasLayoutPreview(
-    @PreviewParameter(IdeasStateProvider ::class) uiState: IdeasUiState,
+    @PreviewParameter(IdeasStateProvider::class) uiState: IdeasUiState,
 ) {
     RecipesTheme {
         IdeasLayout(
@@ -210,10 +211,10 @@ private fun IdeasLayout(
 
                 is IdeasUiState.Categories -> {
                     val items = rememberRecipeItems(
-                            regularItems = uiState.categories,
-                            codeRecipes = uiState.codeRecipes,
-                            itemWrapper = { GridItem.CategoryItem(it) }
-                        )
+                        regularItems = uiState.categories,
+                        codeRecipes = uiState.codeRecipes,
+                        itemWrapper = { GridItem.CategoryItem(it) }
+                    )
                     ResultsGrid(
                         items = items,
                         onScrollChange = onScrollChange,
@@ -715,18 +716,7 @@ private fun CodeRecipeCard(
                 verticalArrangement = if (center) Arrangement.Center else Arrangement.Bottom,
                 horizontalAlignment = if (center) Alignment.CenterHorizontally else Alignment.Start
             ) {
-                Text(
-                    text = codeRecipe.area.name.uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                    modifier = Modifier
-                        .background(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                            RoundedCornerShape(2.dp)
-                        )
-                        .padding(vertical = 2.dp, horizontal = 6.dp)
-                )
+                CodeRecipeAreaBadge(codeRecipe)
 
                 Text(
                     autoSize = TextAutoSize.StepBased(maxFontSize = 14.sp),
@@ -766,32 +756,18 @@ private fun <T> rememberRecipeItems(
         val regularGridItems = regularItems.map(itemWrapper)
         val codeGridItems = codeRecipes.map { GridItem.CodeRecipeItem(it) }
 
-        fun orderedItems(
-            gridItem: GridItem,
-            codeGridItem: GridItem,
-            oddOrEven: Int
-        ): List<GridItem> {
-            return if (oddOrEven == 0) {
-                listOf(codeGridItem, gridItem)
-            } else {
-                listOf(gridItem, codeGridItem)
-            }
-        }
-
-        val size = regularGridItems.size + codeGridItems.size
         var codeIndex = 0
-        var regularItemIndex = 0
-        (0..size - 1).forEach { _ ->
+        regularGridItems.forEach { item ->
             if (codeIndex < codeGridItems.size) {
-                result.addAll(
-                    orderedItems(
-                        gridItem = regularGridItems[regularItemIndex++],
-                        codeGridItem = codeGridItems[codeIndex++],
-                        oddOrEven = if (Random.nextBoolean()) 0 else 1
-                    )
-                )
-            } else if (regularItemIndex < regularGridItems.size) {
-                result.add(regularGridItems[regularItemIndex++])
+                if (Random.nextBoolean()) {
+                    result.add(codeGridItems[codeIndex++])
+                    result.add(item)
+                } else {
+                    result.add(item)
+                    result.add(codeGridItems[codeIndex++])
+                }
+            } else {
+                result.add(item)
             }
         }
         result

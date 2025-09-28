@@ -1,9 +1,8 @@
 package org.balch.recipes.features.details
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import org.balch.recipes.core.models.CodeArea
-import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.Meal
+import org.balch.recipes.ui.preview.CodeRecipeProvider
 
 class DetailStateProvider : PreviewParameterProvider<UiState> {
     override val values = mutableListOf(
@@ -38,43 +37,7 @@ class DetailStateProvider : PreviewParameterProvider<UiState> {
 
 
 class DetailCodeRecipeProvider : PreviewParameterProvider<UiState.ShowCodeRecipe> {
-    override val values = sequenceOf(
-
-        UiState.ShowCodeRecipe(
-            CodeRecipe(
-                index = 1,
-                area = CodeArea.Architecture,
-                title = "Architecture Title",
-                description = "`Architecture` Description",
-                codeSnippet = "print('Hello, Architecture!')"
-            )
-        ),
-        UiState.ShowCodeRecipe(
-            CodeRecipe(
-                index = 2,
-                area = CodeArea.Navigation,
-                title = "Navigation Title",
-                description = "`Navigation` Description",
-                codeSnippet = "print('Hello, Navigation!')"
-            )
-        ),
-        UiState.ShowCodeRecipe(
-            CodeRecipe(
-                index = 3,
-                area = CodeArea.Theme,
-                title = "Theme Title",
-                description = "`Theme` Description",
-                codeSnippet = "print('Hello, Theme!')"
-            )
-        ),
-        UiState.ShowCodeRecipe(
-            CodeRecipe(
-                index = 4,
-                area = CodeArea.Testing,
-                title = "Testing Title",
-                description = "`Testing` Description",
-                codeSnippet = "print('Hello, Testing!')"
-            )
-        )
-    )
+    override val values =
+        CodeRecipeProvider().values
+            .map { UiState.ShowCodeRecipe(it) }
 }

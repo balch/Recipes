@@ -4,26 +4,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.color
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
+import org.balch.recipes.ui.widgets.CodeRecipeAreaBadge
 import org.balch.recipes.ui.widgets.MarkdownCodeSnippet
 
 @Composable
@@ -42,7 +39,7 @@ fun CodeDetailItem(
                 containerColor = codeRecipe.area.color().copy(alpha = 0.1f)
             )
         ) {
-            CodeRecipeAreaCard(
+            CodeRecipeAreaBadge(
                 codeRecipe = codeRecipe,
                 modifier = modifier
                     .padding(start = 12.dp, top = 16.dp),
@@ -59,30 +56,6 @@ fun CodeDetailItem(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun CodeRecipeAreaCard(
-    codeRecipe: CodeRecipe,
-    modifier: Modifier = Modifier,
-) {
-    Row(modifier = modifier) {
-        Box(
-            modifier = Modifier
-                .background(
-                    color = codeRecipe.area.color(),
-                    shape = RoundedCornerShape(4.dp)
-                )
-                .padding(horizontal = 12.dp, vertical = 6.dp)
-        ) {
-            Text(
-                text = codeRecipe.area.name,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.inverseOnSurface,
-                fontWeight = FontWeight.SemiBold
-            )
         }
     }
 }
