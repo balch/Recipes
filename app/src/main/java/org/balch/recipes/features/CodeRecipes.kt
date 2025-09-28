@@ -111,7 +111,7 @@ class CodeRecipes @Inject constructor() {
                 """.trimIndent()
             ),
             CodeRecipe(
-                area = CodeArea.Navigation3,
+                area = CodeArea.Navigation,
                 title = "Bottom Navigation",
                 description = """
                     - Wrap `NavigationBar` in `Scaffold` 
@@ -164,9 +164,9 @@ class CodeRecipes @Inject constructor() {
                     """.trimIndent()
             ),
             CodeRecipe(
-                area = CodeArea.Navigation3,
-                title = "EntryDecorators",
-                description = "- Define `entryDecorators` to provide state management and to facilitate ViewModel creation.",
+                area = CodeArea.Navigation,
+                title = "Nav3 EntryDecorators",
+                description = "- Define **Nav3** `entryDecorators` to provide state management and to facilitate ViewModel creation.",
                 fileName = "MainActivity.kt",
                 codeSnippet = """
                 ```
@@ -183,10 +183,10 @@ class CodeRecipes @Inject constructor() {
                 """.trimIndent()
             ),
             CodeRecipe(
-                area = CodeArea.Navigation3,
-                title = "EntryProvider DSL Syntax",
+                area = CodeArea.Navigation,
+                title = "Nav3 EntryProvider DSL Syntax",
                 description = """
-                - Use `entryProvider` DSL syntax for simple App Nav
+                - Use **Nav3** `entryProvider` DSL syntax for simple App Nav
                 - Provides a convenient way to create ViewModels and Screens on the backstack
                 """.trimIndent(),
                 fileName = "MainActivity.kt",
@@ -213,7 +213,7 @@ class CodeRecipes @Inject constructor() {
             """.trimIndent()
             ),
             CodeRecipe(
-                area = CodeArea.Navigation3,
+                area = CodeArea.Navigation,
                 title = "Nav3 Backstack Management",
                 description = """
                     - In **Nav3**, you own the backstack.
@@ -329,29 +329,42 @@ class CodeRecipes @Inject constructor() {
             ),
             CodeRecipe(
                 area = CodeArea.Testing,
-                title = "TestDispatcherProvider",
+                title = "TestDispatcherProvider & MainCoroutineExtension",
                 description = """
-                - Define `TestDispatcherProvider` to control ViewModel Flows
-                - Make sure the correct dispatcher is defined on the **Main Thread**
+                    - `DispatcherProvider` injected into ViewModels to control StateFlows
+                    - `TestDispatcherProvider` implements `DispatcherProvider` for testing
+                    - `MainCoroutineExtension` assigns provided `TestDispatcher` to `Dispatchers.Main`
                 """.trimIndent(),
                 fileName = "DetailsViewModelTest.kt",
                 codeSnippet = """
+                    
+                **Declare Junit 5 Extension**   
                 ```
-                @OptIn(ExperimentalCoroutinesApi::class)
+                class MainCoroutineExtension(
+                    val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
+                ) : BeforeEachCallback, AfterEachCallback {               
+                    override fun beforeEach(context: ExtensionContext?) {
+                        Dispatchers.setMain(testDispatcher)
+                    }                
+                    override fun afterEach(context: ExtensionContext?) {
+                        Dispatchers.resetMain()
+                    }
+                }
+                ```
+                
+                **Use Extension in Test Class**   
+                ```
                 class DetailsViewModelTest {
 
                     private val dispatcherProvider: TestDispatcherProvider = TestDispatcherProvider()
+
+                    @JvmField
+                    @RegisterExtension
+                    val mainCoroutineExtension = MainCoroutineExtension(dispatcherProvider.testDispatcher)
+
                     private val repository = mock<RecipeRepository>()
-
-                    @Before
-                    fun setUp() {
-                        Dispatchers.setMain(dispatcherProvider.testDispatcher)
-                    }
-
-                    @After
-                    fun tearDown() {
-                        Dispatchers.resetMain()
-                    }
+                    
+                    // ...
                 }
                 ```
                 """.trimIndent()
@@ -410,7 +423,7 @@ class CodeRecipes @Inject constructor() {
                 """.trimIndent()
             ),
             CodeRecipe(
-                area = CodeArea.Navigation3,
+                area = CodeArea.Navigation,
                 title = "Enable BackHandler in Screens",
                 description = """
                 - Conditionally enable `BackHandler` 
@@ -503,7 +516,7 @@ class CodeRecipes @Inject constructor() {
                 fileName = "MainActivity.kt"
             ),
             CodeRecipe(
-                area = CodeArea.Navigation3,
+                area = CodeArea.Navigation,
                 title = "Bottom Nav AutoHide",
                 description = """
                - Calculate `showNavigationBar` from `firstVisibleIndex` and scroll direction

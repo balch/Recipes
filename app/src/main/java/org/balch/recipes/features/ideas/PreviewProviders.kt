@@ -17,7 +17,7 @@ class IdeasStateProvider : PreviewParameterProvider<IdeasUiState> {
             ),
             codeRecipes = listOf(
                 CodeRecipe(CodeArea.Theme, "Code Recipe 1", "Description 1"),
-                CodeRecipe(CodeArea.Navigation3, "Code Recipe 2", "Description 2"),
+                CodeRecipe(CodeArea.Navigation, "Code Recipe 2", "Description 2"),
                 CodeRecipe(CodeArea.Architecture, "Code Recipe 3", "Description 3"),
                 CodeRecipe(CodeArea.Testing, "Code Recipe 4", "Description 4"),
             )

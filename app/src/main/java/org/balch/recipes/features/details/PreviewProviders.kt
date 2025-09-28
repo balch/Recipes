@@ -50,7 +50,7 @@ class DetailCodeRecipeProvider : PreviewParameterProvider<UiState.ShowCodeRecipe
         ),
         UiState.ShowCodeRecipe(
             CodeRecipe(
-                area = CodeArea.Navigation3,
+                area = CodeArea.Navigation,
                 title = "Navigation Title",
                 description = "`Navigation` Description",
                 codeSnippet = "print('Hello, Navigation!')"
