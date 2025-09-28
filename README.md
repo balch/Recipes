@@ -25,7 +25,7 @@ The latest incarnation for my reference app is called Recipes.
 | <img src="screenshots/darkmode-code.png" width="200" alt="Dark Mode Code Recipes"> | <img src="screenshots/darkmode-code-detail.png" width="200" alt="Dark Mode Code Recipe Detail">  |
 |   <img src="screenshots/lightmode-code.png" width="200" alt="Light Mode Recipes">   | <img src="screenshots/lightmode-code-detail.png" width="200" alt="Light Mode Code Recipe Detail"> |
 
-https://github.com/user-attachments/assets/17ba963b-b864-452c-8c30-c792466f2889
+https://github.com/user-attachments/assets/5ec15acd-8fb9-4403-a5a7-9258a0ab6ac7
 
 ### Dependencies
 | Dependency                                                                                     | Description                                         | 
