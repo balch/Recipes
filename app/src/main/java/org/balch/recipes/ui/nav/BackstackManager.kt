@@ -10,25 +10,25 @@ import javax.inject.Inject
 
 
 @ActivityRetainedScoped
-class BackStackManager @Inject constructor() {
-    private val _backStack : SnapshotStateList<NavKey> = mutableStateListOf(Ideas)
+class BackstackManager @Inject constructor() {
+    private val _backstack : SnapshotStateList<NavKey> = mutableStateListOf(Ideas)
 
-    val backStack: List<NavKey>
-        get() = _backStack.toList()
+    val backstack: List<NavKey>
+        get() = _backstack.toList()
 
-    private val logger = logging("BackStackManager")
+    private val logger = logging(BackstackManager::class.simpleName)
 
     fun push(destination: NavKey){
         logger.d { "push: $destination" }
-        _backStack.add(destination)
+        _backstack.add(destination)
     }
 
     fun pop(){
-        _backStack.removeLastOrNull()
+        _backstack.removeLastOrNull()
             .also { logger.d { "pop: $it" } }
     }
 
     fun peek(): NavKey? =
-        _backStack.lastOrNull()
+        _backstack.lastOrNull()
             .also { logger.d { "pop: $it" } }
 }

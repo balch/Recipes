@@ -134,7 +134,7 @@ class CodeRecipes @Inject constructor() {
                             │   ├── FoodLoadingIndicator.kt
                             │   └── WebViewScreen.kt        
                             └── nav/                        # Navigation utilities
-                                └── BackStackManager.kt     
+                                └── BackstackManager.kt     
                                 
                         🎯 Each FEATURE has dedicated ViewModel + Screen (Single Responsibility)
                         🔧 CORE contains shared business logic and data access
@@ -276,7 +276,7 @@ class CodeRecipes @Inject constructor() {
                 Scaffold(
                     bottomBar = {
                         AnimatedVisibility(
-                            visible = showNavigationBar && backStackManager.peek() is TopLevelRoute,
+                            visible = showNavigationBar && backstackManager.peek() is TopLevelRoute,
                             enter = slideInVertically { it },
                             exit = slideOutVertically { it },
                         ) {
@@ -285,17 +285,17 @@ class CodeRecipes @Inject constructor() {
                                 contentColor = MaterialTheme.colorScheme.onSurface,
                             ) {
                                 TOP_LEVEL_ROUTES.forEach { topLevelRoute ->
-                                    val isSelected = topLevelRoute == backStackManager.peek()
+                                    val isSelected = topLevelRoute == backstackManager.peek()
                                     NavigationBarItem(
                                         selected = isSelected,
                                         onClick = {
                                             // pop the current screen off the backstack if it not the root
-                                            if (backStackManager.peek() != TOP_LEVEL_ROUTES[0]) {
-                                                backStackManager.pop()
+                                            if (backstackManager.peek() != TOP_LEVEL_ROUTES[0]) {
+                                                backstackManager.pop()
                                             }
                                             // push the new route onto the backstack
-                                            if (backStackManager.peek() != topLevelRoute) {
-                                                backStackManager.push(topLevelRoute)
+                                            if (backstackManager.peek() != topLevelRoute) {
+                                                backstackManager.push(topLevelRoute)
                                             }
                                         },
                                         icon = {
@@ -373,22 +373,22 @@ class CodeRecipes @Inject constructor() {
                     codeSnippet = """
                 ```
                 @ActivityRetainedScoped
-                class BackStackManager @Inject constructor() {
-                    private val _backStack : SnapshotStateList<NavKey> = mutableStateListOf(Ideas)
+                class BackstackManager @Inject constructor() {
+                    private val _backstack : SnapshotStateList<NavKey> = mutableStateListOf(Ideas)
                 
-                    val backStack: List<NavKey>
-                        get() = _backStack.toList()
+                    val backstack: List<NavKey>
+                        get() = _backstack.toList()
                 
                     fun push(destination: NavKey){
-                        _backStack.add(destination)
+                        _backstack.add(destination)
                     }
                 
                     fun pop(){
-                        _backStack.removeLastOrNull()
+                        _backstack.removeLastOrNull()
                     }
                 
                     fun peek(): NavKey? =
-                        _backStack.lastOrNull()
+                        _backstack.lastOrNull()
                 }
                 ```
                 """.trimIndent()
@@ -690,7 +690,7 @@ class CodeRecipes @Inject constructor() {
                         Scaffold(
                             bottomBar = {
                                 AnimatedVisibility(
-                                    visible = showNavigationBar && backStackManager.peek() is TopLevelRoute,
+                                    visible = showNavigationBar && backstackManager.peek() is TopLevelRoute,
                                     enter = slideInVertically { it },
                                     exit = slideOutVertically { it },
                                 ) {
