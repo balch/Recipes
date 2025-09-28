@@ -16,10 +16,10 @@ class IdeasStateProvider : PreviewParameterProvider<IdeasUiState> {
                 Category("3", "Category 3", "https://example.com/thumb3.jpg", "Description 3"),
             ),
             codeRecipes = listOf(
-                CodeRecipe(CodeArea.Theme, "Code Recipe 1", "Description 1"),
-                CodeRecipe(CodeArea.Navigation, "Code Recipe 2", "Description 2"),
-                CodeRecipe(CodeArea.Architecture, "Code Recipe 3", "Description 3"),
-                CodeRecipe(CodeArea.Testing, "Code Recipe 4", "Description 4"),
+                CodeRecipe(1, CodeArea.Theme, "Code Recipe 1", "Description 1"),
+                CodeRecipe(2, CodeArea.Navigation, "Code Recipe 2", "Description 2"),
+                CodeRecipe(3, CodeArea.Architecture, "Code Recipe 3", "Description 3"),
+                CodeRecipe(4, CodeArea.Testing, "Code Recipe 4", "Description 4"),
             )
         )
     )

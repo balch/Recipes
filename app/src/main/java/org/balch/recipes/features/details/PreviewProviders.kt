@@ -42,6 +42,7 @@ class DetailCodeRecipeProvider : PreviewParameterProvider<UiState.ShowCodeRecipe
 
         UiState.ShowCodeRecipe(
             CodeRecipe(
+                index = 1,
                 area = CodeArea.Architecture,
                 title = "Architecture Title",
                 description = "`Architecture` Description",
@@ -50,6 +51,7 @@ class DetailCodeRecipeProvider : PreviewParameterProvider<UiState.ShowCodeRecipe
         ),
         UiState.ShowCodeRecipe(
             CodeRecipe(
+                index = 2,
                 area = CodeArea.Navigation,
                 title = "Navigation Title",
                 description = "`Navigation` Description",
@@ -58,6 +60,7 @@ class DetailCodeRecipeProvider : PreviewParameterProvider<UiState.ShowCodeRecipe
         ),
         UiState.ShowCodeRecipe(
             CodeRecipe(
+                index = 3,
                 area = CodeArea.Theme,
                 title = "Theme Title",
                 description = "`Theme` Description",
@@ -66,6 +69,7 @@ class DetailCodeRecipeProvider : PreviewParameterProvider<UiState.ShowCodeRecipe
         ),
         UiState.ShowCodeRecipe(
             CodeRecipe(
+                index = 4,
                 area = CodeArea.Testing,
                 title = "Testing Title",
                 description = "`Testing` Description",

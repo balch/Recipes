@@ -20,7 +20,6 @@ import dev.snipme.highlights.model.SyntaxThemes
 @Composable
 fun MarkdownCodeSnippet(
     codeSnippet: String,
-    color: Color,
     modifier: Modifier = Modifier
 ) {
     val isDarkTheme = isSystemInDarkTheme()
@@ -29,33 +28,26 @@ fun MarkdownCodeSnippet(
             .theme(SyntaxThemes.atom(darkMode = isDarkTheme))
             .language(SyntaxLanguage.KOTLIN)
     }
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = color.copy(alpha = 0.1f)
+    Markdown(
+        modifier = modifier.padding(16.dp),
+        content = codeSnippet,
+        components = markdownComponents(
+            codeBlock = {
+                MarkdownHighlightedCodeBlock(
+                    content = it.content,
+                    node = it.node,
+                    highlightsBuilder = highlightsBuilder,
+                    showHeader = true, // optional enable header with code language + copy button
+                )
+            },
+            codeFence = {
+                MarkdownHighlightedCodeFence(
+                    content = it.content,
+                    node = it.node,
+                    highlightsBuilder = highlightsBuilder,
+                    showHeader = true, // optional enable header with code language + copy button
+                )
+            },
         )
-    ) {
-        Markdown(
-            modifier = modifier.padding(16.dp),
-            content = codeSnippet,
-            components = markdownComponents(
-                codeBlock = {
-                    MarkdownHighlightedCodeBlock(
-                        content = it.content,
-                        node = it.node,
-                        highlightsBuilder = highlightsBuilder,
-                        showHeader = true, // optional enable header with code language + copy button
-                    )
-                },
-                codeFence = {
-                    MarkdownHighlightedCodeFence(
-                        content = it.content,
-                        node = it.node,
-                        highlightsBuilder = highlightsBuilder,
-                        showHeader = true, // optional enable header with code language + copy button
-                    )
-                },
-            )
-        )
-    }
+    )
 }

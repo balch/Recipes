@@ -1,5 +1,6 @@
 package org.balch.recipes.features.details
 
+import android.R.attr.fontWeight
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,22 +42,37 @@ fun CodeDetailItem(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        CodeRecipeAreaCard(
-            codeRecipe = codeRecipe,
-        )
 
-        MarkdownCodeSnippet(
-            codeSnippet ="#### Description\n\n${codeRecipe.description}",
-            color = codeRecipe.area.color(),
-            modifier = Modifier.fillMaxWidth()
-        )
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = codeRecipe.area.color().copy(alpha = 0.1f)
+            )
+        ) {
+            CodeRecipeAreaCard(
+                codeRecipe = codeRecipe,
+                modifier = modifier
+                    .padding(start = 12.dp, top = 16.dp),
+            )
 
-        if (codeRecipe.codeSnippet != null) {
             MarkdownCodeSnippet(
-                codeSnippet = codeRecipe.codeSnippet,
-                color = codeRecipe.area.color(),
+                codeSnippet = "#### ${codeRecipe.title}\n\n${codeRecipe.description}",
                 modifier = Modifier.fillMaxWidth()
             )
+        }
+
+        if (codeRecipe.codeSnippet != null) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = codeRecipe.area.color().copy(alpha = 0.1f)
+                )
+            ) {
+                MarkdownCodeSnippet(
+                    codeSnippet = codeRecipe.codeSnippet,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
@@ -64,8 +80,9 @@ fun CodeDetailItem(
 @Composable
 private fun CodeRecipeAreaCard(
     codeRecipe: CodeRecipe,
+    modifier: Modifier = Modifier,
 ) {
-    Row(modifier = Modifier.fillMaxWidth().padding(6.dp)) {
+    Row(modifier = modifier) {
         Box(
             modifier = Modifier
                 .background(
@@ -83,7 +100,6 @@ private fun CodeRecipeAreaCard(
         }
     }
 }
-
 
 @ThemePreview
 @Composable

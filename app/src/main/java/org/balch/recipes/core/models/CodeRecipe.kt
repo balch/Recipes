@@ -28,6 +28,7 @@ fun CodeArea.color(): Color {
 
 
 data class CodeRecipe(
+    val index: Int,
     val area: CodeArea,
     val title: String,
     val description: String,

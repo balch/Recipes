@@ -108,7 +108,7 @@ fun DetailLayout(
         topBar = {
             val titleText = when (uiState) {
                 is UiState.ShowMeal -> uiState.meal.name
-                is UiState.ShowCodeRecipe -> uiState.codeRecipe.title
+                is UiState.ShowCodeRecipe -> "Code Recipe #${uiState.codeRecipe.index}"
                 is UiState.Loading -> "Loading..."
                 is UiState.Error -> "Error"
             }

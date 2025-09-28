@@ -1,5 +1,6 @@
 package org.balch.recipes.features
 
+import android.R.attr.x
 import com.diamondedge.logging.logging
 import org.balch.recipes.core.models.CodeArea
 import org.balch.recipes.core.models.CodeRecipe
@@ -67,13 +68,44 @@ class CodeRecipes @Inject constructor() {
     )
 
     companion object {
-        private val recipes = listOf(
-            CodeRecipe(
-                area = CodeArea.Theme,
-                title = "ColorScheme",
-                description = "- Use `isSystemInDarkTheme` and `dynamicColor` to control color scheme",
-                fileName = "RecipesTheme.kt",
-                codeSnippet = """
+        private data class CodeRecipeRaw(
+            val area: CodeArea,
+            val title: String,
+            val description: String,
+            val fileName: String? = null,
+            val codeSnippet: String? = null,
+        ) {
+            fun toCodeRecipe(index: Int) = CodeRecipe(
+                index = index,
+                area = area,
+                title = title,
+                description = description,
+                fileName = fileName,
+                codeSnippet = codeSnippet,
+            )
+        }
+
+        /**
+         * Maintiant the index based on the order of the `recipesRaw` list
+         * without having to update indiviudal elements.
+         *
+         * This allows me to rank them in order of importance and display
+         * the rank in the Detail Page Title
+         */
+
+        private val recipes by lazy {
+            rawRecipes.mapIndexed { index, rawRecipe ->
+                rawRecipe.toCodeRecipe(index)
+            }
+        }
+        private val rawRecipes by lazy {
+            listOf(
+                CodeRecipeRaw(
+                    area = CodeArea.Theme,
+                    title = "ColorScheme",
+                    description = "- Use `isSystemInDarkTheme` and `dynamicColor` to control color scheme",
+                    fileName = "RecipesTheme.kt",
+                    codeSnippet = """
                 ```
                 val colorScheme = when {
                     dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
@@ -85,16 +117,16 @@ class CodeRecipes @Inject constructor() {
                 }
                 ```
                 """.trimIndent()
-            ),
-            CodeRecipe(
-                area = CodeArea.Theme,
-                title = "ThemePreview",
-                fileName = "ThemePreview.kt",
-                description = """
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Theme,
+                    title = "ThemePreview",
+                    fileName = "ThemePreview.kt",
+                    description = """
                 - Create annotation with an `@Preview` for each theme
                 - Use `@ThemePreview` on Screens and Widgets
                  """.trimIndent(),
-                codeSnippet = """
+                    codeSnippet = """
                 ```
                 @Preview(
                     uiMode = Configuration.UI_MODE_NIGHT_YES,
@@ -109,11 +141,11 @@ class CodeRecipes @Inject constructor() {
                 annotation class ThemePreview
                 ```
                 """.trimIndent()
-            ),
-            CodeRecipe(
-                area = CodeArea.Navigation,
-                title = "Bottom Navigation",
-                description = """
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Navigation,
+                    title = "Bottom Navigation",
+                    description = """
                     - Wrap `NavigationBar` in `Scaffold` 
                     - Use `AnimatedVisibility` to control visibility of `NavigationBar`
                     - `TopLevelRoute` represent displayable items in `NavigationBarItem`
@@ -121,8 +153,8 @@ class CodeRecipes @Inject constructor() {
                        - Pop the current screen off the backstack if it not the root
                        - Push the new route onto the backstack
                 """.trimIndent(),
-                fileName = "MainActivity.kt",
-                codeSnippet = """
+                    fileName = "MainActivity.kt",
+                    codeSnippet = """
                 ```
                 Scaffold(
                     bottomBar = {
@@ -162,13 +194,13 @@ class CodeRecipes @Inject constructor() {
                     }
                     ```
                     """.trimIndent()
-            ),
-            CodeRecipe(
-                area = CodeArea.Navigation,
-                title = "Nav3 EntryDecorators",
-                description = "- Define **Nav3** `entryDecorators` to provide state management and to facilitate ViewModel creation.",
-                fileName = "MainActivity.kt",
-                codeSnippet = """
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Navigation,
+                    title = "Nav3 EntryDecorators",
+                    description = "- Define **Nav3** `entryDecorators` to provide state management and to facilitate ViewModel creation.",
+                    fileName = "MainActivity.kt",
+                    codeSnippet = """
                 ```
                     // In order to add the `ViewModelStoreNavEntryDecorator`
                     // we also need to add the default `NavEntryDecorator`s as well. These provide
@@ -181,16 +213,16 @@ class CodeRecipes @Inject constructor() {
                     ),
                 ```                                
                 """.trimIndent()
-            ),
-            CodeRecipe(
-                area = CodeArea.Navigation,
-                title = "Nav3 EntryProvider DSL Syntax",
-                description = """
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Navigation,
+                    title = "Nav3 EntryProvider DSL Syntax",
+                    description = """
                 - Use **Nav3** `entryProvider` DSL syntax for simple App Nav
                 - Provides a convenient way to create ViewModels and Screens on the backstack
                 """.trimIndent(),
-                fileName = "MainActivity.kt",
-                codeSnippet = """
+                    fileName = "MainActivity.kt",
+                    codeSnippet = """
                 ```
                     entryProvider = entryProvider {
                         entry<Ideas> {
@@ -211,16 +243,16 @@ class CodeRecipes @Inject constructor() {
                     }
                 ```
             """.trimIndent()
-            ),
-            CodeRecipe(
-                area = CodeArea.Navigation,
-                title = "Nav3 Backstack Management",
-                description = """
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Navigation,
+                    title = "Nav3 Backstack Management",
+                    description = """
                     - In **Nav3**, you own the backstack.
                     - Push/Pop works for simple applications
                 """.trimIndent(),
-                fileName = "BackstackManager.kt",
-                codeSnippet = """
+                    fileName = "BackstackManager.kt",
+                    codeSnippet = """
                 ```
                 @ActivityRetainedScoped
                 class BackStackManager @Inject constructor() {
@@ -242,17 +274,17 @@ class CodeRecipes @Inject constructor() {
                 }
                 ```
                 """.trimIndent()
-            ),
-            CodeRecipe(
-                area = CodeArea.Architecture,
-                title = "Hilt ViewModel Factory",
-                description = """
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Architecture,
+                    title = "Hilt ViewModel Factory",
+                    description = """
                 - Use `HiltViewModel` and `assistedFactory` to create unique ViewModel per screen to push on the backstack.
                 - Define Factory using `@AssistedFactory` annotation
                 - Use Factory to create ViewModels to pass to Screens via `hiltViewModel`                
                 """.trimIndent(),
-                fileName = "DetailsViewModel.kt",
-                codeSnippet = """
+                    fileName = "DetailsViewModel.kt",
+                    codeSnippet = """
                 ```
                 // ViewModel Definition
                 @HiltViewModel(assistedFactory = DetailsViewModel.Factory::class)
@@ -277,17 +309,17 @@ class CodeRecipes @Inject constructor() {
                     )
                 ```
             """.trimIndent()
-            ),
-            CodeRecipe(
-                area = CodeArea.Theme,
-                title = """Markdown Render🎨💰""",
-                description = """
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Theme,
+                    title = """Markdown Render🎨💰""",
+                    description = """
                  - Simple Markdown Composable that renders beautiful code in Android (and other platforms)
                  - Support Light/Dark Theme and Code Markdown syntax
                  - Thank you **Mike Penz**!!
                 """.trimIndent(),
-                fileName = "MarkdownCodeSnippet.kt",
-                codeSnippet = """
+                    fileName = "MarkdownCodeSnippet.kt",
+                    codeSnippet = """
                 ```
                 @Composable
                 fun MarkdownCodeSnippet(
@@ -326,17 +358,17 @@ class CodeRecipes @Inject constructor() {
                 }
                 ```
                 """.trimIndent()
-            ),
-            CodeRecipe(
-                area = CodeArea.Testing,
-                title = "TestDispatcherProvider & MainCoroutineExtension",
-                description = """
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Testing,
+                    title = "TestDispatcherProvider & MainCoroutineExtension",
+                    description = """
                     - `DispatcherProvider` injected into ViewModels to control StateFlows
                     - `TestDispatcherProvider` implements `DispatcherProvider` for testing
                     - `MainCoroutineExtension` assigns provided `TestDispatcher` to `Dispatchers.Main`
                 """.trimIndent(),
-                fileName = "DetailsViewModelTest.kt",
-                codeSnippet = """
+                    fileName = "DetailsViewModelTest.kt",
+                    codeSnippet = """
                     
                 **Declare Junit 5 Extension**   
                 ```
@@ -368,17 +400,17 @@ class CodeRecipes @Inject constructor() {
                 }
                 ```
                 """.trimIndent()
-            ),
-            CodeRecipe(
-                area = CodeArea.Testing,
-                title = "Turbine For StateFlow Testing",
-                description = """
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Testing,
+                    title = "Turbine For StateFlow Testing",
+                    description = """
                 - Use `Turbine` for ViewModel stateFlow testing
                 - Ensures all emissions are accounted for
                 - May need to use `StandTestDispatcher` for Conflation issues when the ViewModel emits initial state too quickly. 
             """.trimIndent(),
-                fileName = "SearchViewModelTest.kt",
-                codeSnippet = """
+                    fileName = "SearchViewModelTest.kt",
+                    codeSnippet = """
                 ```
                 @Test
                 fun `clearSearch emits Welcome state`() = runTest {
@@ -400,13 +432,13 @@ class CodeRecipes @Inject constructor() {
                 }
                 ```
                 """.trimIndent()
-            ),
-            CodeRecipe(
-                area = CodeArea.Testing,
-                title = "Test Assertion Extensions",
-                description = "- Create extension functions for custom assertions to improve test readability and reusability",
-                fileName = "DetailsViewModelTest.kt",
-                codeSnippet = """
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Testing,
+                    title = "Test Assertion Extensions",
+                    description = "- Create extension functions for custom assertions to improve test readability and reusability",
+                    fileName = "DetailsViewModelTest.kt",
+                    codeSnippet = """
                 ```
                 private fun UiState.assertValidShowState(meal: Meal) {
                     assertThat(this).isInstanceOf(UiState.ShowMeal::class.java)
@@ -421,15 +453,15 @@ class CodeRecipes @Inject constructor() {
                 }
                 ```
                 """.trimIndent()
-            ),
-            CodeRecipe(
-                area = CodeArea.Navigation,
-                title = "Enable BackHandler in Screens",
-                description = """
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Navigation,
+                    title = "Enable BackHandler in Screens",
+                    description = """
                 - Conditionally enable `BackHandler` 
                 - Use to return to initial Screen state before exiting app/screen
                 """.trimIndent(),
-                codeSnippet = """     
+                    codeSnippet = """     
                 ```                          
                 @Composable
                 fun IdeasScreen(
@@ -449,12 +481,12 @@ class CodeRecipes @Inject constructor() {
                 }          
                 ```
                 """.trimIndent(),
-                fileName = "IdeasScreen.kt"
-            ),
-            CodeRecipe(
-                area = CodeArea.Theme,
-                title = "Glass Blur with Haze",
-                description = """
+                    fileName = "IdeasScreen.kt"
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Theme,
+                    title = "Glass Blur with Haze",
+                    description = """
                 - Use **Haze** to create iOS-like glassmorphism blur 
                 - Save the `hazeState` via `rememberHazeState`
                 - Make the `NavDisplay` contents the source to blur by calling `hazeSource()`
@@ -463,7 +495,7 @@ class CodeRecipes @Inject constructor() {
                 - Each Screen manages its own blur effect for the `TopAppBar`
                 - Thank you **Chris Banes**!!
             """.trimIndent(),
-                codeSnippet = """
+                    codeSnippet = """
                 ```
                 @Composable
                 private fun MainContent() {
@@ -513,18 +545,18 @@ class CodeRecipes @Inject constructor() {
                 }                
             ```
             """.trimIndent(),
-                fileName = "MainActivity.kt"
-            ),
-            CodeRecipe(
-                area = CodeArea.Navigation,
-                title = "Bottom Nav AutoHide",
-                description = """
+                    fileName = "MainActivity.kt"
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Navigation,
+                    title = "Bottom Nav AutoHide",
+                    description = """
                - Calculate `showNavigationBar` from `firstVisibleIndex` and scroll direction
                - Use `showNavigationBar` in `AnimatedVisibility` to control visibility of `NavigationBar`
                - Delegate scroll handling to each Screen via `onScrollChange`
                   - Set `firstVisibleIndex` in handler to emit new `showNavigationBar` state 
             """.trimIndent(),
-                codeSnippet = """
+                    codeSnippet = """
                 ```
                 @Composable
                 private fun MainContent() {
@@ -580,7 +612,8 @@ class CodeRecipes @Inject constructor() {
             ```
             """.trimIndent(),
                 fileName = "MainActivity.kt"
+                )
             )
-        )
+        }
     }
 }
