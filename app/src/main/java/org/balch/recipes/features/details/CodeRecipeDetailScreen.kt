@@ -59,15 +59,8 @@ fun CodeDetailItem(
                 codeSnippet = "#### ${codeRecipe.title}\n\n${codeRecipe.description}",
                 modifier = Modifier.fillMaxWidth()
             )
-        }
 
-        if (codeRecipe.codeSnippet != null) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = codeRecipe.area.color().copy(alpha = 0.1f)
-                )
-            ) {
+            if (codeRecipe.codeSnippet != null) {
                 MarkdownCodeSnippet(
                     codeSnippet = codeRecipe.codeSnippet,
                     modifier = Modifier.fillMaxWidth()

@@ -41,6 +41,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -208,13 +209,13 @@ private fun IdeasLayout(
                 }
 
                 is IdeasUiState.Categories -> {
-                    val mixedItems = createInterestingMix(
-                        regularItems = uiState.categories,
-                        codeRecipes = uiState.codeRecipes,
-                        itemWrapper = { GridItem.CategoryItem(it) }
-                    )
+                    val items = rememberRecipeItems(
+                            regularItems = uiState.categories,
+                            codeRecipes = uiState.codeRecipes,
+                            itemWrapper = { GridItem.CategoryItem(it) }
+                        )
                     ResultsGrid(
-                        items = mixedItems,
+                        items = items,
                         onScrollChange = onScrollChange,
                         modifier = Modifier
                             .fillMaxSize()
@@ -227,13 +228,13 @@ private fun IdeasLayout(
                 }
 
                 is IdeasUiState.Areas -> {
-                    val mixedItems = createInterestingMix(
+                    val items = rememberRecipeItems(
                         regularItems = uiState.areas,
                         codeRecipes = uiState.codeRecipes,
                         itemWrapper = { GridItem.AreaItem(it) }
                     )
                     ResultsGrid(
-                        items = mixedItems,
+                        items = items,
                         onScrollChange = onScrollChange,
                         modifier = Modifier
                             .fillMaxSize()
@@ -246,13 +247,13 @@ private fun IdeasLayout(
                 }
 
                 is IdeasUiState.Ingredients -> {
-                    val mixedItems = createInterestingMix(
+                    val items = rememberRecipeItems(
                         regularItems = uiState.ingredients,
                         codeRecipes = uiState.codeRecipes,
                         itemWrapper = { GridItem.IngredientItem(it) }
                     )
                     ResultsGrid(
-                        items = mixedItems,
+                        items = items,
                         onScrollChange = onScrollChange,
                         modifier = Modifier
                             .fillMaxSize()
@@ -740,47 +741,61 @@ private fun CodeRecipeCard(
 }
 
 /**
- * Creates an interesting mix of regular items and code recipes for the staggered grid
+ * Remembers a list of `GridItem` objects constructed from the provided `regularItems`
+ * and `codeRecipes`. The function combines the regular items and code recipe items
+ * into a single list with specific insertion logic, intended for displaying in
+ * a grid format. The result is saved and remembered across recompositions.
+ *
+ * @param regularItems A list of regular items of type `T` to be wrapped into `GridItem` objects.
+ * @param codeRecipes A list of `CodeRecipe` objects to be transformed into `GridItem.CodeRecipeItem` objects.
+ * @param itemWrapper A lambda function to transform each `T` item from `regularItems` into a `GridItem`.
+ * @return A list of `GridItem` objects combining regular items and code recipe items,
+ * organized with a specific ordering for inclusion in the grid.
  */
-private fun <T> createInterestingMix(
+@Composable
+private fun <T> rememberRecipeItems(
     regularItems: List<T>,
     codeRecipes: List<CodeRecipe>,
     itemWrapper: (T) -> GridItem
-): List<GridItem> {
+): List<GridItem> = rememberSaveable {
     if (codeRecipes.isEmpty()) {
-        return regularItems.map(itemWrapper)
-    }
+        regularItems.map(itemWrapper)
+    } else {
 
-    val result = mutableListOf<GridItem>()
-    val regularGridItems = regularItems.map(itemWrapper)
-    val codeGridItems = codeRecipes.map { GridItem.CodeRecipeItem(it) }
+        val result = mutableListOf<GridItem>()
+        val regularGridItems = regularItems.map(itemWrapper)
+        val codeGridItems = codeRecipes.map { GridItem.CodeRecipeItem(it) }
 
-    val firstOrSecond = if (Random.nextBoolean()) 0 else 1
-
-    // Calculate insertion positions to create interesting distribution
-    val insertPositions = listOf(
-        firstOrSecond,
-        firstOrSecond + 2 + firstOrSecond,
-        firstOrSecond + 3 + firstOrSecond,
-    )
-
-    // Build the mixed list
-    var codeIndex = 0
-    regularGridItems.forEachIndexed { index, item ->
-        if (index in insertPositions && codeIndex < codeGridItems.size) {
-            result.add(codeGridItems[codeIndex])
-            codeIndex++
+        fun orderedItems(
+            gridItem: GridItem,
+            codeGridItem: GridItem,
+            oddOrEven: Int
+        ): List<GridItem> {
+            return if (oddOrEven == 0) {
+                listOf(codeGridItem, gridItem)
+            } else {
+                listOf(gridItem, codeGridItem)
+            }
         }
-        result.add(item)
-    }
 
-    // Add any remaining code recipes at the end
-    while (codeIndex < codeGridItems.size) {
-        result.add(codeGridItems[codeIndex])
-        codeIndex++
+        val size = regularGridItems.size + codeGridItems.size
+        var codeIndex = 0
+        var regularItemIndex = 0
+        (0..size - 1).forEach { _ ->
+            if (codeIndex < codeGridItems.size) {
+                result.addAll(
+                    orderedItems(
+                        gridItem = regularGridItems[regularItemIndex++],
+                        codeGridItem = codeGridItems[codeIndex++],
+                        oddOrEven = if (Random.nextBoolean()) 0 else 1
+                    )
+                )
+            } else if (regularItemIndex < regularGridItems.size) {
+                result.add(regularGridItems[regularItemIndex++])
+            }
+        }
+        result
     }
-
-    return result
 }
 
 /**
