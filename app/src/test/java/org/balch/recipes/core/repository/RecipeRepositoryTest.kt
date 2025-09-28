@@ -9,7 +9,7 @@ import org.balch.recipes.core.models.MealResponse
 import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.models.MealSummaryResponse
 import org.balch.recipes.core.network.TheMealDbApi
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.wheneverBlocking

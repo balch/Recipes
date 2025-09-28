@@ -11,15 +11,17 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.balch.recipes.MainCoroutineExtension
 import org.balch.recipes.core.coroutines.TestDispatcherProvider
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.models.MealDescriptor
 import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.core.repository.RecipeRepository
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.wheneverBlocking
@@ -35,6 +37,10 @@ class SearchViewModelTest {
      * Use [TestScope.whenBlocking] to automatically advance until idle
      */
     private val dispatcherProvider = TestDispatcherProvider(StandardTestDispatcher())
+
+    @JvmField
+    @RegisterExtension
+    val mainCoroutineExtension = MainCoroutineExtension(dispatcherProvider.testDispatcher)
 
     /**
      * Executes a suspending method call in a test scope while advancing the test dispatcher to allow
@@ -56,16 +62,6 @@ class SearchViewModelTest {
         }
 
     private val repository = mock<RecipeRepository>()
-
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(dispatcherProvider.testDispatcher)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     private val testMeal = Meal(
         id = "1",

@@ -1,8 +1,8 @@
 package org.balch.recipes.features
 
-import org.junit.Test
-import org.junit.Assert.*
-import org.junit.Before
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import com.google.common.truth.Truth.assertThat
 import org.balch.recipes.core.models.CodeRecipe
 
@@ -11,7 +11,7 @@ class CodeRecipesTest {
     
     private lateinit var codeRecipes: CodeRecipes
     
-    @Before
+    @BeforeEach
     fun setUp() {
         codeRecipes = CodeRecipes()
     }
@@ -50,24 +50,24 @@ class CodeRecipesTest {
         } while (batchCount < maxBatches)
         
         // We should have seen some recipes before getting duplicates
-        assertTrue("Should have seen some unique recipes", seenRecipes.isNotEmpty())
+        assertTrue(seenRecipes.isNotEmpty(), "Should have seen some unique recipes")
         
         // Verify we got duplicates (indicating reshuffle occurred)
         val totalReturned = allBatches.flatten().size
-        assertTrue("Should have returned more items than unique recipes (indicating reshuffle)", 
-                   totalReturned > seenRecipes.size)
+        assertTrue(totalReturned > seenRecipes.size, 
+                   "Should have returned more items than unique recipes (indicating reshuffle)")
     }
 
     @Test
     fun `getRandomRecipes handles zero count request`() {
         val result = codeRecipes.getRandomRecipes(0)
-        assertEquals("Should return empty list for zero count", 0, result.size)
+        assertEquals(0, result.size, "Should return empty list for zero count")
     }
     
     @Test
     fun `getRandomRecipes handles negative count request`() {
         val result = codeRecipes.getRandomRecipes(-1)
-        assertEquals("Should return empty list for negative count", 0, result.size)
+        assertEquals(0, result.size, "Should return empty list for negative count")
     }
     
     @Test
@@ -99,7 +99,7 @@ class CodeRecipesTest {
 
         // The key assertion: we should have seen a reasonable number of unique recipes
         // before any reshuffle occurred
-        assertTrue("Should have seen multiple unique recipes before reshuffling", 
-                   uniqueRecipesSeen.size > 1)
+        assertTrue(uniqueRecipesSeen.size > 1, 
+                   "Should have seen multiple unique recipes before reshuffling")
     }
 }

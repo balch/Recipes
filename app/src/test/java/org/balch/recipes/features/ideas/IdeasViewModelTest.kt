@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.balch.recipes.BrowsableType
+import org.balch.recipes.MainCoroutineExtension
 import org.balch.recipes.core.coroutines.TestDispatcherProvider
 import org.balch.recipes.core.models.Area
 import org.balch.recipes.core.models.Category
@@ -16,9 +17,10 @@ import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.repository.RecipeRepository
 import org.balch.recipes.features.CodeRecipes
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.wheneverBlocking
@@ -31,6 +33,10 @@ class IdeasViewModelTest {
      * being emitted before the next state with the results
      */
     private val dispatcherProvider = TestDispatcherProvider(StandardTestDispatcher())
+
+    @JvmField
+    @RegisterExtension
+    val mainCoroutineExtension = MainCoroutineExtension(dispatcherProvider.testDispatcher)
 
     private val repository = mock<RecipeRepository>()
     private val codeRecipes = mock<CodeRecipes>()
@@ -67,16 +73,6 @@ class IdeasViewModelTest {
         instructions = "Test Instructions",
         thumbnail = "test_thumbnail.jpg"
     )
-
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(dispatcherProvider.testDispatcher)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     private fun IdeasUiState.assertValidCategories(categories: List<Category>) {
         assertThat(this).isInstanceOf(IdeasUiState.Categories::class.java)

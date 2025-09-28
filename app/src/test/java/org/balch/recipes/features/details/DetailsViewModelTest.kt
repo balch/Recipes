@@ -7,13 +7,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.balch.recipes.MainCoroutineExtension
 import org.balch.recipes.core.coroutines.TestDispatcherProvider
 import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.repository.RecipeRepository
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.Rule
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.wheneverBlocking
@@ -22,6 +23,10 @@ import org.mockito.kotlin.wheneverBlocking
 class DetailsViewModelTest {
 
     private val dispatcherProvider: TestDispatcherProvider = TestDispatcherProvider()
+
+    @JvmField
+    @RegisterExtension
+    val mainCoroutineExtension = MainCoroutineExtension(dispatcherProvider.testDispatcher)
 
     private val repository = mock<RecipeRepository>()
 
@@ -36,16 +41,6 @@ class DetailsViewModelTest {
 
     private fun getViewModel(detailType: DetailType): DetailsViewModel =
         DetailsViewModel(detailType, repository, dispatcherProvider)
-
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(dispatcherProvider.testDispatcher)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     private fun UiState.assertValidShowState(meal: Meal) {
         assertThat(this).isInstanceOf(UiState.ShowMeal::class.java)

@@ -39,6 +39,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     testOptions {
@@ -48,6 +49,7 @@ android {
             all {
                 it.systemProperty("mockito.mock.maker", "mock-maker-inline")
                 it.jvmArgs("-XX:+EnableDynamicAgentLoading")
+                it.useJUnitPlatform()
             }
         }
     }
@@ -96,7 +98,9 @@ dependencies {
 
     ksp(libs.hilt.compiler)
 
-    testImplementation(libs.junit)
+    testRuntimeOnly(libs.junit5.loader)
+    testImplementation(libs.junit5.jupiter)
+    testImplementation(libs.junit5.vintage)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.kotlinx.coroutines.test)
