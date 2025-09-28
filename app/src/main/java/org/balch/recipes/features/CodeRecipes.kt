@@ -103,7 +103,7 @@ class CodeRecipes @Inject constructor() {
                 CodeRecipeRaw(
                     area = CodeArea.Architecture,
                     title = "Separation of Concerns",
-                    description = """"
+                    description = """
                          - Encapsulate feature functionality into Modules
                          - Each Module contains separate classes for Biz Logic and UI
                             - Use ViewModels for BizLogic
