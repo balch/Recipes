@@ -20,10 +20,10 @@ The latest incarnation for my reference app is called Recipes.
 | <img src="screenshots/lightmode-category.png" width="200" alt="Light Mode Category"> | <img src="screenshots/lightmode-cuisine.png" width="200" alt="Light Mode Category"> | <img src="screenshots/lightmode-detail-list.png" width="200" alt="Light Mode Detail List"> | <img src="screenshots/lightmode-detail-step.png" width="200" alt="Light Mode Detail Step By Step"> |
 
 #### Code Recipes
-|                                    Code Recipes                                    |                                        Code Recipe Detail                                         |
-|:----------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------:|
-| <img src="screenshots/darkmode-code.png" width="200" alt="Dark Mode Code Recipes"> |  <img src="screenshots/darkmode-code-detail.png" width="200" alt="Dark Mode Code Recipe Detail">  |
-|  <img src="screenshots/lightmode-code.png" width="200" alt="Light Mode Recipes">   | <img src="screenshots/lightmode-code-detail.png" width="200" alt="Light Mode Code Recipe Detail"> |
+|                                    Code Recipes                                    |                                        Code Recipe Detail                                        |
+|:----------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------:|
+| <img src="screenshots/darkmode-code.png" width="200" alt="Dark Mode Code Recipes"> | <img src="screenshots/darkmode-code-detail.png" width="200" alt="Dark Mode Code Recipe Detail">  |
+|   <img src="screenshots/lightmode-code.png" width="200" alt="Light Mode Recipes">   | <img src="screenshots/lightmode-code-detail.png" width="200" alt="Light Mode Code Recipe Detail"> |
 
 https://github.com/user-attachments/assets/cac97b4d-723e-4d29-a6a2-46b2f1368478
 
