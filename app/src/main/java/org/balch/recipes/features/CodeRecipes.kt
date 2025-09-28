@@ -62,9 +62,9 @@ class CodeRecipes @Inject constructor() {
         return result.also { logger.v { "Random Recipes: $it" } }
     }
 
-    private val randomRecipes = mutableListOf(
-        *recipes.shuffled().toTypedArray()
-    )
+    private val randomRecipes by lazy {
+        mutableListOf(*recipes.shuffled().toTypedArray())
+    }
 
     companion object {
         private data class CodeRecipeRaw(
@@ -763,7 +763,10 @@ class CodeRecipes @Inject constructor() {
             """.trimIndent(),
                 fileName = "CodeRecipes.kt",
                 codeSnippet = """
-            ```
+                ```
+                private val randomRecipes by lazy {
+                    mutableListOf(*recipes.shuffled().toTypedArray())
+                }
                 fun getRandomRecipes(count: Int): List<CodeRecipe> {
                     if (count <= 0) { return emptyList() }
             
@@ -795,7 +798,7 @@ class CodeRecipes @Inject constructor() {
             
                     return result
                 }
-            ```
+                ```
             """.trimIndent()
             )
             )
