@@ -87,8 +87,8 @@ class CodeRecipes @Inject constructor() {
                          - Each Module contains separate classes for Biz Logic and UI
                             - Use ViewModels for BizLogic
                             - Use Compose Screens for UI
-                         - Hoist State from ViewModel to UI to render the UX
-                         - Send user action back to ViewModel to generate new state 
+                         - Hoist State from ***ViewModel*** to UI to render the UX
+                         - Send user action back to ***ViewModel*** to generate new state 
                          - **Separation of Concerns** facilitates **Single Responsibility** principle
                         """.trimIndent(),
                     codeSnippet = """
@@ -266,9 +266,9 @@ class CodeRecipes @Inject constructor() {
                     - Wrap `NavigationBar` in `Scaffold` 
                     - Use `AnimatedVisibility` to control visibility of `NavigationBar`
                     - `TopLevelRoute` represent displayable items in `NavigationBarItem`
-                    - Manage `backstack` in the `NavigationBar`
-                       - Pop the current screen off the backstack if it not the root
-                       - Push the new route onto the backstack
+                    - Manage ***backstack*** in the `NavigationBar`
+                       - Pop the current ***Screen*** off the ***backstack*** if it not the root
+                       - Push the new route onto the ***backstack***
                 """.trimIndent(),
                     fileName = "MainActivity.kt",
                     codeSnippet = """
@@ -315,7 +315,7 @@ class CodeRecipes @Inject constructor() {
                 CodeRecipeRaw(
                     area = CodeArea.Navigation,
                     title = "Nav3 EntryDecorators",
-                    description = "- Define **Nav3** `entryDecorators` to provide state management and to facilitate ViewModel creation.",
+                    description = "- Define **Nav3** `entryDecorators` to provide state management and to facilitate ***ViewModel*** creation.",
                     fileName = "MainActivity.kt",
                     codeSnippet = """
                 ```
@@ -336,7 +336,7 @@ class CodeRecipes @Inject constructor() {
                     title = "Nav3 EntryProvider DSL Syntax",
                     description = """
                 - Use **Nav3** `entryProvider` DSL syntax for simple App Nav
-                - Provides a convenient way to create ViewModels and Screens on the backstack
+                - Provides a convenient way to create ***ViewModels*** and ***Screens*** on the ***backstack***
                 """.trimIndent(),
                     fileName = "MainActivity.kt",
                     codeSnippet = """
@@ -365,7 +365,8 @@ class CodeRecipes @Inject constructor() {
                     area = CodeArea.Navigation,
                     title = "Nav3 Backstack Management",
                     description = """
-                    - In **Nav3**, you own the backstack.
+                    - In **Nav3**, you own the ***backstack***.
+                    - Store ***backstack*** in `SnapshotStateList<NavKey>` 
                     - Push/Pop works for simple applications
                 """.trimIndent(),
                     fileName = "BackstackManager.kt",
@@ -396,7 +397,7 @@ class CodeRecipes @Inject constructor() {
                     area = CodeArea.Architecture,
                     title = "Hilt ViewModel Factory",
                     description = """
-                - Use `HiltViewModel` and `assistedFactory` to create unique ViewModel per screen to push on the backstack.
+                - Use `HiltViewModel` and `assistedFactory` to create unique ***ViewModel*** per ***Screen*** to push on the ***backstack***.
                 - Define Factory using `@AssistedFactory` annotation
                 - Use Factory to create ViewModels to pass to Screens via `hiltViewModel`                
                 """.trimIndent(),
@@ -522,9 +523,9 @@ class CodeRecipes @Inject constructor() {
                     area = CodeArea.Testing,
                     title = "Turbine For StateFlow Testing",
                     description = """
-                - Use `Turbine` for ViewModel stateFlow testing
+                - Use `Turbine` for ***ViewModel*** stateFlow testing
                 - Ensures all emissions are accounted for
-                - May need to use `StandTestDispatcher` for Conflation issues when the ViewModel emits initial state too quickly. 
+                - May need to use `StandTestDispatcher` for Conflation issues when the ***ViewModel*** emits initial state too quickly. 
             """.trimIndent(),
                     fileName = "SearchViewModelTest.kt",
                     codeSnippet = """
@@ -576,7 +577,7 @@ class CodeRecipes @Inject constructor() {
                     title = "BackHandler in Screens",
                     description = """
                 - Conditionally enable `BackHandler` 
-                - Use to return to initial Screen state before exiting app/screen
+                - Use to return to initial ***Screen*** state before exiting app/screen
                 """.trimIndent(),
                     codeSnippet = """     
                 ```                          
@@ -609,7 +610,7 @@ class CodeRecipes @Inject constructor() {
                 - Make the `NavDisplay` contents the source to blur by calling `hazeSource()`
                 - Apply blur effect to `NavigationBar` by calling `hazeEffect()`
                    - For progressive blur use `HazeProgressive.verticalGradient`
-                - Each Screen manages its own blur effect for the `TopAppBar`
+                - Each ***Screen*** manages its own blur effect for the `TopAppBar`
                 - Thank you **Chris Banes**!!
                 """.trimIndent(),
                     codeSnippet = """
@@ -670,7 +671,7 @@ class CodeRecipes @Inject constructor() {
                     description = """
                - Calculate `showNavigationBar` from `firstVisibleIndex` and scroll direction
                - Use `showNavigationBar` in `AnimatedVisibility` to control visibility of `NavigationBar`
-               - Delegate scroll handling to each Screen via `onScrollChange`
+               - Delegate scroll handling to each ***Screen*** via `onScrollChange`
                   - Set `firstVisibleIndex` in handler to emit new `showNavigationBar` state 
             """.trimIndent(),
                     codeSnippet = """
