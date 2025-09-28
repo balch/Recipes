@@ -95,7 +95,7 @@ class CodeRecipes @Inject constructor() {
 
         private val recipes by lazy {
             rawRecipes.mapIndexed { index, rawRecipe ->
-                rawRecipe.toCodeRecipe(index)
+                rawRecipe.toCodeRecipe(index + 1)
             }
         }
         private val rawRecipes by lazy {
@@ -207,7 +207,7 @@ class CodeRecipes @Inject constructor() {
                 ),
                 CodeRecipeRaw(
                     area = CodeArea.Navigation,
-                    title = "Bottom Navigation",
+                    title = "Bottom Nav",
                     description = """
                     - Wrap `NavigationBar` in `Scaffold` 
                     - Use `AnimatedVisibility` to control visibility of `NavigationBar`
@@ -519,7 +519,7 @@ class CodeRecipes @Inject constructor() {
                 ),
                 CodeRecipeRaw(
                     area = CodeArea.Navigation,
-                    title = "Enable BackHandler in Screens",
+                    title = "BackHandler in Screens",
                     description = """
                 - Conditionally enable `BackHandler` 
                 - Use to return to initial Screen state before exiting app/screen
