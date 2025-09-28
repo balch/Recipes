@@ -9,7 +9,7 @@ import javax.inject.Singleton
 @Singleton
 class CodeRecipes @Inject constructor() {
 
-    private val logger  = logging(this::class.simpleName)
+    private val logger = logging(this::class.simpleName)
     val sortedRecipes by lazy {
         recipes.sortedWith(
             compareBy<CodeRecipe> { it.area.name }
@@ -162,8 +162,6 @@ class CodeRecipes @Inject constructor() {
                         ```                                              
                     """.trimIndent()
                 ),
-
-
                 CodeRecipeRaw(
                     area = CodeArea.Architecture,
                     title = "Repository with ApiService",
@@ -175,7 +173,6 @@ class CodeRecipes @Inject constructor() {
                         - Wrap the Specific ApiSerivce in  a Repository pattern to map raw API responses to domain objects
                     """.trimIndent(),
                     codeSnippet = """
-                        **ApiService**
                         ```
                         @Singleton
                         class ApiService @Inject constructor(
@@ -194,18 +191,13 @@ class CodeRecipes @Inject constructor() {
                                 client.close()
                             }
                         }
-                        ```
-                        
-                        **TheMealDbApi Service**
-                        ```
+
                         @Singleton
                         class TheMealDbApi @Inject constructor(
                             private val apiService: ApiService
                         ) {
                             companion object {
-                                private const val BASE_URL = "https://www.themealdb.com/api/json/v1/1"
-                                
-                                // API Endpoints
+                                private const val BASE_URL = 'https://www.themealdb.com/api/json/v1/1'
                                 private const val CATEGORIES = "BASE_URL/categories.php"
                                 private const val MEAL_BY_ID = "BASE_URL/lookup.php"
                             }
@@ -221,9 +213,7 @@ class CodeRecipes @Inject constructor() {
                                 )
                             }
                         }
-                        ```
-                        **RecipeRepository Implementation**
-                        ```
+
                         @Singleton
                         class RecipeRepositoryImpl @Inject constructor(
                             private val api: TheMealDbApi
@@ -246,13 +236,7 @@ class CodeRecipes @Inject constructor() {
                         }
                         ```
                     """.trimIndent()
-                    ),
-
-
-
-
-
-
+                ),
                 CodeRecipeRaw(
                     area = CodeArea.Theme,
                     title = "ColorScheme",
@@ -647,57 +631,57 @@ class CodeRecipes @Inject constructor() {
                    - For progressive blur use `HazeProgressive.verticalGradient`
                 - Each Screen manages its own blur effect for the `TopAppBar`
                 - Thank you **Chris Banes**!!
-            """.trimIndent(),
+                """.trimIndent(),
                     codeSnippet = """
-                ```
-                @Composable
-                private fun MainContent() {
-                    val hazeState = rememberHazeState()
-            
-                    RecipesTheme {
-                        Scaffold(
-                            bottomBar = {
-                                NavigationBar(
-                                    containerColor = Color.Transparent,
-                                    contentColor = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier
-                                        .hazeEffect(state = hazeState, style = LocalHazeStyle.current) {
-                                            HazeProgressive.verticalGradient(
-                                                startIntensity = 1f,
-                                                endIntensity = 0f,
-                                            )
-                                        },
-                                    ) {
-                                    // ...
+                        ```
+                        @Composable
+                        private fun MainContent() {
+                            val hazeState = rememberHazeState()
+                    
+                            RecipesTheme {
+                                Scaffold(
+                                    bottomBar = {
+                                        NavigationBar(
+                                            containerColor = Color.Transparent,
+                                            contentColor = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier
+                                                .hazeEffect(state = hazeState, style = LocalHazeStyle.current) {
+                                                    HazeProgressive.verticalGradient(
+                                                        startIntensity = 1f,
+                                                        endIntensity = 0f,
+                                                    )
+                                                },
+                                            ) {
+                                            // ...
+                                            }
+                                        }
                                     }
+                                ) { innerPadding ->
+                                    NavDisplay(
+                                        modifier = Modifier.hazeSource(state = hazeState),
+                                        entryProvider = entryProvider {
+                                            entry<Ideas> {
+                                                IdeasScreen(
+                                                // ...
+                                                )
+                                            }
+                                            entry<SearchRoute> { searchRoute ->
+                                                // ...
+                                            }
+                                            entry<Search> {
+                                                // ...
+                                            }
+                                            entry<DetailRoute> { detailRoute ->
+                                                // ...
+                                            }
+                                            entry<Info> { InfoScreen() }
+                                        },
+                                    )
                                 }
                             }
-                        ) { innerPadding ->
-                            NavDisplay(
-                                modifier = Modifier.hazeSource(state = hazeState),
-                                entryProvider = entryProvider {
-                                    entry<Ideas> {
-                                        IdeasScreen(
-                                        // ...
-                                        )
-                                    }
-                                    entry<SearchRoute> { searchRoute ->
-                                        // ...
-                                    }
-                                    entry<Search> {
-                                        // ...
-                                    }
-                                    entry<DetailRoute> { detailRoute ->
-                                        // ...
-                                    }
-                                    entry<Info> { InfoScreen() }
-                                },
-                            )
-                        }
-                    }
-                }                
-            ```
-            """.trimIndent(),
+                        }                
+                    ```
+                    """.trimIndent(),
                     fileName = "MainActivity.kt"
                 ),
                 CodeRecipeRaw(
@@ -765,7 +749,55 @@ class CodeRecipes @Inject constructor() {
             ```
             """.trimIndent(),
                 fileName = "MainActivity.kt"
-                )
+            ),
+            CodeRecipeRaw(
+                area = CodeArea.Architecture,
+                title = "Random Exhaustive List ",
+                description = """
+                - Sometimes you need to randomly show items from a list 
+                - Using a random index is easy, but leads to many repeated items
+                - Its better to show all the items in a random list to enure freshness  
+                    - Shuffle main list to randomize order
+                    - Remove items from shuffled list as needed
+                    - Reshuffle list when it is empty
+            """.trimIndent(),
+                fileName = "CodeRecipes.kt",
+                codeSnippet = """
+            ```
+                fun getRandomRecipes(count: Int): List<CodeRecipe> {
+                    if (count <= 0) { return emptyList() }
+            
+                    val result = mutableListOf<CodeRecipe>()
+                    var remaining = count
+            
+                    // First, try to get recipes from the current shuffled pool
+                    while (remaining > 0 && randomRecipes.isNotEmpty()) {
+                        randomRecipes.removeLastOrNull()?.let { recipe ->
+                            result.add(recipe)
+                            remaining--
+                        }
+                    }
+            
+                    // If we still need more recipes and have exhausted the current pool,
+                    // reshuffle and continue
+                    while (remaining > 0) {
+                        // Reshuffle the pool only when it's empty
+                        if (randomRecipes.isEmpty()) {
+                            randomRecipes.addAll(recipes.shuffled())
+                        }
+            
+                        // Take more recipes from the newly shuffled pool
+                        randomRecipes.removeLastOrNull()?.let { recipe ->
+                            result.add(recipe)
+                            remaining--
+                        }
+                    }
+            
+                    return result
+                }
+            ```
+            """.trimIndent()
+            )
             )
         }
     }
