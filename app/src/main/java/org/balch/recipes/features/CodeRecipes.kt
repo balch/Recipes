@@ -737,9 +737,9 @@ class CodeRecipes @Inject constructor() {
                 - Sometimes you need to randomly show items from a list 
                 - Using a random index is easy, but leads to many repeated items
                 - Its better to show all the items in a random list to enure freshness  
-                    - Shuffle main list to randomize order
-                    - Remove items from shuffled list as needed
-                    - Reshuffle list when it is empty
+                    - Save shuffled main list to randomize order
+                    - Return and remove items from front of saved list 
+                    - Add more shuffled items when capacity runs low
             """.trimIndent(),
                 fileName = "CodeRecipes.kt",
                 codeSnippet = """
