@@ -27,39 +27,19 @@ class CodeRecipes @Inject constructor() {
      * @return A list of `CodeRecipe` objects, with a size of up to the specified count.
      */
     fun getRandomRecipes(count: Int): List<CodeRecipe> {
-        // Handle edge cases
-        if (count <= 0) {
-            return emptyList()
+        if (count <= 0) { return emptyList() }
+
+        if (randomRecipes.size < count) {
+            randomRecipes.addAll(recipes.shuffled())
+            logger.d { "Reshuffled Code Recipes Pool" }
         }
 
         val result = mutableListOf<CodeRecipe>()
-        var remaining = count
-
-        // First, try to get recipes from the current shuffled pool
-        while (remaining > 0 && randomRecipes.isNotEmpty()) {
-            randomRecipes.removeLastOrNull()?.let { recipe ->
-                result.add(recipe)
-                remaining--
-            }
+        repeat(count) {
+            result.add(randomRecipes.removeFirst())
         }
-
-        // If we still need more recipes and have exhausted the current pool,
-        // reshuffle and continue
-        while (remaining > 0) {
-            // Reshuffle the pool only when it's empty
-            if (randomRecipes.isEmpty()) {
-                randomRecipes.addAll(recipes.shuffled())
-                logger.d { "Reshuffled Code Recipes Pool" }
-            }
-
-            // Take more recipes from the newly shuffled pool
-            randomRecipes.removeLastOrNull()?.let { recipe ->
-                result.add(recipe)
-                remaining--
-            }
-        }
-
-        return result.also { logger.v { "Random Recipes: $it" } }
+        return result
+            .also { logger.v { "getRandomRecipes: $it" } }
     }
 
     private val randomRecipes by lazy {
@@ -770,32 +750,14 @@ class CodeRecipes @Inject constructor() {
                 fun getRandomRecipes(count: Int): List<CodeRecipe> {
                     if (count <= 0) { return emptyList() }
             
+                    if (randomRecipes.size < count) {
+                        randomRecipes.addAll(recipes.shuffled())
+                    }
+            
                     val result = mutableListOf<CodeRecipe>()
-                    var remaining = count
-            
-                    // First, try to get recipes from the current shuffled pool
-                    while (remaining > 0 && randomRecipes.isNotEmpty()) {
-                        randomRecipes.removeLastOrNull()?.let { recipe ->
-                            result.add(recipe)
-                            remaining--
-                        }
+                    repeat(count) {
+                        result.add(randomRecipes.removeFirst())
                     }
-            
-                    // If we still need more recipes and have exhausted the current pool,
-                    // reshuffle and continue
-                    while (remaining > 0) {
-                        // Reshuffle the pool only when it's empty
-                        if (randomRecipes.isEmpty()) {
-                            randomRecipes.addAll(recipes.shuffled())
-                        }
-            
-                        // Take more recipes from the newly shuffled pool
-                        randomRecipes.removeLastOrNull()?.let { recipe ->
-                            result.add(recipe)
-                            remaining--
-                        }
-                    }
-            
                     return result
                 }
                 ```
