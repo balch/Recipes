@@ -757,7 +757,7 @@ class CodeRecipes @Inject constructor() {
             
                     val result = mutableListOf<CodeRecipe>()
                     repeat(count) {
-                        result.add(randomRecipes.removeFirst())
+                        result.add(randomRecipes.removeAt(0))
                     }
                     return result
                 }
