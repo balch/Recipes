@@ -37,7 +37,7 @@ https://github.com/user-attachments/assets/5ec15acd-8fb9-4403-a5a7-9258a0ab6ac7
 | [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)               | Dependency Injection for Android                    | 
 | [KmLogging](https://github.com/LighthouseGames/KmLogging)                                      | Kotlin Multiplatform logging library (v2.0.3).      |
 | [Ktor](https://ktor.io/)                                                                       | HTTP Client for Android                             | 
-| [Markdown Renderer](hhttps://github.com/mikepenz/multiplatform-markdown-renderer)              | Mike Penz Multiplatform Markdown Renderer           |
+| [Markdown Renderer](https://github.com/mikepenz/multiplatform-markdown-renderer)              | Mike Penz Multiplatform Markdown Renderer           |
 | [TheMealDB](https://www.themealdb.com/api.php)                                                 | Free, easy to use, API for Food Recipes             |
 | [Truth](https://truth.dev/)                                                                    | Google Assertion Library used for Testing           |
 | [Turbine](https://github.com/cashapp/turbine)                                                  | Couroutine Flow Testing Library from CashApp        |
