@@ -1,6 +1,8 @@
 package org.balch.recipes.core.models
 
+import android.os.Parcelable
 import androidx.compose.runtime.Composable
+import kotlinx.parcelize.Parcelize
 import androidx.compose.ui.graphics.Color
 import org.balch.recipes.ui.theme.AccentYellow
 import org.balch.recipes.ui.theme.DarkBackground
@@ -9,7 +11,8 @@ import org.balch.recipes.ui.theme.FreshGreen
 import org.balch.recipes.ui.theme.LightBackground
 import org.balch.recipes.ui.theme.WarmOrange
 
-enum class CodeArea {
+@Parcelize
+enum class CodeArea : Parcelable {
     Theme,
     Navigation,
     Architecture,
@@ -41,6 +44,7 @@ fun CodeArea.textColor(): Color {
     }
 }
 
+@Parcelize
 data class CodeRecipe(
     val index: Int,
     val area: CodeArea,
@@ -48,4 +52,4 @@ data class CodeRecipe(
     val description: String,
     val fileName: String? = null,
     val codeSnippet: String? = null,
-)
+): Parcelable

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("kotlin-parcelize")
     alias(libs.plugins.jetbrains.kotlin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)

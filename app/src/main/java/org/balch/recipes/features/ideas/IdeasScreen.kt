@@ -1,6 +1,7 @@
 package org.balch.recipes.features.ideas
 
 import android.annotation.SuppressLint
+import android.os.Parcelable
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,6 +42,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +67,7 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.rememberHazeState
+import kotlinx.parcelize.Parcelize
 import org.balch.recipes.BrowsableType
 import org.balch.recipes.core.models.Area
 import org.balch.recipes.core.models.Category
@@ -82,10 +85,14 @@ import kotlin.random.Random
  * Sealed interface representing items that can be displayed in the ideas grid
  */
 sealed interface GridItem {
-    data class CategoryItem(val category: Category) : GridItem
-    data class AreaItem(val area: Area) : GridItem
-    data class IngredientItem(val ingredient: Ingredient) : GridItem
-    data class CodeRecipeItem(val codeRecipe: CodeRecipe) : GridItem
+    @Parcelize
+    data class CategoryItem(val category: Category) : GridItem, Parcelable
+    @Parcelize
+    data class AreaItem(val area: Area) : GridItem, Parcelable
+    @Parcelize
+    data class IngredientItem(val ingredient: Ingredient) : GridItem, Parcelable
+    @Parcelize
+    data class CodeRecipeItem(val codeRecipe: CodeRecipe) : GridItem, Parcelable
 }
 
 @Composable
@@ -746,7 +753,7 @@ private fun <T> rememberRecipeItems(
     regularItems: List<T>,
     codeRecipes: List<CodeRecipe>,
     itemWrapper: (T) -> GridItem
-): List<GridItem> = remember {
+): List<GridItem> = rememberSaveable() {
     if (codeRecipes.isEmpty()) {
         regularItems.map(itemWrapper)
     } else {
