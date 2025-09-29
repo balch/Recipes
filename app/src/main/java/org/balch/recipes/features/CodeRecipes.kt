@@ -36,10 +36,10 @@ class CodeRecipes @Inject constructor() {
 
         val result = mutableListOf<CodeRecipe>()
         repeat(count) {
-            result.add(randomRecipes.removeFirst())
+            result.add(randomRecipes.removeAt(0))
         }
         return result
-            .also { logger.v { "getRandomRecipes: $it" } }
+            .also { list -> logger.v { "getRandomRecipes: ${list.map { it.title } }" } }
     }
 
     private val randomRecipes by lazy {
