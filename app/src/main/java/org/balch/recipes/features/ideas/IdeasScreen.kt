@@ -211,11 +211,6 @@ private fun IdeasLayout(
                 }
             }
         ) {
-            Box(
-                modifier = modifier
-                    .padding(innerPadding)
-                    .hazeSource(state = hazeState),
-            )
             Box {
                 if (uiState.imageUrl != null) {
                     AsyncImage(
