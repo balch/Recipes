@@ -457,7 +457,7 @@ private fun SearchResults(
                     )
                 }
             }
-        } else {
+        } else if (!isFetching) {
             Text(
                 text = "No results found",
                 style = MaterialTheme.typography.headlineSmall,
