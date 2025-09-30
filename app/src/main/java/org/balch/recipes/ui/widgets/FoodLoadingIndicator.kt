@@ -24,7 +24,8 @@ import androidx.compose.ui.unit.sp
 @Preview
 @Composable
 fun FoodLoadingIndicator(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    text: String? = "Loading delicious food recipes..."
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "rotation")
     val rotation by infiniteTransition.animateFloat(
@@ -52,11 +53,13 @@ fun FoodLoadingIndicator(
                     .rotate(rotation)
                     .padding(bottom = 16.dp)
             )
-            Text(
-                text = "Loading delicious categories...",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
+            if (text != null) {
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+            }
         }
     }
 }

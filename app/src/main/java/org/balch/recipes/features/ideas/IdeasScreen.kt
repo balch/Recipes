@@ -37,6 +37,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -113,23 +115,17 @@ fun IdeasScreen(
         viewModel.changeBrowsableType(BrowsableType.Category)
     }
 
-    PullToRefreshBox(
-        isRefreshing = uiState is IdeasUiState.Loading,
-        onRefresh = { viewModel.retry() },
+    IdeasLayout(
+        uiState = uiState,
+        onRetry = viewModel::retry,
+        onAreaClick = onAreaClick,
+        onCategoryClick = onCategoryClick,
+        onIngredientClick = onIngredientClick,
+        onCodeRecipeClick = onCodeRecipeClick,
+        onScrollChange = onScrollChange,
+        onBrowsableTypeChange = viewModel::changeBrowsableType,
         modifier = modifier
-    ) {
-        IdeasLayout(
-            uiState = uiState,
-            onRetry = viewModel::retry,
-            onAreaClick = onAreaClick,
-            onCategoryClick = onCategoryClick,
-            onIngredientClick = onIngredientClick,
-            onCodeRecipeClick = onCodeRecipeClick,
-            onScrollChange = onScrollChange,
-            onBrowsableTypeChange = viewModel::changeBrowsableType,
-            modifier = modifier
-        )
-    }
+    )
 }
 
 @ThemePreview
@@ -188,108 +184,135 @@ private fun IdeasLayout(
             )
         }
     ) { innerPadding ->
-        Box(
-            modifier = modifier
-                .padding(innerPadding)
-                .hazeSource(state = hazeState),
-        )
-        Box {
-            if (uiState.imageUrl != null) {
-                AsyncImage(
-                    contentScale = ContentScale.FillHeight,
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(uiState.imageUrl)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "Background",
+        val state = rememberPullToRefreshState()
+        val isRefreshing = uiState is IdeasUiState.Loading
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = onRetry,
+            modifier = modifier,
+            state = state,
+            indicator = {
+                IndicatorBox(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = innerPadding.calculateTopPadding())
-                    )
+                        .padding(innerPadding)
+                        .fillMaxWidth()
+                        .height(128.dp)
+                        .align(Alignment.TopCenter),
+                    isRefreshing = isRefreshing,
+                    containerColor = Color.Transparent,
+                    maxDistance = 128.dp,
+                    elevation = 8.dp,
+                    state = state
+                ) {
+                    val text =
+                        if (isRefreshing) "Refreshing Food and Code..."
+                        else ""
+                    FoodLoadingIndicator(text = text)
+                }
             }
-            when (uiState) {
-                is IdeasUiState.Loading -> {
-                    FoodLoadingIndicator(
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-
-                is IdeasUiState.Error -> {
-                    ErrorState(
-                        error = uiState.message,
-                        onRetry = onRetry,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-
-                is IdeasUiState.Categories -> {
-                    val items = rememberRecipeItems(
-                        regularItems = uiState.categories,
-                        codeRecipes = uiState.codeRecipes,
-                        itemWrapper = { GridItem.CategoryItem(it) }
-                    )
-                    ResultsGrid(
-                        items = items,
-                        onScrollChange = onScrollChange,
+        ) {
+            Box(
+                modifier = modifier
+                    .padding(innerPadding)
+                    .hazeSource(state = hazeState),
+            )
+            Box {
+                if (uiState.imageUrl != null) {
+                    AsyncImage(
+                        contentScale = ContentScale.FillHeight,
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(uiState.imageUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Background",
                         modifier = Modifier
                             .fillMaxSize()
-                            .hazeSource(state = hazeState),
-                        paddingValues = innerPadding,
-                        onCategoryClick = onCategoryClick,
-                        onCodeRecipeClick = onCodeRecipeClick,
-                        centerCodeRecipes = false,
+                            .padding(top = innerPadding.calculateTopPadding())
                     )
                 }
+                when (uiState) {
+                    is IdeasUiState.Loading -> {
+                        // no-op. handled by PullToRefreshBox
+                    }
 
-                is IdeasUiState.Areas -> {
-                    val items = rememberRecipeItems(
-                        regularItems = uiState.areas,
-                        codeRecipes = uiState.codeRecipes,
-                        itemWrapper = { GridItem.AreaItem(it) }
-                    )
-                    ResultsGrid(
-                        items = items,
-                        onScrollChange = onScrollChange,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .hazeSource(state = hazeState),
-                        paddingValues = innerPadding,
-                        onAreaClick = onAreaClick,
-                        onCodeRecipeClick = onCodeRecipeClick,
-                        centerCodeRecipes = true,
-                    )
-                }
+                    is IdeasUiState.Error -> {
+                        ErrorState(
+                            error = uiState.message,
+                            onRetry = onRetry,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
 
-                is IdeasUiState.Ingredients -> {
-                    val items = rememberRecipeItems(
-                        regularItems = uiState.ingredients,
-                        codeRecipes = uiState.codeRecipes,
-                        itemWrapper = { GridItem.IngredientItem(it) }
-                    )
-                    ResultsGrid(
-                        items = items,
-                        onScrollChange = onScrollChange,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .hazeSource(state = hazeState),
-                        paddingValues = innerPadding,
-                        onIngredientClick = onIngredientClick,
-                        onCodeRecipeClick = onCodeRecipeClick,
-                        centerCodeRecipes = true,
-                    )
-                }
-                is IdeasUiState.CodeRecipes -> {
-                    ResultsGrid(
-                        items = uiState.codeRecipes.map { GridItem.CodeRecipeItem(it) },
-                        onScrollChange = onScrollChange,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .hazeSource(state = hazeState),
-                        paddingValues = innerPadding,
-                        onIngredientClick = onIngredientClick,
-                        onCodeRecipeClick = onCodeRecipeClick,
-                        centerCodeRecipes = true,
-                    )
+                    is IdeasUiState.Categories -> {
+                        val items = rememberRecipeItems(
+                            regularItems = uiState.categories,
+                            codeRecipes = uiState.codeRecipes,
+                            itemWrapper = { GridItem.CategoryItem(it) }
+                        )
+                        ResultsGrid(
+                            items = items,
+                            onScrollChange = onScrollChange,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .hazeSource(state = hazeState),
+                            paddingValues = innerPadding,
+                            onCategoryClick = onCategoryClick,
+                            onCodeRecipeClick = onCodeRecipeClick,
+                            centerCodeRecipes = false,
+                        )
+                    }
+
+                    is IdeasUiState.Areas -> {
+                        val items = rememberRecipeItems(
+                            regularItems = uiState.areas,
+                            codeRecipes = uiState.codeRecipes,
+                            itemWrapper = { GridItem.AreaItem(it) }
+                        )
+                        ResultsGrid(
+                            items = items,
+                            onScrollChange = onScrollChange,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .hazeSource(state = hazeState),
+                            paddingValues = innerPadding,
+                            onAreaClick = onAreaClick,
+                            onCodeRecipeClick = onCodeRecipeClick,
+                            centerCodeRecipes = true,
+                        )
+                    }
+
+                    is IdeasUiState.Ingredients -> {
+                        val items = rememberRecipeItems(
+                            regularItems = uiState.ingredients,
+                            codeRecipes = uiState.codeRecipes,
+                            itemWrapper = { GridItem.IngredientItem(it) }
+                        )
+                        ResultsGrid(
+                            items = items,
+                            onScrollChange = onScrollChange,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .hazeSource(state = hazeState),
+                            paddingValues = innerPadding,
+                            onIngredientClick = onIngredientClick,
+                            onCodeRecipeClick = onCodeRecipeClick,
+                            centerCodeRecipes = true,
+                        )
+                    }
+
+                    is IdeasUiState.CodeRecipes -> {
+                        ResultsGrid(
+                            items = uiState.codeRecipes.map { GridItem.CodeRecipeItem(it) },
+                            onScrollChange = onScrollChange,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .hazeSource(state = hazeState),
+                            paddingValues = innerPadding,
+                            onIngredientClick = onIngredientClick,
+                            onCodeRecipeClick = onCodeRecipeClick,
+                            centerCodeRecipes = true,
+                        )
+                    }
                 }
             }
         }
