@@ -486,9 +486,14 @@ class CodeRecipes @Inject constructor() {
                                         state.distanceFraction > 0.05F -> "Harder......"
                                         else -> ""
                                     }
+                                    val rotationDegrees =
+                                        (360f * (state.distanceFraction.coerceIn(0f, 1f)))
+                                            .takeUnless { isRefreshing }
+            
                                     FoodLoadingIndicator(
                                         modifier = Modifier.hazeSource(hazeState),
-                                        text = text
+                                        text = text,
+                                        rotationDegrees = rotationDegrees,
                                     )
                                 }
                             }

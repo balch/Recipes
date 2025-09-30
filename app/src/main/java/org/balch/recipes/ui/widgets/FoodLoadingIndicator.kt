@@ -14,6 +14,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -25,18 +27,24 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun FoodLoadingIndicator(
     modifier: Modifier = Modifier,
-    text: String? = "Loading delicious food recipes..."
+    text: String? = "Loading delicious food recipes...",
+    rotationDegrees: Float? = null
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "rotation")
-    val rotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "rotation"
-    )
+    val rotation by
+        if (rotationDegrees != null)  {
+            remember(rotationDegrees) { mutableFloatStateOf(rotationDegrees) }
+        } else {
+            infiniteTransition.animateFloat(
+                initialValue = 0f,
+                targetValue = 360f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 2000, easing = LinearEasing),
+                    repeatMode = RepeatMode.Restart
+                ),
+                label = "rotation"
+            )
+        }
 
     Box(
         contentAlignment = Alignment.Center,
