@@ -213,11 +213,8 @@ private fun IdeasLayout(
                             state.distanceFraction > 0.05F -> "Harder......"
                             else -> ""
                         }
-                            if (isRefreshing) "Refreshing Food and Code..."
-                            else ""
                         FoodLoadingIndicator(
-                            modifier = Modifier
-                                .hazeSource(hazeState),
+                            modifier = Modifier.hazeSource(hazeState),
                             text = text
                         )
                     }

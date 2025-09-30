@@ -27,7 +27,9 @@ class CodeRecipes @Inject constructor() {
      * @return A list of `CodeRecipe` objects, with a size of up to the specified count.
      */
     fun getRandomRecipes(count: Int): List<CodeRecipe> {
-        if (count <= 0) { return emptyList() }
+        if (count <= 0) {
+            return emptyList()
+        }
 
         if (randomRecipes.size < count) {
             randomRecipes.addAll(recipes.shuffled())
@@ -39,7 +41,7 @@ class CodeRecipes @Inject constructor() {
             result.add(randomRecipes.removeAt(0))
         }
         return result
-            .also { list -> logger.v { "getRandomRecipes: ${list.map { it.title } }" } }
+            .also { list -> logger.v { "getRandomRecipes: ${list.map { it.title }}" } }
     }
 
     private val randomRecipes by lazy {
@@ -219,32 +221,16 @@ class CodeRecipes @Inject constructor() {
                 ),
                 CodeRecipeRaw(
                     area = CodeArea.Theme,
-                    title = "ColorScheme",
-                    description = "- Use `isSystemInDarkTheme` and `dynamicColor` to control color scheme",
-                    fileName = "RecipesTheme.kt",
-                    codeSnippet = """
-                ```
-                val colorScheme = when {
-                    dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-                        val context = LocalContext.current
-                        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-                    }
-                    darkTheme -> DarkColorScheme
-                    else -> LightColorScheme
-                }
-                ```
-                """.trimIndent()
-                ),
-                CodeRecipeRaw(
-                    area = CodeArea.Theme,
-                    title = "ThemePreview",
+                    title = "ThemePreview + PreviewParameter",
                     fileName = "ThemePreview.kt",
                     description = """
                 - Create annotation with an `@Preview` for each theme
-                - Use `@ThemePreview` on Screens and Widgets
+                - Define instances of `PreviewParameterProvider` to feed values in Composable arguments 
+                - Combine these techniques to create multiple Previews for each theme and argument combo  
                  """.trimIndent(),
                     codeSnippet = """
                 ```
+                // Combine multiple `@Preview` into a new `@ThemePreview` annotation      
                 @Preview(
                     uiMode = Configuration.UI_MODE_NIGHT_YES,
                     group = "Theme",
@@ -256,7 +242,38 @@ class CodeRecipes @Inject constructor() {
                     name = "ThemeLight",
                 )
                 annotation class ThemePreview
-                ```
+
+                // Define `PreviewParameterProvider` with values for a `@Preview` argument      
+                class CodeRecipeProvider : PreviewParameterProvider<CodeRecipe> {
+                    override val values = sequenceOf(
+                        CodeRecipe(
+                            index = 1,
+                            area = CodeArea.Architecture,
+                            title = "Architecture Title",
+                            description = "`Architecture` Description",
+                            codeSnippet = "print('Hello, Architecture!')"
+                        ),
+                        CodeRecipe(
+                            index = 2,
+                            area = CodeArea.Navigation,
+                            title = "Navigation Title",
+                            description = "`Navigation` Description",
+                            codeSnippet = "print('Hello, Navigation!')"
+                        ),
+                        // ...
+                    )
+                }
+
+                // Combine `@ThemePreview` and `@PreviewParameter(CodeRecipeProvider::class)` to create multiple Previews      
+                @Preview
+                @ThemePreview
+                @Composable
+                fun CodeRecipePreview(
+                    @PreviewParameter(CodeRecipeProvider::class) codeRecipe: CodeRecipe
+                ) {
+                    // ...
+                }
+                ```                   
                 """.trimIndent()
                 ),
                 CodeRecipeRaw(
@@ -427,6 +444,62 @@ class CodeRecipes @Inject constructor() {
                     )
                 ```
             """.trimIndent()
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Theme,
+                    title = "PullToRefreshBox + Haze = 🎨👑" ,
+                    description = """
+                        - Wrap `PullToRefreshBox` in `Scaffold` content section
+                        - Declare `state` to share between `PullToRefreshBox` and `IndicatorBox`
+                        - Define `IndicatorBox` that contains a custom indicator Composable
+                        - Use `state.distanceFraction` to provide feedback
+                             - Only render indicator when _distance_ is greater than 0
+                             - Use _distance_ to show dynamic text
+                        - Add the `.hazeSource(hazeState)` to the `modifier` of the custom indicator Composable                         
+                    """.trimIndent(),
+                    fileName = "RecipesTheme.kt",
+                    codeSnippet = """
+                    ```
+                    val state = rememberPullToRefreshState()
+                    val isRefreshing = uiState is IdeasUiState.Loading
+                    PullToRefreshBox(
+                        isRefreshing = isRefreshing,
+                        onRefresh = onRetry,
+                        modifier = modifier,
+                        state = state,
+                        indicator = {
+                            IndicatorBox(
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter),
+                                isRefreshing = isRefreshing,
+                                containerColor = Color.Transparent,
+                                maxDistance = 128.dp,
+                                elevation = 8.dp,
+                                state = state
+                            ) {
+                                if (state.distanceFraction > 0F) {
+                                    val text = when {
+                                        isRefreshing -> "Refreshing Food and Code..."
+                                        state.distanceFraction > 1F -> "Got it!!!"
+                                        state.distanceFraction > 0.9F -> "Almost.."
+                                        state.distanceFraction > 0.5F -> "Keep pulling..."
+                                        state.distanceFraction > 0.05F -> "Harder......"
+                                        else -> ""
+                                    }
+                                    FoodLoadingIndicator(
+                                        modifier = Modifier.hazeSource(hazeState),
+                                        text = text
+                                    )
+                                }
+                            }
+                        }
+                    ) {
+                        Box {
+                            // ..
+                        }
+                    }
+                    ```
+                """.trimIndent()
                 ),
                 CodeRecipeRaw(
                     area = CodeArea.Theme,
@@ -729,41 +802,59 @@ class CodeRecipes @Inject constructor() {
             }
             ```
             """.trimIndent(),
-                fileName = "MainActivity.kt"
-            ),
-            CodeRecipeRaw(
-                area = CodeArea.Architecture,
-                title = "Random Exhaustive List ",
-                description = """
-                - Sometimes you need to randomly show items from a list 
-                - Using a random index is easy, but leads to many repeated items
-                - Its better to show all the items in a random list to enure freshness  
-                    - Save shuffled main list to randomize order
-                    - Return and remove items from front of saved list 
-                    - Add more shuffled items when capacity runs low
-            """.trimIndent(),
-                fileName = "CodeRecipes.kt",
-                codeSnippet = """
+                    fileName = "MainActivity.kt"
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Architecture,
+                    title = "Random Exhaustive List ",
+                    description = """
+                        - Sometimes you need to randomly show items from a list 
+                        - Using a random index is easy, but leads to many repeated items
+                        - Its better to show all the items in a random list to enure freshness  
+                            - Save shuffled main list to randomize order
+                            - Return and remove items from front of saved list 
+                            - Add more shuffled items when capacity runs low
+                    """.trimIndent(),
+                    fileName = "CodeRecipes.kt",
+                    codeSnippet = """
+                        ```
+                        private val randomRecipes by lazy {
+                            mutableListOf(*recipes.shuffled().toTypedArray())
+                        }
+                        fun getRandomRecipes(count: Int): List<CodeRecipe> {
+                            if (count <= 0) { return emptyList() }
+                    
+                            if (randomRecipes.size < count) {
+                                randomRecipes.addAll(recipes.shuffled())
+                            }
+                    
+                            val result = mutableListOf<CodeRecipe>()
+                            repeat(count) {
+                                result.add(randomRecipes.removeAt(0))
+                            }
+                            return result
+                        }
+                        ```
+                    """.trimIndent()
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Theme,
+                    title = "ColorScheme",
+                    description = "- Use `isSystemInDarkTheme` and `dynamicColor` to control color scheme",
+                    fileName = "RecipesTheme.kt",
+                    codeSnippet = """
                 ```
-                private val randomRecipes by lazy {
-                    mutableListOf(*recipes.shuffled().toTypedArray())
-                }
-                fun getRandomRecipes(count: Int): List<CodeRecipe> {
-                    if (count <= 0) { return emptyList() }
-            
-                    if (randomRecipes.size < count) {
-                        randomRecipes.addAll(recipes.shuffled())
+                val colorScheme = when {
+                    dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                        val context = LocalContext.current
+                        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
                     }
-            
-                    val result = mutableListOf<CodeRecipe>()
-                    repeat(count) {
-                        result.add(randomRecipes.removeAt(0))
-                    }
-                    return result
+                    darkTheme -> DarkColorScheme
+                    else -> LightColorScheme
                 }
                 ```
-            """.trimIndent()
-            )
+                """.trimIndent()
+                ),
             )
         }
     }
