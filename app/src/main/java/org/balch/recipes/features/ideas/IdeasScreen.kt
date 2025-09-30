@@ -204,10 +204,23 @@ private fun IdeasLayout(
                     elevation = 8.dp,
                     state = state
                 ) {
-                    val text =
-                        if (isRefreshing) "Refreshing Food and Code..."
-                        else ""
-                    FoodLoadingIndicator(text = text)
+                    if (state.distanceFraction > 0F) {
+                        val text = when {
+                            isRefreshing -> "Refreshing Food and Code..."
+                            state.distanceFraction > 1F -> "Got it!!!"
+                            state.distanceFraction > 0.9F -> "Almost.."
+                            state.distanceFraction > 0.5F -> "Keep pulling..."
+                            state.distanceFraction > 0.05F -> "Harder......"
+                            else -> ""
+                        }
+                            if (isRefreshing) "Refreshing Food and Code..."
+                            else ""
+                        FoodLoadingIndicator(
+                            modifier = Modifier
+                                .hazeSource(hazeState),
+                            text = text
+                        )
+                    }
                 }
             }
         ) {

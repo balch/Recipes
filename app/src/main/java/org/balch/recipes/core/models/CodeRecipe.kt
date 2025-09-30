@@ -55,5 +55,5 @@ data class CodeRecipe(
     val codeSnippet: String? = null,
 ): UniqueItem, Parcelable {
     @IgnoredOnParcel
-    override val id: String = index.toString()
+    override val id: String by lazy { index.toString() }
 }
