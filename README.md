@@ -33,7 +33,7 @@ Another reason this app came together so nicely is due to the plethora of free a
 | <img src="screenshots/darkmode-code.png" width="200" alt="Dark Mode Code Recipes"> | <img src="screenshots/darkmode-code-detail.png" width="200" alt="Dark Mode Code Recipe Detail">  |
 |   <img src="screenshots/lightmode-code.png" width="200" alt="Light Mode Recipes">   | <img src="screenshots/lightmode-code-detail.png" width="200" alt="Light Mode Code Recipe Detail"> |
 
-https://github.com/user-attachments/assets/5ec15acd-8fb9-4403-a5a7-9258a0ab6ac7
+https://github.com/user-attachments/assets/562de77d-dc28-40a6-b93f-3fe2ab76591d
 
 ### Code Recipes
 
