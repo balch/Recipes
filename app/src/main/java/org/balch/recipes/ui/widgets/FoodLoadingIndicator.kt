@@ -51,10 +51,11 @@ fun FoodLoadingIndicator(
                 fontSize = 64.sp,
                 modifier = Modifier
                     .rotate(rotation)
-                    .padding(bottom = 16.dp)
             )
             if (text != null) {
                 Text(
+                    modifier = Modifier
+                        .padding(top = 8.dp),
                     text = text,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
