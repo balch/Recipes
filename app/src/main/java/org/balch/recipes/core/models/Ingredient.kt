@@ -1,9 +1,9 @@
 package org.balch.recipes.core.models
 
 import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.parcelize.Parcelize
 
 /**
  * Data classes representing the API response for ingredients.

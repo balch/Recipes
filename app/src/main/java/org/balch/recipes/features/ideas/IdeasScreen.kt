@@ -518,7 +518,7 @@ private fun ResultsGrid(
                     is GridItem.CategoryItem -> "category_${item.category.id}"
                     is GridItem.AreaItem -> "area_${item.area.id}"
                     is GridItem.IngredientItem -> "ingredient_${item.ingredient.id}"
-                    is GridItem.CodeRecipeItem -> "code_${item.codeRecipe.hashCode()}"
+                    is GridItem.CodeRecipeItem -> "code_${item.codeRecipe.id}"
                 }
             }
         ) { index, item ->

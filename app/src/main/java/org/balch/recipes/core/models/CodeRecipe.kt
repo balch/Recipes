@@ -2,8 +2,9 @@ package org.balch.recipes.core.models
 
 import android.os.Parcelable
 import androidx.compose.runtime.Composable
-import kotlinx.parcelize.Parcelize
 import androidx.compose.ui.graphics.Color
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 import org.balch.recipes.ui.theme.AccentYellow
 import org.balch.recipes.ui.theme.DarkBackground
 import org.balch.recipes.ui.theme.DeepBrown
@@ -52,4 +53,7 @@ data class CodeRecipe(
     val description: String,
     val fileName: String? = null,
     val codeSnippet: String? = null,
-): Parcelable
+): UniqueItem, Parcelable {
+    @IgnoredOnParcel
+    override val id: String = index.toString()
+}
