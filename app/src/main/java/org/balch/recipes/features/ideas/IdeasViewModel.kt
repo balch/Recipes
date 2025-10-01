@@ -104,7 +104,7 @@ class IdeasViewModel @Inject constructor(
                 BrowsableType.CodeRecipe -> {
                     IdeasUiState.CodeRecipes(
                         imageUrl = null,
-                        codeRecipes = codeRecipes.sortedRecipes
+                        codeRecipes = codeRecipes.sortedRecipes(),
                     )
                 }
             }

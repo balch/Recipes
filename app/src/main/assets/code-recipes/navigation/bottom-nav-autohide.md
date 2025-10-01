@@ -1,0 +1,61 @@
+## Description
+
+- Calculate `showNavigationBar` from `firstVisibleIndex` and scroll direction
+- Use `showNavigationBar` in `AnimatedVisibility` to control visibility of `NavigationBar`
+- Delegate scroll handling to each ***Screen*** via `onScrollChange`
+  - Set `firstVisibleIndex` in handler to emit new `showNavigationBar` state
+
+## Code Snippet
+
+```
+@Composable
+private fun MainContent() {
+    var previousVisibleIndex by remember { mutableIntStateOf(0) }
+    var firstVisibleIndex by remember { mutableIntStateOf(0) }
+    var showNavigationBar by remember { mutableStateOf(true) }
+    LaunchedEffect(firstVisibleIndex) {
+        showNavigationBar = firstVisibleIndex == 0 || firstVisibleIndex < previousVisibleIndex
+        previousVisibleIndex = firstVisibleIndex
+    }
+
+    RecipesTheme {
+        Scaffold(
+            bottomBar = {
+                AnimatedVisibility(
+                    visible = showNavigationBar && backstackManager.peek() is TopLevelRoute,
+                    enter = slideInVertically { it },
+                    exit = slideOutVertically { it },
+                ) {
+                    NavigationBar(
+                        // ...
+                    )
+                }
+            }
+        ) { innerPadding ->
+            NavDisplay(
+                entryProvider = entryProvider {
+                    entry<Ideas> {
+                        IdeasScreen(
+                            onScrollChange = { firstVisibleIndex = it }
+                            // ...
+                        )
+                    }
+                    entry<SearchRoute> { searchRoute ->
+                        SearchScreen(
+                            onScrollChange = { firstVisibleIndex = it },
+                            // ...
+                        )
+                    }
+                    entry<Search> {
+                        SearchScreen(
+                            onScrollChange = { firstVisibleIndex = it },
+                            // ...
+                        )
+                    }
+                    // ...
+                },
+            )
+        }
+    }
+}
+```

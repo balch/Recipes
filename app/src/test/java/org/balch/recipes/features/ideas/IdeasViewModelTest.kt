@@ -16,7 +16,6 @@ import org.balch.recipes.core.models.Category
 import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.repository.RecipeRepository
-import org.balch.recipes.features.CodeRecipes
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

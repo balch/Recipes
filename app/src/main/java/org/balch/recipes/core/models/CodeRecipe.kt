@@ -54,7 +54,7 @@ data class CodeRecipe(
     val title: String,
     val description: String,
     val fileName: String? = null,
-    val codeSnippet: String? = null,
+    val codeSnippet: String = "",
 ): UniqueItem, Parcelable {
     @IgnoredOnParcel
     override val id: String by lazy { index.toString() }
