@@ -8,6 +8,7 @@ val DeepBrown = Color(0xFF6D4C41)         // Primary variant - rich brown
 val FreshGreen = Color(0xFF66BB6A)        // Secondary - fresh ingredient green
 val SageGreen = Color(0xFF8D9E8B)         // Secondary variant - muted sage
 val AccentYellow = Color(0xFFFFD54F)      // Tertiary - warm accent
+val StrongTeal = Color( 0xFF03DAC5)
 
 // Light Theme Surfaces - Improved grays with better contrast
 val LightBackground = Color(0xFFFAFAFA)   // Very light gray background

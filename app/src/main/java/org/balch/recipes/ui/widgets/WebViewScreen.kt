@@ -1,46 +1,57 @@
 package org.balch.recipes.ui.widgets
 
-import android.view.ViewGroup
+import android.graphics.Color
 import android.webkit.WebView
-import android.widget.FrameLayout
+import android.webkit.WebViewClient
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.viewinterop.AndroidView
-
-private const val WEBVIEW_TAG = "recipeWebViewTag"
 
 @Composable
 fun WebViewScreen(
     modifier: Modifier = Modifier,
     url: String
 ) {
-    Box(modifier = modifier.fillMaxSize()) {
 
+    var isLoading by remember { mutableStateOf(true) }
+    val animatedAlpha: Float by animateFloatAsState(
+        if (isLoading) 0.25f else 1f, label = "alpha"
+    )
+
+    Box(modifier = modifier.fillMaxSize()) {
+        if (isLoading) {
+            FoodLoadingIndicator(
+                modifier = Modifier.fillMaxSize()
+                    .graphicsLayer { alpha = 1f - animatedAlpha },
+            )
+        }
         AndroidView(
+            modifier = Modifier.fillMaxSize()
+                .graphicsLayer { alpha = animatedAlpha },
             factory = { context ->
-                FrameLayout(context).apply {
-                    addView(
-                        WebView(context).apply {
-                            tag = WEBVIEW_TAG
-                            settings.javaScriptEnabled = true
-                            settings.domStorageEnabled = true
-                            settings.allowContentAccess = true
-                            settings.allowFileAccess = true
-                            settings.javaScriptCanOpenWindowsAutomatically = true
-                            layoutParams = ViewGroup.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT
-                            )
+                WebView(context).apply {
+                    settings.javaScriptEnabled = true
+                    settings.domStorageEnabled = true
+                    settings.allowContentAccess = true
+                    settings.allowFileAccess = true
+                    settings.javaScriptCanOpenWindowsAutomatically = true
+                    webViewClient = object : WebViewClient() {
+                        override fun onPageFinished(view: WebView?, url: String?) {
+                            isLoading = false
                         }
-                    )
-                }
-            },
-            update = { frameLayout ->
-                frameLayout.findViewWithTag<WebView>(WEBVIEW_TAG).apply {
+                    }
+                    setBackgroundColor(Color.TRANSPARENT)
                     loadUrl(url)
                 }
-            }
+            },
         )
-    }}
+    }
+}

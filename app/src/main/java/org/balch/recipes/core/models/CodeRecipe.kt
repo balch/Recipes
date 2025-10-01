@@ -10,6 +10,7 @@ import org.balch.recipes.ui.theme.DarkBackground
 import org.balch.recipes.ui.theme.DeepBrown
 import org.balch.recipes.ui.theme.FreshGreen
 import org.balch.recipes.ui.theme.LightBackground
+import org.balch.recipes.ui.theme.StrongTeal
 import org.balch.recipes.ui.theme.WarmOrange
 
 @Parcelize
@@ -17,7 +18,9 @@ enum class CodeArea : Parcelable {
     Theme,
     Navigation,
     Architecture,
-    Testing
+    Testing,
+    Compose,
+
 }
 
 /**
@@ -32,16 +35,15 @@ fun CodeArea.color(): Color {
         CodeArea.Navigation -> FreshGreen
         CodeArea.Architecture -> DeepBrown
         CodeArea.Testing -> AccentYellow
+        CodeArea.Compose -> StrongTeal
     }
 }
 
 @Composable
 fun CodeArea.textColor(): Color {
     return when (this) {
-        CodeArea.Theme -> DarkBackground
-        CodeArea.Navigation -> DarkBackground
         CodeArea.Architecture -> LightBackground
-        CodeArea.Testing -> DarkBackground
+        else -> DarkBackground
     }
 }
 

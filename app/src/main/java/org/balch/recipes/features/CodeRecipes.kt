@@ -146,6 +146,41 @@ class CodeRecipes @Inject constructor() {
                 ),
                 CodeRecipeRaw(
                     area = CodeArea.Architecture,
+                    title = "Hilt ViewModel Factory",
+                    description = """
+                - Use `HiltViewModel` and `assistedFactory` to create unique ***ViewModel*** per ***Screen*** to push on the ***backstack***.
+                - Define Factory using `@AssistedFactory` annotation
+                - Use Factory to create ViewModels to pass to Screens via `hiltViewModel`                
+                """.trimIndent(),
+                    fileName = "DetailsViewModel.kt",
+                    codeSnippet = """
+                ```
+                // ViewModel Definition
+                @HiltViewModel(assistedFactory = DetailsViewModel.Factory::class)
+                class DetailsViewModel @AssistedInject constructor(
+                    @Assisted val detailType: DetailType,
+                    private val repository: RecipeRepository,
+                    dispatcherProvider: DispatcherProvider
+                ) : ViewModel() {
+
+                // ViewModel Factory
+                @AssistedFactory
+                interface Factory {
+                    fun create(detailType: DetailType): DetailsViewModel
+                }
+
+                // Create ViewModel
+                val viewModel =
+                    hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
+                        creationCallback = { factory ->
+                            factory.create(detailRoute.detailType)
+                        }
+                    )
+                ```
+                """.trimIndent()
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Architecture,
                     title = "Repository with ApiService",
                     description = """
                         - Use **Ktor** for Networking
@@ -411,42 +446,7 @@ class CodeRecipes @Inject constructor() {
                 """.trimIndent()
                 ),
                 CodeRecipeRaw(
-                    area = CodeArea.Architecture,
-                    title = "Hilt ViewModel Factory",
-                    description = """
-                - Use `HiltViewModel` and `assistedFactory` to create unique ***ViewModel*** per ***Screen*** to push on the ***backstack***.
-                - Define Factory using `@AssistedFactory` annotation
-                - Use Factory to create ViewModels to pass to Screens via `hiltViewModel`                
-                """.trimIndent(),
-                    fileName = "DetailsViewModel.kt",
-                    codeSnippet = """
-                ```
-                // ViewModel Definition
-                @HiltViewModel(assistedFactory = DetailsViewModel.Factory::class)
-                class DetailsViewModel @AssistedInject constructor(
-                    @Assisted val detailType: DetailType,
-                    private val repository: RecipeRepository,
-                    dispatcherProvider: DispatcherProvider
-                ) : ViewModel() {
-
-                // ViewModel Factory
-                @AssistedFactory
-                interface Factory {
-                    fun create(detailType: DetailType): DetailsViewModel
-                }
-
-                // Create ViewModel
-                val viewModel =
-                    hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
-                        creationCallback = { factory ->
-                            factory.create(detailRoute.detailType)
-                        }
-                    )
-                ```
-            """.trimIndent()
-                ),
-                CodeRecipeRaw(
-                    area = CodeArea.Theme,
+                    area = CodeArea.Compose,
                     title = "PullToRefreshBox + Haze = 🎨👑" ,
                     description = """
                         - Wrap `PullToRefreshBox` in `Scaffold` content section
@@ -507,12 +507,12 @@ class CodeRecipes @Inject constructor() {
                 """.trimIndent()
                 ),
                 CodeRecipeRaw(
-                    area = CodeArea.Theme,
+                    area = CodeArea.Compose,
                     title = """Markdown Render🎨💰""",
                     description = """
                  - Simple Markdown Composable that renders beautiful code in Android (and other platforms)
                  - Support Light/Dark Theme and Code Markdown syntax
-                 - Thank you **Mike Penz**!!
+                 - Thank you [Mike Penz](https://github.com/mikepenz/multiplatform-markdown-renderer)!!
                 """.trimIndent(),
                     fileName = "MarkdownCodeSnippet.kt",
                     codeSnippet = """
@@ -689,7 +689,7 @@ class CodeRecipes @Inject constructor() {
                 - Apply blur effect to `NavigationBar` by calling `hazeEffect()`
                    - For progressive blur use `HazeProgressive.verticalGradient`
                 - Each ***Screen*** manages its own blur effect for the `TopAppBar`
-                - Thank you **Chris Banes**!!
+                - Thank you [Chris Banes](https://chrisbanes.github.io/haze/latest/)!!
                 """.trimIndent(),
                     codeSnippet = """
                         ```
@@ -857,6 +857,58 @@ class CodeRecipes @Inject constructor() {
                     darkTheme -> DarkColorScheme
                     else -> LightColorScheme
                 }
+                ```
+                """.trimIndent()
+                ),
+                CodeRecipeRaw(
+                    area = CodeArea.Compose,
+                    title = "WebView Fade-in",
+                    description = """
+                            - Loading a `WebView` in Compose sometimes causes flashing when app loads
+                            - Use a `mutableStateOf(true)` to track the `WebView` loading state
+                            - Define `animateFloatAsState` to control the animation based on `isLoading` state
+                            - Set the `alpha` according to the `animatedAlpha` state
+                               - Use `.graphicsLayer { alpha = animatedAlpha }` on `WebView`
+                               - Use `.graphicsLayer { alpha = 1f - animatedAlpha }` on loading indicator                            
+                            """.trimIndent(),
+                    fileName = "WebViewScreen.kt",
+                    codeSnippet = """
+                ```
+                @Composable
+                fun WebViewScreen(
+                    modifier: Modifier = Modifier,
+                    url: String
+                ) {
+                
+                    var isLoading by remember { mutableStateOf(true) }
+                    val animatedAlpha: Float by animateFloatAsState(
+                        if (isLoading) 0.25f else 1f, label = "alpha"
+                    )
+                
+                    Box(modifier = modifier.fillMaxSize()) {
+                        if (isLoading) {
+                            FoodLoadingIndicator(
+                                modifier = Modifier.fillMaxSize()
+                                    .graphicsLayer { alpha = 1f - animatedAlpha },
+                            )
+                        }
+                        AndroidView(
+                            modifier = Modifier.fillMaxSize()
+                                .graphicsLayer { alpha = animatedAlpha },
+                            factory = { context ->
+                                WebView(context).apply {
+                                    webViewClient = object : WebViewClient() {
+                                        override fun onPageFinished(view: WebView?, url: String?) {
+                                            isLoading = false
+                                        }
+                                    }
+                                    setBackgroundColor(Color.TRANSPARENT)
+                                    loadUrl(url)
+                                }
+                            },
+                        )
+                    }
+                }                
                 ```
                 """.trimIndent()
                 ),
