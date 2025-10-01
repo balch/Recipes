@@ -886,7 +886,7 @@ class CodeRecipes @Inject constructor() {
                     area = CodeArea.Compose,
                     title = "WebView Fade-in",
                     description = """
-                            - Loading a `WebView` in Compose sometimes causes flashing when app loads
+                            - Loading a `WebView` in Compose sometimes causes flashing after url loads
                             - Use a `mutableStateOf(true)` to track the `WebView` loading state
                             - Define `animateFloatAsState` to control the animation based on `isLoading` state
                             - Set the `alpha` according to the `animatedAlpha` state
