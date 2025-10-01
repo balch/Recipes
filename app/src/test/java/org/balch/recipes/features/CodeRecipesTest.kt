@@ -1,10 +1,11 @@
 package org.balch.recipes.features
 
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import com.google.common.truth.Truth.assertThat
 import org.balch.recipes.core.models.CodeRecipe
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 
 class CodeRecipesTest {
@@ -101,5 +102,14 @@ class CodeRecipesTest {
         // before any reshuffle occurred
         assertTrue(uniqueRecipesSeen.size > 1, 
                    "Should have seen multiple unique recipes before reshuffling")
+    }
+
+    @Test
+    fun `getRandomRecipes returns unique recipes before reshuffling`() {
+        val firstThree = codeRecipes.randomRecipes.take(3)
+        codeRecipes.randomRecipes.add(2, firstThree[1])
+
+        val result = codeRecipes.getRandomRecipes(3)
+        assertThat(result).containsExactlyElementsIn(firstThree)
     }
 }

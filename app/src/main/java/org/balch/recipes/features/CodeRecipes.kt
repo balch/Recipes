@@ -1,5 +1,6 @@
 package org.balch.recipes.features
 
+import androidx.annotation.VisibleForTesting
 import com.diamondedge.logging.logging
 import org.balch.recipes.core.models.CodeArea
 import org.balch.recipes.core.models.CodeRecipe
@@ -36,15 +37,26 @@ class CodeRecipes @Inject constructor() {
             logger.d { "Reshuffled Code Recipes Pool" }
         }
 
-        val result = mutableListOf<CodeRecipe>()
+        // use a Set to ensure unique entries when list roles over
+        val result = mutableSetOf<CodeRecipe>()
         repeat(count) {
-            result.add(randomRecipes.removeAt(0))
+            var addedToResult = false
+            while (!addedToResult) {
+                val nextIem = randomRecipes.removeAt(0)
+                addedToResult = result.add(nextIem)
+                if (!addedToResult) {
+                    // nextItem is in use, so add it to the end of the list
+                    logger.d { "Edge Case Alert!!! - $nextIem already in use" }
+                    randomRecipes.add(nextIem)
+                }
+            }
         }
-        return result
+        return result.toList()
             .also { list -> logger.v { "getRandomRecipes: ${list.map { it.title }}" } }
     }
 
-    private val randomRecipes by lazy {
+    @VisibleForTesting
+    val randomRecipes by lazy {
         mutableListOf(*recipes.shuffled().toTypedArray())
     }
 
@@ -819,6 +831,7 @@ class CodeRecipes @Inject constructor() {
                             - Save shuffled main list to randomize order
                             - Return and remove items from front of saved list 
                             - Add more shuffled items when capacity runs low
+                            - Use a Set to ensure unique items
                     """.trimIndent(),
                     fileName = "CodeRecipes.kt",
                     codeSnippet = """
@@ -833,11 +846,20 @@ class CodeRecipes @Inject constructor() {
                                 randomRecipes.addAll(recipes.shuffled())
                             }
                     
-                            val result = mutableListOf<CodeRecipe>()
+                            // use a Set to ensure unique entries when list roles over
+                            val result = mutableSetOf<CodeRecipe>()
                             repeat(count) {
-                                result.add(randomRecipes.removeAt(0))
+                                var addedToResult = false
+                                while (!addedToResult) {
+                                    val nextIem = randomRecipes.removeAt(0)
+                                    addedToResult = result.add(nextIem)
+                                    if (!addedToResult) {
+                                        // nextItem is in use, so add it to the end of the list
+                                        randomRecipes.add(nextIem)
+                                    }
+                                }
                             }
-                            return result
+                            return result.toList()
                         }
                         ```
                     """.trimIndent()
