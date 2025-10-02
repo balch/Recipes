@@ -36,7 +36,7 @@ fun InfoScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(topPartHeight),
-                url = "https://github.com/balch/Recipes/tree/main/app/src/main/assets/code-recipes"
+                url = "https://github.com/balch/Recipes?#recipe-reference-app"
             )
 
             HorizontalDivider(
