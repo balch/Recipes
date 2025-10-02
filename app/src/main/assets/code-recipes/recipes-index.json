@@ -19,6 +19,12 @@
       "fileName": null
     },
     {
+      "area": "Architecture",
+      "title": "Lazy Log Pattern",
+      "bodyMarkdown": "architecture/lazy-log-pattern.md",
+      "fileName": null
+    },
+    {
       "area": "Theme",
       "title": "ThemePreview + PreviewParameter",
       "bodyMarkdown": "theme/theme-preview.md",

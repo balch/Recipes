@@ -19,7 +19,7 @@ class CodeRecipes @Inject constructor(
     private suspend fun rawRecipes(): List<CodeRecipe> {
         if (!::_rawRecipes.isInitialized) {
             _rawRecipes = codeRecipeAssetLoader.loadRecipes()
-            logger.v { "Loaded ${_rawRecipes.size} Code Recipes" }
+            logger.d { "Loaded ${_rawRecipes.size} Code Recipes" }
         }
         return _rawRecipes
     }
@@ -44,6 +44,7 @@ class CodeRecipes @Inject constructor(
      */
     suspend fun getRandomRecipes(count: Int): List<CodeRecipe> {
         if (count <= 0) {
+            logger.w { "Empty list returned for count: $count" }
             return emptyList()
         }
 

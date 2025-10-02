@@ -37,7 +37,6 @@ https://github.com/user-attachments/assets/562de77d-dc28-40a6-b93f-3fe2ab76591d
 
 ### Code Recipes: 👉👉👉 [assets/code-recipes](https://github.com/balch/Recipes/tree/main/app/src/main/assets/code-recipes) 👈 👈 👈 
 
-
 ### Dependencies
 | Dependency                                                                                     | Description                                         | 
 |------------------------------------------------------------------------------------------------|-----------------------------------------------------|
