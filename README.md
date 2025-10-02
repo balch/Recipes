@@ -35,8 +35,7 @@ Another reason this app came together so nicely is due to the plethora of free a
 
 https://github.com/user-attachments/assets/562de77d-dc28-40a6-b93f-3fe2ab76591d
 
-### 📚 Code Recipe
-### 👉👉👉 [assets/code-recipes](https://github.com/balch/Recipes/tree/main/app/src/main/assets/code-recipes) 👈 👈 👈 
+### Code Recipes: 👉👉👉 [assets/code-recipes](https://github.com/balch/Recipes/tree/main/app/src/main/assets/code-recipes) 👈 👈 👈 
 
 
 ### Dependencies
