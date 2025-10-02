@@ -2,12 +2,9 @@ package org.balch.recipes.features.ideas
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import org.balch.recipes.BrowsableType
 import org.balch.recipes.MainCoroutineExtension
 import org.balch.recipes.core.coroutines.TestDispatcherProvider
@@ -16,8 +13,7 @@ import org.balch.recipes.core.models.Category
 import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.repository.RecipeRepository
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
+import org.balch.recipes.features.CodeRecipes
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.mockito.kotlin.doReturn
@@ -38,7 +34,9 @@ class IdeasViewModelTest {
     val mainCoroutineExtension = MainCoroutineExtension(dispatcherProvider.testDispatcher)
 
     private val repository = mock<RecipeRepository>()
-    private val codeRecipes = mock<CodeRecipes>()
+    private val codeRecipes = mock<CodeRecipes> {
+        onBlocking { getRandomRecipes(3) } doReturn listOf(mock(), mock(), mock())
+    }
 
     private val viewModel by lazy {
         IdeasViewModel(repository, codeRecipes, dispatcherProvider)

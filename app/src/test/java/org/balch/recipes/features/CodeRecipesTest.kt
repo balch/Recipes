@@ -1,31 +1,37 @@
 package org.balch.recipes.features
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.runTest
+import org.balch.recipes.core.assets.CodeRecipeAssetLoader
 import org.balch.recipes.core.models.CodeRecipe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 
 
 class CodeRecipesTest {
-    
-    private lateinit var codeRecipes: CodeRecipes
-    
-    @BeforeEach
-    fun setUp() {
-        codeRecipes = CodeRecipes()
+
+    private val codeRecipeAssetLoader = mock<CodeRecipeAssetLoader> {
+        onBlocking { loadRecipes() } doReturn (1..20).map { mock() }
     }
-    
+
+    private val codeRecipes: CodeRecipes by lazy {
+        CodeRecipes(
+            codeRecipeAssetLoader = codeRecipeAssetLoader,
+        )
+    }
+
     @Test
-    fun `getRandomRecipes returns requested count when available`() {
+    fun `getRandomRecipes returns requested count when available`() = runTest {
         val result = codeRecipes.getRandomRecipes(3)
         assertThat(result).hasSize(3)
         assertThat(result).containsAtLeastElementsIn(result.toSet())
     }
 
     @Test
-    fun `getRandomRecipes displays all shuffled recipes before reshuffling`() {
+    fun `getRandomRecipes displays all shuffled recipes before reshuffling`() = runTest {
         // This is the key test to verify the issue is resolved
         val seenRecipes = mutableSetOf<CodeRecipe>()
         val allBatches = mutableListOf<List<CodeRecipe>>()
@@ -60,19 +66,19 @@ class CodeRecipesTest {
     }
 
     @Test
-    fun `getRandomRecipes handles zero count request`() {
+    fun `getRandomRecipes handles zero count request`() = runTest {
         val result = codeRecipes.getRandomRecipes(0)
         assertEquals(0, result.size, "Should return empty list for zero count")
     }
     
     @Test
-    fun `getRandomRecipes handles negative count request`() {
+    fun `getRandomRecipes handles negative count request`() = runTest {
         val result = codeRecipes.getRandomRecipes(-1)
         assertEquals(0, result.size, "Should return empty list for negative count")
     }
     
     @Test
-    fun `getRandomRecipes exhausts all recipes before reshuffling`() {
+    fun `getRandomRecipes exhausts all recipes before reshuffling`() = runTest {
         // Track all unique recipes we see
         val uniqueRecipesSeen = mutableSetOf<CodeRecipe>()
         val allResults = mutableListOf<CodeRecipe>()
@@ -105,7 +111,9 @@ class CodeRecipesTest {
     }
 
     @Test
-    fun `getRandomRecipes returns unique recipes before reshuffling`() {
+    fun `getRandomRecipes returns unique recipes before reshuffling`() = runTest {
+        // prime the `codeRecipes.randomRecipes` method first
+        codeRecipes.getRandomRecipes(1)
         val firstThree = codeRecipes.randomRecipes.take(3)
         codeRecipes.randomRecipes.add(2, firstThree[1])
 

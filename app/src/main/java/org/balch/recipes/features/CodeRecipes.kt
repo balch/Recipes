@@ -1,5 +1,6 @@
 package org.balch.recipes.features
 
+import androidx.annotation.VisibleForTesting
 import com.diamondedge.logging.logging
 import org.balch.recipes.core.assets.CodeRecipeAssetLoader
 import org.balch.recipes.core.models.CodeRecipe
@@ -29,7 +30,8 @@ class CodeRecipes @Inject constructor(
                 .thenBy { it.title }
         ).also { logger.v { "Sorted Recipes: $it" } }
 
-    private val randomRecipes = mutableListOf<CodeRecipe>()
+    @VisibleForTesting
+    val randomRecipes = mutableListOf<CodeRecipe>()
 
     /**
      * Retrieves a specified number of random `CodeRecipe` objects.
