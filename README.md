@@ -19,6 +19,8 @@ The goal was to brush up on the the latest **Android** tech stack components and
 
 Another reason this app came together so nicely is due to the plethora of free and easy to use **Android Tools and Libraries** supplied by both _Big-Biz_ (hello _GOOGLE_ and _JETBRAINS_), and the **Android Community ICs** toiling away on GitHub and Medium. The ***Code Recipes*** mostly originate from these sources and describe the wiring and plumbing used to create a visually complelling **Android Application**.
 
+### Code Recipes: 👉👉 [assets/code-recipes](https://github.com/balch/Recipes/tree/main/app/src/main/assets/code-recipes) 👈 👈
+
 ### Screenshots
 
 #### Meal Recipes
@@ -34,8 +36,6 @@ Another reason this app came together so nicely is due to the plethora of free a
 |   <img src="screenshots/lightmode-code.png" width="200" alt="Light Mode Recipes">   | <img src="screenshots/lightmode-code-detail.png" width="200" alt="Light Mode Code Recipe Detail"> |
 
 https://github.com/user-attachments/assets/562de77d-dc28-40a6-b93f-3fe2ab76591d
-
-### Code Recipes: 👉👉👉 [assets/code-recipes](https://github.com/balch/Recipes/tree/main/app/src/main/assets/code-recipes) 👈 👈 👈 
 
 ### Dependencies
 | Dependency                                                                                     | Description                                         | 
