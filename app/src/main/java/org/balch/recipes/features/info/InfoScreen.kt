@@ -1,7 +1,6 @@
 package org.balch.recipes.features.info
 
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,25 +18,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.balch.recipes.ui.theme.WarmOrangeDark
-import org.balch.recipes.ui.widgets.WebViewScreen
+import org.balch.recipes.ui.widgets.WebViewWidget
 
 @Composable
-fun InfoScreen() {
-    val theme = if (isSystemInDarkTheme()) "dark" else "light"
+fun InfoScreen(
+    viewModel: InfoViewModel = hiltViewModel(),
+) {
 
-    BoxWithConstraints(modifier = Modifier
-        .safeDrawingPadding()
-        .fillMaxSize()) {
+    val urls: List<String> by viewModel.uiState.collectAsState()
+
+    InfoLayout(
+        urls = urls,
+    )
+}
+
+@Composable
+private fun InfoLayout(urls: List<String>) {
+    BoxWithConstraints(
+        modifier = Modifier
+            .safeDrawingPadding()
+            .fillMaxSize()
+    ) {
         val boxHeight = with(LocalDensity.current) { constraints.maxHeight.toDp() }
         var topPartHeight by remember { mutableStateOf(boxHeight / 2) }
 
         Column {
-            WebViewScreen(
+            WebViewWidget(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(topPartHeight),
-                url = "https://github.com/balch/Recipes?#recipe-reference-app"
+                url = urls[0]
             )
 
             HorizontalDivider(
@@ -55,11 +68,11 @@ fun InfoScreen() {
                 color = WarmOrangeDark
             )
 
-            WebViewScreen(
+            WebViewWidget(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(boxHeight - topPartHeight - 4.dp),
-                url = "https://www.themealdb.com/api.php"
+                url = urls[1]
             )
         }
     }

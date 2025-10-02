@@ -16,11 +16,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.viewinterop.AndroidView
 
 @Composable
-fun WebViewScreen(
+fun WebViewWidget(
     modifier: Modifier = Modifier,
     url: String
 ) {
-
     var isLoading by remember { mutableStateOf(true) }
     val animatedAlpha: Float by animateFloatAsState(
         if (isLoading) 0.25f else 1f, label = "alpha"
@@ -39,10 +38,6 @@ fun WebViewScreen(
             factory = { context ->
                 WebView(context).apply {
                     settings.javaScriptEnabled = true
-                    settings.domStorageEnabled = true
-                    settings.allowContentAccess = true
-                    settings.allowFileAccess = true
-                    settings.javaScriptCanOpenWindowsAutomatically = true
                     webViewClient = object : WebViewClient() {
                         override fun onPageFinished(view: WebView?, url: String?) {
                             isLoading = false
