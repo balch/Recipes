@@ -1,6 +1,7 @@
 ## Description
 
-- Efficient logging is key to app performance and memory consumption 
+- Efficient logging is necessary for stable app performance and low memory consumption 
+- Declare logger with class name or other distinct identifier
 - Create logging strings in _lambda_ functions   
 - _Lambda_ functions don't get called when log level is not enabled
 - Use `logger.v { }` for targeted debugging 
