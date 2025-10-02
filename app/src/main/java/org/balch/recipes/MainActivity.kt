@@ -3,6 +3,7 @@ package org.balch.recipes
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
@@ -81,6 +82,12 @@ class MainActivity : ComponentActivity() {
         LaunchedEffect(firstVisibleIndex) {
             showNavigationBar = firstVisibleIndex == 0 || firstVisibleIndex < previousVisibleIndex
             previousVisibleIndex = firstVisibleIndex
+        }
+
+        // override back button behavior to prevent closing the app when
+        // there is only one screen and the nav bar is down
+        BackHandler(enabled = backstackManager.isLastScreen && !showNavigationBar) {
+            showNavigationBar = true
         }
 
         RecipesTheme {

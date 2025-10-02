@@ -4,6 +4,7 @@
 - Use `showNavigationBar` in `AnimatedVisibility` to control visibility of `NavigationBar`
 - Delegate scroll handling to each ***Screen*** via `onScrollChange`
   - Set `firstVisibleIndex` in handler to emit new `showNavigationBar` state
+- Add `BackHandler` to show Bottom Nav instead of closing the App  
 
 ## Code Snippet
 
@@ -16,6 +17,12 @@ private fun MainContent() {
     LaunchedEffect(firstVisibleIndex) {
         showNavigationBar = firstVisibleIndex == 0 || firstVisibleIndex < previousVisibleIndex
         previousVisibleIndex = firstVisibleIndex
+    }
+
+    // override back button behavior to prevent closing the app when
+    // there is only one screen and the nav bar is down
+    BackHandler(enabled = backstackManager.isLastScreen && !showNavigationBar) {
+        showNavigationBar = true
     }
 
     RecipesTheme {

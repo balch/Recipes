@@ -14,6 +14,13 @@ class BackstackManager @Inject constructor() {
     val backstack: List<NavKey>
         get() = _backstack.toList()
 
+    /**
+     * Returns `true` if there is only one screen in the backstack
+     * and the app will close when the back button is pressed
+     */
+    val isLastScreen: Boolean
+        get() = _backstack.size == 1
+
     fun push(destination: NavKey){
         _backstack.add(destination)
     }
