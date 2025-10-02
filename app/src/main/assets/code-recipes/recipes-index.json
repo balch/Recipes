@@ -20,7 +20,13 @@
     },
     {
       "area": "Architecture",
-      "title": "Lazy Log Pattern",
+      "title": "Async Requests",
+      "bodyMarkdown": "architecture/async-requests.md",
+      "fileName": null
+    },
+    {
+      "area": "Architecture",
+      "title": "Lazy Logging",
       "bodyMarkdown": "architecture/lazy-log-pattern.md",
       "fileName": null
     },
