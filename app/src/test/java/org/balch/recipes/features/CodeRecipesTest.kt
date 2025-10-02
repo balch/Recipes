@@ -112,9 +112,11 @@ class CodeRecipesTest {
 
     @Test
     fun `getRandomRecipes returns unique recipes before reshuffling`() = runTest {
-        // prime the `codeRecipes.randomRecipes` method first
+        // prime the `codeRecipes.randomRecipes` method and take the next 3
         codeRecipes.getRandomRecipes(1)
         val firstThree = codeRecipes.randomRecipes.take(3)
+
+        // add duplicate recipe, expecting it to be filtered out
         codeRecipes.randomRecipes.add(2, firstThree[1])
 
         val result = codeRecipes.getRandomRecipes(3)
