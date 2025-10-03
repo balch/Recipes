@@ -1,7 +1,7 @@
 ## Description
 
 - Sometimes the ***ViewModel*** state requires data from multiple sources
-- Optimize these use cases by paralleling the API requests 
+- Optimize these use cases by _parallelizing_ the API requests 
   - Emit `Loading` state to the UI when loading data
   - Create async jobs for each API call scoped to the ***ViewModel*** 
     - `val job = viewModelScope.async { }`
