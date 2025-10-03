@@ -37,6 +37,12 @@
       "fileName": "ThemePreview.kt"
     },
     {
+      "area": "Compose",
+      "title": "PreviewParameter + ThemePreview",
+      "bodyMarkdown": "theme/theme-preview.md",
+      "fileName": "ThemePreview.kt"
+    },
+    {
       "area": "Navigation",
       "title": "Bottom Nav",
       "bodyMarkdown": "navigation/bottom-nav.md",
