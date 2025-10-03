@@ -39,7 +39,7 @@ class IdeasViewModelTest {
     }
 
     private val viewModel by lazy {
-        IdeasViewModel(repository, codeRecipes, dispatcherProvider)
+        IdeasViewModel(repository, codeRecipes, mock(), dispatcherProvider)
     }
 
     private val testCategories = listOf(
