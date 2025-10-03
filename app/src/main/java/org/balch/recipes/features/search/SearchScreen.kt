@@ -132,7 +132,7 @@ private fun SearchLayout(
     onScrollChange: (Int) -> Unit,
 ) {
     val hazeState = rememberHazeState()
-    var query by rememberSaveable(searchText) { mutableStateOf(searchText) }
+    var query by rememberSaveable { mutableStateOf(searchText) }
 
     Scaffold(
         topBar = {
