@@ -133,6 +133,12 @@ private fun SearchLayout(
 ) {
     val hazeState = rememberHazeState()
     var query by rememberSaveable { mutableStateOf(searchText) }
+    LaunchedEffect(Unit) {
+        if (query != searchText) {
+            // rerun the search if the reload after Process Death
+            onSearch(query)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -158,7 +164,10 @@ private fun SearchLayout(
                     onSearch(it)
                 },
                 onRandom = onRandom,
-                clearSearch = clearSearch,
+                clearSearch = {
+                    query = ""
+                    clearSearch()
+                },
                 onBack = onBack,
             )
         }

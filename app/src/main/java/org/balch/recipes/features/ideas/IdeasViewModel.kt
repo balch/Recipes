@@ -1,5 +1,6 @@
 package org.balch.recipes.features.ideas
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diamondedge.logging.logging
@@ -39,6 +40,7 @@ import javax.inject.Inject
 class IdeasViewModel @Inject constructor(
     private val repository: RecipeRepository,
     private val codeRecipes: CodeRecipes,
+    private val savedStateHandle: SavedStateHandle,
     dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
 
@@ -46,7 +48,9 @@ class IdeasViewModel @Inject constructor(
 
     private val loadIntentFlow = MutableStateFlow(true)
 
-    private val browsableTypeFlow = MutableStateFlow(BrowsableType.Category)
+    private val browsableTypeFlow = MutableStateFlow(
+        savedStateHandle[KEY_BROWSABLE_TYPE] ?: BrowsableType.Category
+    )
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<IdeasUiState> =
@@ -55,6 +59,9 @@ class IdeasViewModel @Inject constructor(
             browsableTypeFlow,
             ::Pair
         ).transformLatest { (_, browsableType) ->
+            // Save the browsableType to the saved state handle
+            savedStateHandle[KEY_BROWSABLE_TYPE] = browsableType
+
             loadIntentFlow.value = false
             emit(IdeasUiState.Loading)
             emit(deriveState(browsableType))
@@ -119,6 +126,10 @@ class IdeasViewModel @Inject constructor(
 
     fun changeBrowsableType(browsableType: BrowsableType) {
         browsableTypeFlow.value = browsableType
+    }
+
+    companion object {
+        private const val KEY_BROWSABLE_TYPE = "browsableType"
     }
 }
 
