@@ -56,6 +56,12 @@
     },
     {
       "area": "Navigation",
+      "title": "Nav3 TopLevel ViewModels",
+      "bodyMarkdown": "navigation/nav3-top-level-viewmodels.md",
+      "fileName": "MainActivity.kt"
+    },
+    {
+      "area": "Navigation",
       "title": "Nav3 EntryProvider DSL Syntax",
       "bodyMarkdown": "navigation/nav3-entry-provider.md",
       "fileName": "MainActivity.kt"

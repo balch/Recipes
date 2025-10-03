@@ -148,9 +148,16 @@ class MainActivity : ComponentActivity() {
                         rememberSavedStateNavEntryDecorator(),
                         rememberViewModelStoreNavEntryDecorator()
                     ),
+
+                    // Use the Activities `ViewModelStoreOwner` for ViewModels belonging to
+                    // `TopLevelRoute` NavEntry routes. This allows screens to maintain their last
+                    // states when navigating back to a top level screen
                     entryProvider = entryProvider {
                         entry<Ideas> {
                             IdeasScreen(
+                                viewModel = hiltViewModel(
+                                    viewModelStoreOwner = this@MainActivity,
+                                ),
                                 onCategoryClick = { category ->
                                     backstackManager.push(
                                         SearchRoute(SearchType.Category(category.name))
@@ -206,7 +213,8 @@ class MainActivity : ComponentActivity() {
                                 hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
                                     creationCallback = { factory ->
                                         factory.create(SearchType.Search(""))
-                                    }
+                                    },
+                                    viewModelStoreOwner = this@MainActivity
                                 )
                             SearchScreen(
                                 viewModel = viewModel,
@@ -237,7 +245,11 @@ class MainActivity : ComponentActivity() {
                                 onBack = { backstackManager.pop() }
                             )
                         }
-                        entry<Info> { InfoScreen() }
+                        entry<Info> { InfoScreen(
+                            viewModel = hiltViewModel(
+                                viewModelStoreOwner = this@MainActivity,
+                            ),
+                        ) }
                     },
                 )
             }

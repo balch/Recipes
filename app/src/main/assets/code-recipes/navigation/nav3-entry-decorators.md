@@ -1,6 +1,9 @@
 ## Description
 
-- Define **Nav3** `entryDecorators` to provide state management and to facilitate ***ViewModel*** creation.
+- Define **Nav3** `entryDecorators` to provide necessary configuration for state management and ***ViewModel*** creation
+  - `rememberSceneSetupNavEntryDecorator()` manages and optimizes lifecycle of ***Screens*** and **NavEntry**s
+  - `rememberSavedStateNavEntryDecorator()` facilitates saving state across Process Death using `rememberSaveable` 
+  - `rememberViewModelStoreNavEntryDecorator()` causes the ***ViewModel** to be cleared when the screen is popped off the ***backstack***
 
 ## Code Snippet
 
