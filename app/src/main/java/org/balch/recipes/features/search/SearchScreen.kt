@@ -19,22 +19,22 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -43,17 +43,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -71,6 +69,7 @@ import dev.chrisbanes.haze.rememberHazeState
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.models.MealDescriptor
 import org.balch.recipes.core.models.SearchType
+import org.balch.recipes.ui.theme.DeepBrown
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.widgets.FoodLoadingIndicator
@@ -86,7 +85,6 @@ fun SearchScreen(
     onScrollChange: (Int) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val keyboardController = LocalSoftwareKeyboardController.current
 
     SearchLayout(
         uiState = uiState,
@@ -95,9 +93,8 @@ fun SearchScreen(
         onScrollChange = onScrollChange,
         onMealClick = onMealLookup,
         onRandom = onRandomMeal,
-        keyboardController = keyboardController,
-        clearSearch = { viewModel.clearSearch() },
-        onSearch = { viewModel.updateSearchQuery(it) },
+        clearSearch = viewModel::clearSearch,
+        onSearch = viewModel::updateSearchQuery,
         onBack = onBack
     )
 }
@@ -117,7 +114,6 @@ private fun SearchLayoutPreview(
             clearSearch = {},
             onBack = {},
             onScrollChange = {},
-            keyboardController = null
         )
     }
 }
@@ -134,9 +130,9 @@ private fun SearchLayout(
     clearSearch: () -> Unit,
     onBack: () -> Unit,
     onScrollChange: (Int) -> Unit,
-    keyboardController: SoftwareKeyboardController?
 ) {
     val hazeState = rememberHazeState()
+    var query by rememberSaveable(searchText) { mutableStateOf(searchText) }
 
     Scaffold(
         topBar = {
@@ -156,10 +152,12 @@ private fun SearchLayout(
                         )
                     },
                 showSearchBar = showSearchBar,
-                searchText = searchText,
-                onSearch = onSearch,
+                searchText = query,
+                onSearch = {
+                    query = it
+                    onSearch(it)
+                },
                 onRandom = onRandom,
-                hideKeyboard = { keyboardController?.hide() },
                 clearSearch = clearSearch,
                 onBack = onBack,
             )
@@ -249,7 +247,6 @@ private fun TopBar(
     onSearch: (String) -> Unit = {},
     onRandom: () -> Unit = {},
     clearSearch: () -> Unit = {},
-    hideKeyboard: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
     Box(
@@ -264,7 +261,6 @@ private fun TopBar(
                     onSearch = onSearch,
                     onRandom = onRandom,
                     clearSearch = clearSearch,
-                    hideKeyboard = hideKeyboard
                 )
             },
             navigationIcon = {
@@ -292,15 +288,13 @@ private fun TitleBar(
     onSearch: (String) -> Unit,
     onRandom: () -> Unit,
     clearSearch: () -> Unit,
-    hideKeyboard: () -> Unit,
 ) {
     if (showSearchBar) {
-        SearchBar(
-            searchText = searchText,
+        SearchBarRow(
+            query = searchText,
             onSearch = onSearch,
             onRandom = onRandom,
             clearSearch = clearSearch,
-            hideKeyboard = hideKeyboard
         )
     } else {
         Text(
@@ -312,76 +306,78 @@ private fun TitleBar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SearchBar(
-    searchText: String,
+private fun SearchBarRow(
+    query: String,
     onSearch: (String) -> Unit,
     onRandom: () -> Unit,
     clearSearch: () -> Unit,
-    hideKeyboard: () -> Unit,
 ) {
-    var userSearchText by remember { mutableStateOf(searchText) }
+    SearchBar(
+        expanded = false,
+        onExpandedChange = {  },
+        colors = SearchBarDefaults.colors(
+            containerColor = Color.Transparent,
+        ),
+        inputField = {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
-    // Search bar and random button row
-    Row(
-        modifier = Modifier.fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        OutlinedTextField(
-            value = userSearchText,
-            onValueChange = {
-                userSearchText = it
-                onSearch(it)
-            },
-            modifier = Modifier
-                .weight(.75F)
-                .padding(end = 8.dp)
-                .height(56.dp),
-            placeholder = { Text("Search recipes...") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search"
-                )
-            },
-            trailingIcon = {
-                if (searchText.isNotEmpty()) {
-                    IconButton(
-                        onClick = {
-                            userSearchText = ""
-                            clearSearch()
-                        }
-                    ) {
+                SearchBarDefaults.InputField(
+                    modifier = Modifier.weight(.75F)
+                        .graphicsLayer(alpha = .8f),
+                    query = query,
+                    enabled = true,
+                    onQueryChange = onSearch,
+                    onSearch = onSearch,
+                    expanded = false,
+                    onExpandedChange = {  },
+                    placeholder = { Text("Search recipes...") },
+                    leadingIcon = {
                         Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear"
-                        )
-                    }
-                }
-            },
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Search
-            ),
-            keyboardActions = KeyboardActions(
-                onSearch = { hideKeyboard }
-            ),
-            singleLine = true,
-            shape = RoundedCornerShape(28.dp)
-        )
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search"
 
-        Button(
-            onClick = onRandom,
-            modifier = Modifier.height(52.dp)
-                .weight(.24f),
-            shape = RoundedCornerShape(23.dp)
-        ) {
-            BasicText(
-                autoSize = TextAutoSize.StepBased(maxFontSize = 24.sp),
-                text = "?",
-            )
+                        )
+                    },
+                    trailingIcon = {
+                        if (query.isNotEmpty()) {
+                            IconButton(onClick = clearSearch) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "Clear"
+                                )
+                            }
+                        }
+                    }
+                )
+
+                Button(
+                    onClick = onRandom,
+                    modifier = Modifier.height(52.dp)
+                        .graphicsLayer(alpha = .8f)
+                        .weight(.24f),
+                    shape = RoundedCornerShape(23.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = DeepBrown,
+                    )
+
+                ) {
+                    BasicText(
+                        autoSize = TextAutoSize.StepBased(maxFontSize = 12.sp),
+                        text = "🎲🎲",
+                        maxLines = 1
+                    )
+                }
+            }
         }
+    ) {
+        // `expanded always = false, content is displayed in Scaffold
     }
 }
 
@@ -400,19 +396,22 @@ private fun ErrorMessage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
+                modifier = Modifier.padding(bottom = 8.dp)
+                    .fillMaxWidth(),
                 text = "Oops! Something went wrong search for \"$searchText\"",
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.error
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(8.dp))
             Text(
+                modifier = Modifier.fillMaxWidth(),
                 text = errorMessage,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(16.dp))
             Button(
+                modifier = Modifier.padding(top = 8.dp),
                 onClick = { onTryAgain() }
             ) {
                 Text("Try Again")
