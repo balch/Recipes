@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 import org.balch.recipes.ui.theme.AccentYellow
 import org.balch.recipes.ui.theme.DarkBackground
 import org.balch.recipes.ui.theme.DeepBrown
@@ -48,6 +49,7 @@ fun CodeArea.textColor(): Color {
 }
 
 @Parcelize
+@Serializable
 data class CodeRecipe(
     val index: Int,
     val area: CodeArea,

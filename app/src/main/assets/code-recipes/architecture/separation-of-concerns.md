@@ -52,7 +52,7 @@ app/src/main/java/org/balch/recipes/
     │   ├── FoodLoadingIndicator.kt
     │   └── WebViewScreen.kt        
     └── nav/                        # Navigation utilities
-        └── BackstackManager.kt     
+        └── NavBackStackExt.kt     
         
 🎯 Each FEATURE has dedicated ViewModel + Screen (Single Responsibility)
 🔧 CORE contains shared business logic and data access

@@ -11,6 +11,9 @@
 ```
 @Composable
 private fun MainContent() {
+    // remember backstack in a savable way
+    val backStack = rememberNavBackStack(TOP_LEVEL_ROUTES[0])
+
     var previousVisibleIndex by remember { mutableIntStateOf(0) }
     var firstVisibleIndex by remember { mutableIntStateOf(0) }
     var showNavigationBar by remember { mutableStateOf(true) }
@@ -21,7 +24,7 @@ private fun MainContent() {
 
     // override back button behavior to prevent closing the app when
     // there is only one screen and the nav bar is down
-    BackHandler(enabled = backstackManager.isLastScreen && !showNavigationBar) {
+    BackHandler(enabled = backStack.isLastScreen() && !showNavigationBar) {
         showNavigationBar = true
     }
 
@@ -29,7 +32,7 @@ private fun MainContent() {
         Scaffold(
             bottomBar = {
                 AnimatedVisibility(
-                    visible = showNavigationBar && backstackManager.peek() is TopLevelRoute,
+                    visible = showNavigationBar && backStack.peek() is TopLevelRoute,
                     enter = slideInVertically { it },
                     exit = slideOutVertically { it },
                 ) {

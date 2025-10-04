@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.scene.rememberSceneSetupNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
@@ -45,21 +46,18 @@ import org.balch.recipes.features.ideas.IdeasScreen
 import org.balch.recipes.features.info.InfoScreen
 import org.balch.recipes.features.search.SearchScreen
 import org.balch.recipes.features.search.SearchViewModel
-import org.balch.recipes.ui.nav.BackstackManager
+import org.balch.recipes.ui.nav.isLastScreen
+import org.balch.recipes.ui.nav.peek
+import org.balch.recipes.ui.nav.pop
+import org.balch.recipes.ui.nav.push
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.utils.setEdgeToEdgeConfig
-import javax.inject.Inject
-
 
 private val TOP_LEVEL_ROUTES : List<TopLevelRoute> =
     listOf(Ideas, Search(SearchType.Search("")), Info)
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    @Inject
-    lateinit var backstackManager: BackstackManager
-
 
     @OptIn(ExperimentalMaterial3AdaptiveApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,6 +74,9 @@ class MainActivity : ComponentActivity() {
     private fun MainContent() {
         val hazeState = rememberHazeState()
 
+        // remember backstack in a savable way
+        val backStack = rememberNavBackStack(TOP_LEVEL_ROUTES[0])
+
         var previousVisibleIndex by remember { mutableIntStateOf(0) }
         var firstVisibleIndex by remember { mutableIntStateOf(0) }
         var showNavigationBar by remember { mutableStateOf(true) }
@@ -86,7 +87,7 @@ class MainActivity : ComponentActivity() {
 
         // override back button behavior to prevent closing the app when
         // there is only one screen and the nav bar is down
-        BackHandler(enabled = backstackManager.isLastScreen && !showNavigationBar) {
+        BackHandler(enabled = backStack.isLastScreen() && !showNavigationBar) {
             showNavigationBar = true
         }
 
@@ -94,7 +95,7 @@ class MainActivity : ComponentActivity() {
             Scaffold(
                 bottomBar = {
                     AnimatedVisibility(
-                        visible = showNavigationBar && backstackManager.peek() is TopLevelRoute,
+                        visible = showNavigationBar && backStack.peek() is TopLevelRoute,
                         enter = slideInVertically { it },
                         exit = slideOutVertically { it },
                     ) {
@@ -110,17 +111,17 @@ class MainActivity : ComponentActivity() {
                                 },
                         ) {
                             TOP_LEVEL_ROUTES.forEach { topLevelRoute ->
-                                val isSelected = topLevelRoute == backstackManager.peek()
+                                val isSelected = topLevelRoute == backStack.peek()
                                 NavigationBarItem(
                                     selected = isSelected,
                                     onClick = {
                                         // pop the current screen off the backstack if it not the root
-                                        if (backstackManager.peek() != TOP_LEVEL_ROUTES[0]) {
-                                            backstackManager.pop()
+                                        if (backStack.peek() != TOP_LEVEL_ROUTES[0]) {
+                                            backStack.pop()
                                         }
                                         // push the new route onto the backstack
-                                        if (backstackManager.peek() != topLevelRoute) {
-                                            backstackManager.push(topLevelRoute)
+                                        if (backStack.peek() != topLevelRoute) {
+                                            backStack.push(topLevelRoute)
                                         }
                                     },
                                     icon = {
@@ -137,8 +138,8 @@ class MainActivity : ComponentActivity() {
             ) { innerPadding ->
                 NavDisplay(
                     modifier = Modifier.hazeSource(state = hazeState),
-                    backStack = backstackManager.backstack,
-                    onBack = { repeat(it) { backstackManager.pop() } },
+                    backStack = backStack,
+                    onBack = { repeat(it) { backStack.pop() } },
                     // In order to add the `ViewModelStoreNavEntryDecorator` (see comment below for why)
                     // we also need to add the default `NavEntryDecorator`s as well. These provide
                     // extra information to the entry's content to enable it to display correctly
@@ -159,22 +160,22 @@ class MainActivity : ComponentActivity() {
                                     viewModelStoreOwner = this@MainActivity,
                                 ),
                                 onCategoryClick = { category ->
-                                    backstackManager.push(
+                                    backStack.push(
                                         SearchRoute(SearchType.Category(category.name))
                                     )
                                 },
                                 onAreaClick = { area ->
-                                    backstackManager.push(
+                                    backStack.push(
                                         SearchRoute(SearchType.Area(area.name))
                                     )
                                 },
                                 onIngredientClick = { ingredient ->
-                                    backstackManager.push(
+                                    backStack.push(
                                         SearchRoute(SearchType.Ingredient(ingredient.name))
                                     )
                                 },
                                 onCodeRecipeClick = { codeRecipe ->
-                                    backstackManager.push(
+                                    backStack.push(
                                         DetailRoute(DetailType.CodeRecipeContent(codeRecipe))
                                     )
                                 },
@@ -194,9 +195,9 @@ class MainActivity : ComponentActivity() {
                                 )
                             SearchScreen(
                                 viewModel = viewModel,
-                                onBack = { backstackManager.pop() },
+                                onBack = { backStack.pop() },
                                 onMealLookup = { id ->
-                                    backstackManager.push(
+                                    backStack.push(
                                         DetailRoute(
                                             DetailType.MealLookup(
                                                 id
@@ -205,7 +206,7 @@ class MainActivity : ComponentActivity() {
                                     )
                                 },
                                 onScrollChange = { firstVisibleIndex = it },
-                                onRandomMeal = { backstackManager.push(DetailRoute(DetailType.MealRandom)) }
+                                onRandomMeal = { backStack.push(DetailRoute(DetailType.MealRandom)) }
                             )
                         }
                         entry<Search> {
@@ -218,9 +219,9 @@ class MainActivity : ComponentActivity() {
                                 )
                             SearchScreen(
                                 viewModel = viewModel,
-                                onBack = { backstackManager.pop() },
+                                onBack = { backStack.pop() },
                                 onMealLookup = { id ->
-                                    backstackManager.push(
+                                    backStack.push(
                                         DetailRoute(
                                             DetailType.MealLookup(
                                                 id
@@ -229,7 +230,7 @@ class MainActivity : ComponentActivity() {
                                     )
                                 },
                                 onScrollChange = { firstVisibleIndex = it },
-                                onRandomMeal = { backstackManager.push(DetailRoute(DetailType.MealRandom)) }
+                                onRandomMeal = { backStack.push(DetailRoute(DetailType.MealRandom)) }
                             )
                         }
                         entry<DetailRoute> { detailRoute ->
@@ -242,7 +243,7 @@ class MainActivity : ComponentActivity() {
 
                             DetailScreen(
                                 viewModel = viewModel,
-                                onBack = { backstackManager.pop() }
+                                onBack = { backStack.pop() }
                             )
                         }
                         entry<Info> { InfoScreen(

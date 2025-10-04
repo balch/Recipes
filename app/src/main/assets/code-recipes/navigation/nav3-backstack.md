@@ -1,35 +1,71 @@
 ## Description
 
-- In **Nav3**, you own the ***backstack***.
-- Store ***backstack*** in `SnapshotStateList<NavKey>` 
-- Push/Pop works for simple applications
+- In **Nav3**, you manage the ***backstack***.
+- Create ***backstack*** using `rememberNavBackStack(navKey)`
+  - ***backstack*** survives process death and configuration changes (aka savable)
+  - All route paramaters must be `@Serializable`
+- Push/Pop/Peek works for simple applications
 
 ## Code Snippet
 
 ```
-@ActivityRetainedScoped
-class BackstackManager @Inject constructor() {
-    private val _backstack : SnapshotStateList<NavKey> = mutableStateListOf(Ideas)
+@Composable
+private fun MainContent() {
 
-    val backstack: List<NavKey>
-        get() = _backstack.toList()
+    // remember backstack in a savable way
+    val backStack = rememberNavBackStack(TOP_LEVEL_ROUTES[0])
+    
+    // ...
+    
+    NavDisplay(
+        backStack = backStack,
+        onBack = { repeat(it) { backStack.pop() } },
 
-    /**
-     * Returns `true` if there is only one screen in the backstack
-     * and the app will close when the back button is pressed
-     */
-    val isLastScreen: Boolean
-        get() = _backstack.size == 1
-
-    fun push(destination: NavKey){
-        _backstack.add(destination)
+        entryProvider = entryProvider {
+            entry<Ideas> {
+                IdeasScreen(
+                    onCategoryClick = { category ->
+                        backStack.push(
+                            SearchRoute(SearchType.Category(category.name))
+                        )
+                    },
+                    onAreaClick = { area ->
+                        backStack.push(
+                            SearchRoute(SearchType.Area(area.name))
+                        )
+                    },
+                    onIngredientClick = { ingredient ->
+                        backStack.push(
+                            SearchRoute(SearchType.Ingredient(ingredient.name))
+                        )
+                    },
+                    onCodeRecipeClick = { codeRecipe ->
+                        backStack.push(
+                            DetailRoute(DetailType.CodeRecipeContent(codeRecipe))
+                        )
+                    },
+                    onScrollChange = { firstVisibleIndex = it }
+                )
+            }
+            entry<SearchRoute> { searchRoute ->
+            
+            // ..
+        }
     }
-
-    fun pop(){
-        _backstack.removeLastOrNull()
-    }
-
-    fun peek(): NavKey? =
-        _backstack.lastOrNull()
 }
+
+// NavBackStack push/pop/peek extensions
+
+fun NavBackStack<NavKey>.isLastScreen() = size == 1
+
+fun NavBackStack<NavKey>.push(destination: NavKey){
+    backStackLogger.d { "push: $destination" }
+    add(destination)
+}
+
+fun NavBackStack<NavKey>.pop(): NavKey? =
+    removeLastOrNull()
+        .also { backStackLogger.d { "pop: $it" } }
+
+fun NavBackStack<NavKey>.peek(): NavKey? = lastOrNull()
 ```

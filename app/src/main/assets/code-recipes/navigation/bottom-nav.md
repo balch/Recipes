@@ -13,7 +13,7 @@
 Scaffold(
     bottomBar = {
         AnimatedVisibility(
-            visible = showNavigationBar && backstackManager.peek() is TopLevelRoute,
+            visible = showNavigationBar && backStack.peek() is TopLevelRoute,
             enter = slideInVertically { it },
             exit = slideOutVertically { it },
         ) {
@@ -22,17 +22,17 @@ Scaffold(
                 contentColor = MaterialTheme.colorScheme.onSurface,
             ) {
                 TOP_LEVEL_ROUTES.forEach { topLevelRoute ->
-                    val isSelected = topLevelRoute == backstackManager.peek()
+                    val isSelected = topLevelRoute == backStack.peek()
                     NavigationBarItem(
                         selected = isSelected,
                         onClick = {
                             // pop the current screen off the backstack if it not the root
-                            if (backstackManager.peek() != TOP_LEVEL_ROUTES[0]) {
-                                backstackManager.pop()
+                            if (backStack.peek() != TOP_LEVEL_ROUTES[0]) {
+                                backStack.pop()
                             }
                             // push the new route onto the backstack
-                            if (backstackManager.peek() != topLevelRoute) {
-                                backstackManager.push(topLevelRoute)
+                            if (backStack.peek() != topLevelRoute) {
+                                backStack.push(topLevelRoute)
                             }
                         },
                         icon = {

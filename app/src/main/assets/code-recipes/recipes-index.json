@@ -70,7 +70,7 @@
       "area": "Navigation",
       "title": "Nav3 Backstack Management",
       "bodyMarkdown": "navigation/nav3-backstack.md",
-      "fileName": "BackstackManager.kt"
+      "fileName": "NavBackStackExt.kt"
     },
     {
       "area": "Compose",

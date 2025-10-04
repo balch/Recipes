@@ -9,8 +9,8 @@
 
 ```
 NavDisplay(
-    backStack = backstackManager.backstack,
-    onBack = { repeat(it) { backstackManager.pop() } },
+    backStack = backstack,
+    onBack = { repeat(it) { backstack.pop() } },
     entryDecorators = listOf(
         rememberSceneSetupNavEntryDecorator(),
         rememberSavedStateNavEntryDecorator(),
@@ -70,7 +70,7 @@ NavDisplay(
 
             DetailScreen(
                 viewModel = viewModel,
-                onBack = { backstackManager.pop() }
+                onBack = { backstack.pop() }
             )
         }
         entry<Info> { InfoScreen(
