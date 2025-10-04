@@ -156,28 +156,18 @@ class MainActivity : ComponentActivity() {
                     entryProvider = entryProvider {
                         entry<Ideas> {
                             IdeasScreen(
-                                viewModel = hiltViewModel(
-                                    viewModelStoreOwner = this@MainActivity,
-                                ),
+                                viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity,),
                                 onCategoryClick = { category ->
-                                    backStack.push(
-                                        SearchRoute(SearchType.Category(category.name))
-                                    )
+                                    backStack.push(SearchRoute(SearchType.Category(category.name)))
                                 },
                                 onAreaClick = { area ->
-                                    backStack.push(
-                                        SearchRoute(SearchType.Area(area.name))
-                                    )
+                                    backStack.push(SearchRoute(SearchType.Area(area.name)))
                                 },
                                 onIngredientClick = { ingredient ->
-                                    backStack.push(
-                                        SearchRoute(SearchType.Ingredient(ingredient.name))
-                                    )
+                                    backStack.push(SearchRoute(SearchType.Ingredient(ingredient.name)))
                                 },
                                 onCodeRecipeClick = { codeRecipe ->
-                                    backStack.push(
-                                        DetailRoute(DetailType.CodeRecipeContent(codeRecipe))
-                                    )
+                                    backStack.push(DetailRoute(DetailType.CodeRecipeContent(codeRecipe)))
                                 },
                                 onScrollChange = { firstVisibleIndex = it }
                             )
@@ -197,16 +187,13 @@ class MainActivity : ComponentActivity() {
                                 viewModel = viewModel,
                                 onBack = { backStack.pop() },
                                 onMealLookup = { id ->
-                                    backStack.push(
-                                        DetailRoute(
-                                            DetailType.MealLookup(
-                                                id
-                                            )
-                                        )
-                                    )
+                                    backStack.push(DetailRoute(DetailType.MealLookup(id)))
+                                },
+                                onCodeClick = { codeRecipe ->
+                                    backStack.push(DetailRoute(DetailType.CodeRecipeContent(codeRecipe)))
                                 },
                                 onScrollChange = { firstVisibleIndex = it },
-                                onRandomMeal = { backStack.push(DetailRoute(DetailType.MealRandom)) }
+                                onRandomMeal = { backStack.push(DetailRoute(DetailType.RandomRecipe)) }
                             )
                         }
                         entry<Search> {
@@ -221,16 +208,13 @@ class MainActivity : ComponentActivity() {
                                 viewModel = viewModel,
                                 onBack = { backStack.pop() },
                                 onMealLookup = { id ->
-                                    backStack.push(
-                                        DetailRoute(
-                                            DetailType.MealLookup(
-                                                id
-                                            )
-                                        )
-                                    )
+                                    backStack.push(DetailRoute(DetailType.MealLookup(id)))
+                                },
+                                onCodeClick = { codeRecipe ->
+                                    backStack.push(DetailRoute(DetailType.CodeRecipeContent(codeRecipe)))
                                 },
                                 onScrollChange = { firstVisibleIndex = it },
-                                onRandomMeal = { backStack.push(DetailRoute(DetailType.MealRandom)) }
+                                onRandomMeal = { backStack.push(DetailRoute(DetailType.RandomRecipe)) }
                             )
                         }
                         entry<DetailRoute> { detailRoute ->
@@ -247,9 +231,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         entry<Info> { InfoScreen(
-                            viewModel = hiltViewModel(
-                                viewModelStoreOwner = this@MainActivity,
-                            ),
+                            viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity),
                         ) }
                     },
                 )

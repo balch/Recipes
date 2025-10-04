@@ -9,7 +9,7 @@ sealed interface DetailType {
     @Serializable
     data class MealContent(val meal: Meal) : DetailType
     @Serializable
-    data object MealRandom : DetailType
+    data object RandomRecipe : DetailType
     @Serializable
     data class CodeRecipeContent(val codeRecipe: CodeRecipe) : DetailType
 }

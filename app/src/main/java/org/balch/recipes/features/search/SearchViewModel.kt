@@ -9,7 +9,10 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,11 +28,12 @@ import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import org.balch.recipes.core.coroutines.DispatcherProvider
-import org.balch.recipes.core.models.MealDescriptor
+import org.balch.recipes.core.models.CodeRecipe
+import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.core.repository.RecipeRepository
+import org.balch.recipes.features.CodeRecipeRepository
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 
 /**
@@ -52,10 +56,12 @@ import kotlin.time.Duration.Companion.seconds
 class SearchViewModel @AssistedInject constructor(
     @Assisted val searchType: SearchType,
     private val repository: RecipeRepository,
+    private val codeRecipeRepository: CodeRecipeRepository,
     dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
-    private val searchQueryIntent = MutableSharedFlow<String>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    private val searchQueryIntent =
+        MutableSharedFlow<String>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     private val logger = logging("SearchViewModel")
 
@@ -65,11 +71,11 @@ class SearchViewModel @AssistedInject constructor(
         } else {
             SearchUiState.Show(
                 searchType = searchType,
-                meals = emptyList(),
+                items = emptyList(),
                 searchTerm = searchType.searchText,
                 isFetching = true
             )
-        }.also { logger.d { "Initial UIState: $it"} }
+        }.also { logger.d { "Initial UIState: $it" } }
 
     private val searchFlow: Flow<SearchUiState> =
         merge(
@@ -106,7 +112,7 @@ class SearchViewModel @AssistedInject constructor(
                         if (searchType.searchText.isBlank()) {
                             emit(SearchUiState.Welcome)
                         } else {
-                            emit(searchMeals(searchType.searchText))
+                            emit(searchMealsAndCode(searchType.searchText))
                         }
                     }
                 }
@@ -115,7 +121,7 @@ class SearchViewModel @AssistedInject constructor(
                 if (newState is SearchUiState.Loading && previousState is SearchUiState.Show) {
                     SearchUiState.Show(
                         searchType = previousState.searchType,
-                        meals = previousState.meals,
+                        items = previousState.items,
                         searchTerm = newState.searchTerm,
                         isFetching = true
                     )
@@ -138,19 +144,39 @@ class SearchViewModel @AssistedInject constructor(
             .flowOn(dispatcherProvider.default)
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds),
+                started = SharingStarted.Lazily,
                 initialValue = initialUiState
             )
 
 
-    private suspend fun searchMeals(query: String): SearchUiState {
-        val result = repository.searchMeals(query)
+    private suspend fun searchMealsAndCode(query: String): SearchUiState {
+        val items = coroutineScope {
+            listOf(
+                async {
+                    repository.searchMeals(query)
+                        .getOrElse { emptyList() }
+                        .map { it.toMealSummary().toItemType() }
+                },
+                async {
+                    codeRecipeRepository.searchRecipes(query)
+                        .map { it.toItemType() }
+                }
+            ).awaitAll()
+                .flatten()
+                .sortedBy {
+                    when (it) {
+                        is ItemType.MealType -> it.meal.name
+                        is ItemType.CodeRecipeType -> it.codeRecipe.title
+                    }
+                }
+        }
+
         return SearchUiState.Show(
-                searchType = SearchType.Search(query),
-                meals = result.getOrElse { emptyList() },
-                searchTerm = query,
-                isFetching = false
-            )
+            searchType = SearchType.Search(query),
+            items = items,
+            searchTerm = query,
+            isFetching = false
+        )
     }
 
     private suspend fun searchByArea(name: String, text: String): SearchUiState {
@@ -159,7 +185,7 @@ class SearchViewModel @AssistedInject constructor(
         return try {
             SearchUiState.Show(
                 searchType = SearchType.Area(name),
-                meals = result.getOrThrow(),
+                items = result.getOrThrow().map { it.toItemType() },
                 searchTerm = text,
                 isFetching = false
             )
@@ -173,7 +199,7 @@ class SearchViewModel @AssistedInject constructor(
         return try {
             SearchUiState.Show(
                 searchType = SearchType.Category(name),
-                meals = result.getOrThrow(),
+                items = result.getOrThrow().map { it.toItemType() },
                 searchTerm = text,
                 isFetching = false
             )
@@ -187,7 +213,7 @@ class SearchViewModel @AssistedInject constructor(
         return try {
             SearchUiState.Show(
                 searchType = SearchType.Ingredient(name),
-                meals = result.getOrThrow(),
+                items = result.getOrThrow().map { it.toItemType() },
                 searchTerm = text,
                 isFetching = false
             )
@@ -212,6 +238,18 @@ class SearchViewModel @AssistedInject constructor(
     }
 }
 
+internal fun MealSummary.toItemType(): ItemType = ItemType.MealType(this)
+internal fun CodeRecipe.toItemType(): ItemType = ItemType.CodeRecipeType(this)
+
+sealed class ItemType(val id: String) {
+
+    data class MealType(val meal: MealSummary) :
+        ItemType("meal-${meal.id}")
+
+    data class CodeRecipeType(val codeRecipe: CodeRecipe) :
+        ItemType ("recipe-${codeRecipe.id}")
+}
+
 sealed class SearchUiState {
     val searchText: String
         get() = when (this) {
@@ -225,7 +263,7 @@ sealed class SearchUiState {
     data class Error(val message: String) : SearchUiState()
     data class Show(
         val searchType: SearchType,
-        val meals: List<MealDescriptor>,
+        val items: List<ItemType>,
         val isFetching: Boolean,
         val searchTerm: String
     ) : SearchUiState()

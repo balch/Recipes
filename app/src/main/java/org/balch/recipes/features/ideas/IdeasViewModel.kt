@@ -23,7 +23,7 @@ import org.balch.recipes.core.models.Category
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.repository.RecipeRepository
-import org.balch.recipes.features.CodeRecipes
+import org.balch.recipes.features.CodeRecipeRepository
 import javax.inject.Inject
 
 /**
@@ -38,8 +38,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class IdeasViewModel @Inject constructor(
-    private val repository: RecipeRepository,
-    private val codeRecipes: CodeRecipes,
+    private val mealRepository: RecipeRepository,
+    private val codeRecipeRepository: CodeRecipeRepository,
     private val savedStateHandle: SavedStateHandle,
     dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
@@ -78,19 +78,19 @@ class IdeasViewModel @Inject constructor(
     private suspend fun deriveState(browsableType: BrowsableType): IdeasUiState =
         try {
             // Randomly select 1 or 3 CodeRecipes to sprinkle into the grid
-            val randomCodeRecipes = codeRecipes.getRandomRecipes(3)
+            val randomCodeRecipes = codeRecipeRepository.getRandomRecipes(3)
             
             when (browsableType) {
                 BrowsableType.Category -> {
-                    val categories = repository.getCategories()
+                    val categories = mealRepository.getCategories()
                     IdeasUiState.Categories(
                         categories = categories.getOrThrow(),
                         codeRecipes = randomCodeRecipes
                     )
                 }
                 BrowsableType.Area -> {
-                    val areasJob = viewModelScope.async { repository.getAreas() }
-                    val randomMealJob = viewModelScope.async { repository.getRandomMeal() }
+                    val areasJob = viewModelScope.async { mealRepository.getAreas() }
+                    val randomMealJob = viewModelScope.async { mealRepository.getRandomMeal() }
 
                     IdeasUiState.Areas(
                         areas = areasJob.await().getOrThrow(),
@@ -99,8 +99,8 @@ class IdeasViewModel @Inject constructor(
                     )
                 }
                 BrowsableType.Ingredient -> {
-                    val ingredientsJob = viewModelScope.async { repository.getIngredients() }
-                    val randomMealJob = viewModelScope.async { repository.getRandomMeal() }
+                    val ingredientsJob = viewModelScope.async { mealRepository.getIngredients() }
+                    val randomMealJob = viewModelScope.async { mealRepository.getRandomMeal() }
 
                     IdeasUiState.Ingredients(
                         ingredients = ingredientsJob.await().getOrThrow(),
@@ -111,7 +111,7 @@ class IdeasViewModel @Inject constructor(
                 BrowsableType.CodeRecipe -> {
                     IdeasUiState.CodeRecipes(
                         imageUrl = null,
-                        codeRecipes = codeRecipes.sortedRecipes(),
+                        codeRecipes = codeRecipeRepository.sortedRecipes(),
                     )
                 }
             }

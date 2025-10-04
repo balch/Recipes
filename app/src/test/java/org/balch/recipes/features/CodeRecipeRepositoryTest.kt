@@ -11,21 +11,21 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 
 
-class CodeRecipesTest {
+class CodeRecipeRepositoryTest {
 
     private val codeRecipeAssetLoader = mock<CodeRecipeAssetLoader> {
         onBlocking { loadRecipes() } doReturn (1..20).map { mock() }
     }
 
-    private val codeRecipes: CodeRecipes by lazy {
-        CodeRecipes(
+    private val repository: CodeRecipeRepository by lazy {
+        CodeRecipeRepository(
             codeRecipeAssetLoader = codeRecipeAssetLoader,
         )
     }
 
     @Test
     fun `getRandomRecipes returns requested count when available`() = runTest {
-        val result = codeRecipes.getRandomRecipes(3)
+        val result = repository.getRandomRecipes(3)
         assertThat(result).hasSize(3)
         assertThat(result).containsAtLeastElementsIn(result.toSet())
     }
@@ -41,7 +41,7 @@ class CodeRecipesTest {
         val maxBatches = 50 // Safety limit
         
         do {
-            val batch = codeRecipes.getRandomRecipes(3)
+            val batch = repository.getRandomRecipes(3)
             allBatches.add(batch)
             
             val beforeSize = seenRecipes.size
@@ -67,13 +67,13 @@ class CodeRecipesTest {
 
     @Test
     fun `getRandomRecipes handles zero count request`() = runTest {
-        val result = codeRecipes.getRandomRecipes(0)
+        val result = repository.getRandomRecipes(0)
         assertEquals(0, result.size, "Should return empty list for zero count")
     }
     
     @Test
     fun `getRandomRecipes handles negative count request`() = runTest {
-        val result = codeRecipes.getRandomRecipes(-1)
+        val result = repository.getRandomRecipes(-1)
         assertEquals(0, result.size, "Should return empty list for negative count")
     }
     
@@ -88,7 +88,7 @@ class CodeRecipesTest {
         val maxIterations = 100 // Safety limit
         
         while (iterations < maxIterations) {
-            val batch = codeRecipes.getRandomRecipes(3)
+            val batch = repository.getRandomRecipes(3)
             allResults.addAll(batch)
             
             // Check if we've seen this recipe before
@@ -113,13 +113,13 @@ class CodeRecipesTest {
     @Test
     fun `getRandomRecipes returns unique recipes before reshuffling`() = runTest {
         // prime the `codeRecipes.randomRecipes` method and take the next 3
-        codeRecipes.getRandomRecipes(1)
-        val firstThree = codeRecipes.randomRecipes.take(3)
+        repository.getRandomRecipes(1)
+        val firstThree = repository.randomRecipes.take(3)
 
         // add duplicate recipe, expecting it to be filtered out
-        codeRecipes.randomRecipes.add(2, firstThree[1])
+        repository.randomRecipes.add(2, firstThree[1])
 
-        val result = codeRecipes.getRandomRecipes(3)
+        val result = repository.getRandomRecipes(3)
         assertThat(result).containsExactlyElementsIn(firstThree)
     }
 }

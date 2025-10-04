@@ -13,14 +13,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells.Fixed
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
@@ -73,10 +71,9 @@ import org.balch.recipes.core.models.Area
 import org.balch.recipes.core.models.Category
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.Ingredient
-import org.balch.recipes.core.models.color
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
-import org.balch.recipes.ui.widgets.CodeRecipeAreaBadge
+import org.balch.recipes.ui.widgets.CodeRecipeCard
 import org.balch.recipes.ui.widgets.FoodPullToRefreshIndicator
 import kotlin.math.abs
 import kotlin.random.Random
@@ -523,7 +520,9 @@ private fun ResultsGrid(
                 }
                 is GridItem.CodeRecipeItem -> {
                     CodeRecipeCard(
-                        modifier = Modifier.alpha(0.9f),
+                        modifier = Modifier
+                            .alpha(0.9f)
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
                         codeRecipe = item.codeRecipe,
                         onClick = { onCodeRecipeClick(item.codeRecipe) },
                         center = centerCodeRecipes,
@@ -691,54 +690,6 @@ private fun IngredientCard(
     }
 }
 
-@Composable
-private fun CodeRecipeCard(
-    codeRecipe: CodeRecipe,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    center: Boolean,
-) {
-    val color = codeRecipe.area.color()
-    Card(
-        modifier = modifier
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-            .height(105.dp)
-            .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(12.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            color.copy(alpha = 0.1f),
-                            color.copy(alpha = 0.3f)
-                        )
-                    )
-                )
-                .padding(12.dp),
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = if (center) Arrangement.Center else Arrangement.Bottom,
-                horizontalAlignment = if (center) Alignment.CenterHorizontally else Alignment.Start
-            ) {
-                CodeRecipeAreaBadge(codeRecipe)
-
-                Text(
-                    autoSize = TextAutoSize.StepBased(maxFontSize = 14.sp),
-                    text = codeRecipe.title,
-                    textAlign = if (center) TextAlign.Center else TextAlign.Start,
-                    style = MaterialTheme.typography.titleSmall
-                        .copy(MaterialTheme.colorScheme.onSurface),
-                )
-            }
-        }
-    }
-}
-
 /**
  * Remembers a list of `GridItem` objects constructed from the provided `regularItems`
  * and `codeRecipes`. The function combines the regular items and code recipe items
@@ -756,7 +707,7 @@ private fun <T> rememberRecipeItems(
     regularItems: List<T>,
     codeRecipes: List<CodeRecipe>,
     itemWrapper: (T) -> GridItem
-): List<GridItem> = rememberSaveable() {
+): List<GridItem> = rememberSaveable {
     if (codeRecipes.isEmpty()) {
         regularItems.map(itemWrapper)
     } else {

@@ -2,19 +2,19 @@ package org.balch.recipes.features.details
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import org.balch.recipes.MainCoroutineExtension
 import org.balch.recipes.core.coroutines.TestDispatcherProvider
 import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.Meal
+import org.balch.recipes.core.random.RandomProvider
 import org.balch.recipes.core.repository.RecipeRepository
-import org.junit.Rule
+import org.balch.recipes.features.CodeRecipeRepository
+import org.balch.recipes.features.details.DetailsViewModel.Companion.RANDOM_MEAL_PERCENTAGE
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.wheneverBlocking
@@ -28,7 +28,13 @@ class DetailsViewModelTest {
     @RegisterExtension
     val mainCoroutineExtension = MainCoroutineExtension(dispatcherProvider.testDispatcher)
 
-    private val repository = mock<RecipeRepository>()
+    private val mealRepository = mock<RecipeRepository>()
+    private val codeRecipeRepository = mock<CodeRecipeRepository>()
+
+    private var nextRandomFloat = RANDOM_MEAL_PERCENTAGE
+    private val randomProvider = mock<RandomProvider> {
+        on { nextFloat() } doAnswer { nextRandomFloat }
+    }
 
     private val testMeal = Meal(
         id = "1",
@@ -40,7 +46,13 @@ class DetailsViewModelTest {
     )
 
     private fun getViewModel(detailType: DetailType): DetailsViewModel =
-        DetailsViewModel(detailType, repository, dispatcherProvider)
+        DetailsViewModel(
+            detailType = detailType,
+            mealRepository = mealRepository,
+            codeRecipeRepository = codeRecipeRepository,
+            randomProvider = randomProvider,
+            dispatcherProvider = dispatcherProvider
+        )
 
     private fun UiState.assertValidShowState(meal: Meal) {
         assertThat(this).isInstanceOf(UiState.ShowMeal::class.java)
@@ -66,7 +78,7 @@ class DetailsViewModelTest {
     @Test
     fun `initial state is Loading when DetailType is Lookup and then Shows meal on success`() = runTest {
         val detailType = DetailType.MealLookup("1")
-        wheneverBlocking { repository.getMealById("1") } doReturn(Result.success(testMeal))
+        wheneverBlocking { mealRepository.getMealById("1") } doReturn(Result.success(testMeal))
         val viewModel = getViewModel(detailType)
         viewModel.uiState.test {
             awaitItem().assertValidShowState(testMeal)
@@ -77,7 +89,7 @@ class DetailsViewModelTest {
     fun `emits Error state when lookup fails`() = runTest {
         val detailType = DetailType.MealLookup("1")
         val errorMessage = "Network Error"
-        wheneverBlocking { repository.getMealById("1") } doReturn(Result.failure(Exception(errorMessage)))
+        wheneverBlocking { mealRepository.getMealById("1") } doReturn(Result.failure(Exception(errorMessage)))
         val viewModel = getViewModel(detailType)
         viewModel.uiState.test {
             awaitItem().assertErrorState(errorMessage)
@@ -88,7 +100,7 @@ class DetailsViewModelTest {
     fun `emits Error state with default message when exception message is null`() = runTest {
         val detailType = DetailType.MealLookup("1")
         val exceptionWithNullMessage = Exception(null as String?)
-        wheneverBlocking { repository.getMealById("1") } doReturn(Result.failure(exceptionWithNullMessage))
+        wheneverBlocking { mealRepository.getMealById("1") } doReturn(Result.failure(exceptionWithNullMessage))
         val viewModel = getViewModel(detailType)
         viewModel.uiState.test {
             awaitItem().assertErrorState("Unknown Error")
@@ -97,8 +109,8 @@ class DetailsViewModelTest {
 
     @Test
     fun `initial state is Loading when DetailType is Random and then Shows meal on success`() = runTest {
-        val detailType = DetailType.MealRandom
-        wheneverBlocking { repository.getRandomMeal() } doReturn(Result.success(testMeal))
+        val detailType = DetailType.RandomRecipe
+        wheneverBlocking { mealRepository.getRandomMeal() } doReturn(Result.success(testMeal))
         val viewModel = getViewModel(detailType)
         viewModel.uiState.test {
             awaitItem().assertValidShowState(testMeal)
@@ -107,8 +119,8 @@ class DetailsViewModelTest {
 
     @Test
     fun `getRandomMeal emits Show state with random meal`() = runTest {
-        val detailType = DetailType.MealRandom
-        wheneverBlocking { repository.getRandomMeal() } doReturn(Result.success(testMeal))
+        val detailType = DetailType.RandomRecipe
+        wheneverBlocking { mealRepository.getRandomMeal() } doReturn(Result.success(testMeal))
         val viewModel = getViewModel(detailType)
 
         viewModel.uiState.test {
@@ -117,9 +129,9 @@ class DetailsViewModelTest {
     }
     @Test
     fun `emits Error state when random meal fails`() = runTest {
-        val detailType = DetailType.MealRandom
+        val detailType = DetailType.RandomRecipe
         val errorMessage = "Random meal failed"
-        wheneverBlocking { repository.getRandomMeal() } doReturn(Result.failure(Exception(errorMessage)))
+        wheneverBlocking { mealRepository.getRandomMeal() } doReturn(Result.failure(Exception(errorMessage)))
         val viewModel = getViewModel(detailType)
         viewModel.uiState.test {
             awaitItem().assertErrorState(errorMessage)
@@ -128,9 +140,9 @@ class DetailsViewModelTest {
 
     @Test
     fun `emits Error state with default message when random meal exception message is null`() = runTest {
-        val detailType = DetailType.MealRandom
+        val detailType = DetailType.RandomRecipe
         val exceptionWithNullMessage = Exception(null as String?)
-        wheneverBlocking { repository.getRandomMeal() } doReturn(Result.failure(exceptionWithNullMessage))
+        wheneverBlocking { mealRepository.getRandomMeal() } doReturn(Result.failure(exceptionWithNullMessage))
         val viewModel = getViewModel(detailType)
         viewModel.uiState.test {
             awaitItem().assertErrorState("Unknown Error")

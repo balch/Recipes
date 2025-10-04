@@ -66,12 +66,14 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.rememberHazeState
+import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.Meal
-import org.balch.recipes.core.models.MealDescriptor
+import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.ui.theme.DeepBrown
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
+import org.balch.recipes.ui.widgets.CodeRecipeCard
 import org.balch.recipes.ui.widgets.FoodLoadingIndicator
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,6 +84,7 @@ fun SearchScreen(
     onBack: () -> Unit,
     onRandomMeal: () -> Unit,
     onMealLookup: (String) -> Unit,
+    onCodeClick: (CodeRecipe) -> Unit,
     onScrollChange: (Int) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -92,6 +95,7 @@ fun SearchScreen(
         searchText = uiState.searchText,
         onScrollChange = onScrollChange,
         onMealClick = onMealLookup,
+        onCodeClick = onCodeClick,
         onRandom = onRandomMeal,
         clearSearch = viewModel::clearSearch,
         onSearch = viewModel::updateSearchQuery,
@@ -109,6 +113,7 @@ private fun SearchLayoutPreview(
             uiState = uiState,
             searchText = "",
             onMealClick = {},
+            onCodeClick = {},
             onSearch = {},
             onRandom = {},
             clearSearch = {},
@@ -125,6 +130,7 @@ private fun SearchLayout(
     modifier: Modifier = Modifier,
     searchText: String,
     onMealClick: (String) -> Unit,
+    onCodeClick: (CodeRecipe) -> Unit,
     onSearch: (String) -> Unit,
     onRandom: () -> Unit,
     clearSearch: () -> Unit,
@@ -209,8 +215,9 @@ private fun SearchLayout(
                 is SearchUiState.Show -> {
                     SearchResults(
                         isFetching = uiState.isFetching,
-                        meals = uiState.meals,
+                        items = uiState.items,
                         onMealClick = onMealClick,
+                        onCodeClick = onCodeClick,
                         onScrollChange = onScrollChange,
                         paddingValues = innerPadding
                     )
@@ -432,8 +439,9 @@ private fun ErrorMessage(
 @Composable
 private fun SearchResults(
     isFetching: Boolean,
-    meals: List<MealDescriptor>,
+    items: List<ItemType>,
     onMealClick: (String) -> Unit,
+    onCodeClick: (CodeRecipe) -> Unit,
     onScrollChange: (Int) -> Unit,
     paddingValues: PaddingValues,
 ) {
@@ -446,23 +454,32 @@ private fun SearchResults(
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        if (meals.isNotEmpty()) {
+        if (items.isNotEmpty()) {
             LazyVerticalStaggeredGrid(
                 state = gridState,
                 columns = Adaptive(160.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalItemSpacing = 6.dp,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = paddingValues
             ) {
                 items(
-                    items = meals,
-                    key = { meal -> meal.id }
-                ) { meal ->
-                    MealCard(
-                        meal = meal,
-                        onClick = { onMealClick(meal.id) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    items = items,
+                    key = { item -> item.id }
+                ) { item ->
+                    when (item) {
+                        is ItemType.MealType -> MealCard(
+                            meal = item.meal,
+                            onClick = { onMealClick(item.meal.id) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        is ItemType.CodeRecipeType -> CodeRecipeCard(
+                            codeRecipe = item.codeRecipe,
+                            onClick = { onCodeClick(item.codeRecipe) },
+                            modifier = Modifier.fillMaxWidth(),
+                            center = false,
+                        )
+                    }
                 }
             }
         } else if (!isFetching) {
@@ -485,7 +502,7 @@ private fun SearchResults(
 
 @Composable
 private fun MealCard(
-    meal: MealDescriptor,
+    meal: MealSummary,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {

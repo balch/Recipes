@@ -3,25 +3,21 @@ package org.balch.recipes.features.search
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import org.balch.recipes.MainCoroutineExtension
 import org.balch.recipes.core.coroutines.TestDispatcherProvider
 import org.balch.recipes.core.models.Meal
-import org.balch.recipes.core.models.MealDescriptor
 import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.core.repository.RecipeRepository
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
+import org.balch.recipes.features.CodeRecipeRepository
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.wheneverBlocking
@@ -63,6 +59,10 @@ class SearchViewModelTest {
 
     private val repository = mock<RecipeRepository>()
 
+    private val codeRecipeRepository = mock<CodeRecipeRepository> {
+        onBlocking { searchRecipes(any()) } doReturn(emptyList())
+    }
+
     private val testMeal = Meal(
         id = "1",
         name = "Test Meal",
@@ -85,14 +85,14 @@ class SearchViewModelTest {
 
     private fun SearchUiState.assertValidShowState(
         searchType: SearchType,
-        meals: List<MealDescriptor> = emptyList(),
+        items: List<ItemType> = emptyList(),
         isFetching: Boolean = true,
     ) {
         assertThat(this).isInstanceOf(SearchUiState.Show::class.java)
         val state = this as SearchUiState.Show
         assertThat(state.searchType).isEqualTo(searchType)
         assertThat(state.isFetching).isEqualTo(isFetching)
-        assertThat(state.meals).isEqualTo(meals)
+        assertThat(state.items).isEqualTo(items)
     }
 
     private fun SearchUiState.assertWelcomeState() {
@@ -116,7 +116,12 @@ class SearchViewModelTest {
     }
 
     private fun getViewModel(searchType: SearchType) =
-        SearchViewModel(searchType, repository, dispatcherProvider)
+        SearchViewModel(
+            searchType,
+            repository,
+            codeRecipeRepository,
+            dispatcherProvider,
+        )
 
     @Test
     fun `initial state is Welcome when SearchType is Search with blank text`() = runTest {
@@ -139,7 +144,7 @@ class SearchViewModelTest {
             awaitItem().assertValidShowState(searchType)
             awaitItem().assertValidShowState(
                 searchType = searchType,
-                meals = testMealDescriptors,
+                items = testMealDescriptors.map { it.toItemType() },
                 isFetching = false
             )
         }
@@ -153,7 +158,11 @@ class SearchViewModelTest {
 
         viewModel.uiState.test {
             awaitItem().assertValidShowState(searchType)
-            awaitItem().assertValidShowState(searchType, testMealDescriptors, false)
+            awaitItem().assertValidShowState(
+                searchType = searchType,
+                items = testMealDescriptors.map { it.toItemType() },
+                isFetching = false
+            )
         }
     }
 
@@ -165,7 +174,11 @@ class SearchViewModelTest {
 
         viewModel.uiState.test {
             awaitItem().assertValidShowState(searchType)
-            awaitItem().assertValidShowState(searchType, testMealDescriptors, false)
+            awaitItem().assertValidShowState(
+                searchType = searchType,
+                items = testMealDescriptors.map { it.toItemType() },
+                isFetching = false
+            )
         }
     }
 
@@ -180,7 +193,11 @@ class SearchViewModelTest {
             awaitItem().assertWelcomeState()
             viewModel.updateSearchQuery(searchTerm)
             awaitItem().assertLoadingState(searchTerm, true)
-            awaitItem().assertValidShowState(SearchType.Search(searchTerm), testMeals, false)
+            awaitItem().assertValidShowState(
+                searchType = SearchType.Search(searchTerm),
+                items = testMeals.map { it.toMealSummary().toItemType() },
+                isFetching = false
+            )
         }
     }
 
@@ -194,7 +211,7 @@ class SearchViewModelTest {
             awaitItem().assertValidShowState(searchType)
             awaitItem().assertValidShowState(
                 searchType = searchType,
-                meals = testMeals,
+                items = testMeals.map { it.toMealSummary().toItemType() },
                 isFetching = false
             )
 

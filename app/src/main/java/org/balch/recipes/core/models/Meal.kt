@@ -3,20 +3,15 @@ package org.balch.recipes.core.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-interface MealDescriptor {
-    val id: String
-    val name: String
-    val thumbnail: String
-}
 /**
  * Data classes representing the API response for meals.
  */
 @Serializable
 data class Meal(
     @SerialName("idMeal")
-    override val id: String,
+    val id: String,
     @SerialName("strMeal")
-    override val name: String,
+    val name: String,
     @SerialName("strDrinkAlternate")
     val drinkAlternate: String? = null,
     @SerialName("strCategory")
@@ -26,7 +21,7 @@ data class Meal(
     @SerialName("strInstructions")
     val instructions: String,
     @SerialName("strMealThumb")
-    override val thumbnail: String,
+    val thumbnail: String,
     @SerialName("strTags")
     val tags: String? = null,
     @SerialName("strYoutube")
@@ -81,7 +76,7 @@ data class Meal(
     @SerialName("strMeasure18") val measure18: String? = null,
     @SerialName("strMeasure19") val measure19: String? = null,
     @SerialName("strMeasure20") val measure20: String? = null
-): MealDescriptor {
+) {
     // Helper function to get ingredients with measurements
     val ingredientsWithMeasures: List<Pair<String, String>>
         get() {
@@ -101,6 +96,8 @@ data class Meal(
             
             return ingredients.zip(measures)
         }
+
+    fun toMealSummary(): MealSummary = MealSummary(id, name, thumbnail)
 }
 
 @Serializable
@@ -112,12 +109,12 @@ data class MealResponse(
 @Serializable
 data class MealSummary(
     @SerialName("idMeal")
-    override val id: String,
+    val id: String,
     @SerialName("strMeal")
-    override val name: String,
+    val name: String,
     @SerialName("strMealThumb")
-    override val thumbnail: String
-): MealDescriptor
+    val thumbnail: String
+)
 
 
 @Serializable

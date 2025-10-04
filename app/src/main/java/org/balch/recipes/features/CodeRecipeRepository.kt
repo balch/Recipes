@@ -8,7 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class CodeRecipes @Inject constructor(
+class CodeRecipeRepository @Inject constructor(
     private val codeRecipeAssetLoader: CodeRecipeAssetLoader,
 ) {
 
@@ -23,6 +23,12 @@ class CodeRecipes @Inject constructor(
         }
         return _rawRecipes
     }
+
+    suspend fun searchRecipes(query: String): List<CodeRecipe> =
+        rawRecipes().filter {
+            it.title.contains(query, ignoreCase = true)
+                || it.area.name.contains(query, ignoreCase = true)
+        }.sortedBy { it.title }
 
     suspend fun sortedRecipes() =
         rawRecipes().sortedWith(

@@ -13,7 +13,7 @@ import org.balch.recipes.core.models.Category
 import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.repository.RecipeRepository
-import org.balch.recipes.features.CodeRecipes
+import org.balch.recipes.features.CodeRecipeRepository
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.mockito.kotlin.doReturn
@@ -33,13 +33,18 @@ class IdeasViewModelTest {
     @RegisterExtension
     val mainCoroutineExtension = MainCoroutineExtension(dispatcherProvider.testDispatcher)
 
-    private val repository = mock<RecipeRepository>()
-    private val codeRecipes = mock<CodeRecipes> {
+    private val mealRepository = mock<RecipeRepository>()
+    private val codeRecipeRepository = mock<CodeRecipeRepository> {
         onBlocking { getRandomRecipes(3) } doReturn listOf(mock(), mock(), mock())
     }
 
     private val viewModel by lazy {
-        IdeasViewModel(repository, codeRecipes, mock(), dispatcherProvider)
+        IdeasViewModel(
+            mealRepository = mealRepository,
+            codeRecipeRepository = codeRecipeRepository,
+            savedStateHandle = mock(),
+            dispatcherProvider = dispatcherProvider
+        )
     }
 
     private val testCategories = listOf(
@@ -109,7 +114,7 @@ class IdeasViewModelTest {
 
     @Test
     fun `initial state is Categories when default BrowsableType is Category`() = runTest {
-        wheneverBlocking { repository.getCategories() } doReturn (Result.success(testCategories))
+        wheneverBlocking { mealRepository.getCategories() } doReturn (Result.success(testCategories))
         viewModel.uiState.test {
             awaitItem().assertLoadingState()
             awaitItem().assertValidCategories(testCategories)
@@ -118,9 +123,9 @@ class IdeasViewModelTest {
 
     @Test
     fun `emits Areas state when browsable type is changed to Area`() = runTest { // Given
-        wheneverBlocking { repository.getCategories() } doReturn (Result.success(testCategories))
-        wheneverBlocking { repository.getAreas() } doReturn (Result.success(testAreas))
-        wheneverBlocking { repository.getRandomMeal() } doReturn (Result.success(testMeal))
+        wheneverBlocking { mealRepository.getCategories() } doReturn (Result.success(testCategories))
+        wheneverBlocking { mealRepository.getAreas() } doReturn (Result.success(testAreas))
+        wheneverBlocking { mealRepository.getRandomMeal() } doReturn (Result.success(testMeal))
         viewModel.uiState.test {
             awaitItem().assertLoadingState()
             awaitItem().assertValidCategories(testCategories)
@@ -133,9 +138,9 @@ class IdeasViewModelTest {
 
     @Test
     fun `emits Ingredients state when browsable type is changed to Ingredient`() = runTest {
-        wheneverBlocking { repository.getCategories() } doReturn (Result.success(testCategories))
-        wheneverBlocking { repository.getIngredients() } doReturn (Result.success(testIngredients))
-        wheneverBlocking { repository.getRandomMeal() } doReturn (Result.success(testMeal))
+        wheneverBlocking { mealRepository.getCategories() } doReturn (Result.success(testCategories))
+        wheneverBlocking { mealRepository.getIngredients() } doReturn (Result.success(testIngredients))
+        wheneverBlocking { mealRepository.getRandomMeal() } doReturn (Result.success(testMeal))
         viewModel.uiState.test {
             awaitItem().assertLoadingState()
             awaitItem().assertValidCategories(testCategories)
@@ -149,7 +154,7 @@ class IdeasViewModelTest {
     @Test
     fun `emits Error state when categories fetch fails`() = runTest {
         val errorMessage = "Network Error"
-        wheneverBlocking { repository.getCategories() } doReturn (Result.failure(Exception(errorMessage)))
+        wheneverBlocking { mealRepository.getCategories() } doReturn (Result.failure(Exception(errorMessage)))
         viewModel.uiState.test {
             awaitItem().assertLoadingState()
             awaitItem().assertErrorState(errorMessage)
@@ -158,10 +163,10 @@ class IdeasViewModelTest {
 
     @Test
     fun `emits Error state when areas fetch fails`() = runTest {
-        wheneverBlocking { repository.getCategories() } doReturn (Result.success(testCategories))
+        wheneverBlocking { mealRepository.getCategories() } doReturn (Result.success(testCategories))
         val errorMessage = "Areas fetch failed"
-        wheneverBlocking { repository.getAreas() } doReturn (Result.failure(Exception(errorMessage)))
-        wheneverBlocking { repository.getRandomMeal() } doReturn (Result.success(testMeal))
+        wheneverBlocking { mealRepository.getAreas() } doReturn (Result.failure(Exception(errorMessage)))
+        wheneverBlocking { mealRepository.getRandomMeal() } doReturn (Result.success(testMeal))
         viewModel.uiState.test {
             awaitItem().assertLoadingState()
             awaitItem().assertValidCategories(testCategories)
@@ -174,10 +179,10 @@ class IdeasViewModelTest {
 
     @Test
     fun `emits Error state when ingredients fetch fails`() = runTest {
-        wheneverBlocking { repository.getCategories() } doReturn (Result.success(testCategories))
+        wheneverBlocking { mealRepository.getCategories() } doReturn (Result.success(testCategories))
         val errorMessage = "Ingredients fetch failed"
-        wheneverBlocking { repository.getIngredients() } doReturn (Result.failure(Exception(errorMessage)))
-        wheneverBlocking { repository.getRandomMeal() } doReturn (Result.success(testMeal))
+        wheneverBlocking { mealRepository.getIngredients() } doReturn (Result.failure(Exception(errorMessage)))
+        wheneverBlocking { mealRepository.getRandomMeal() } doReturn (Result.success(testMeal))
         viewModel.uiState.test {
             awaitItem().assertLoadingState()
             awaitItem().assertValidCategories(testCategories)
@@ -190,7 +195,7 @@ class IdeasViewModelTest {
 
     @Test
     fun `retry function triggers data reload`() = runTest {
-        wheneverBlocking { repository.getCategories() } doReturn (Result.success(testCategories))
+        wheneverBlocking { mealRepository.getCategories() } doReturn (Result.success(testCategories))
         viewModel.uiState.test {
             awaitItem().assertLoadingState()
             awaitItem().assertValidCategories(testCategories)
@@ -203,9 +208,9 @@ class IdeasViewModelTest {
 
     @Test
     fun `handles null random meal gracefully for Areas`() = runTest {
-        wheneverBlocking { repository.getCategories() } doReturn (Result.success(testCategories))
-        wheneverBlocking { repository.getAreas() } doReturn (Result.success(testAreas))
-        wheneverBlocking { repository.getRandomMeal() } doReturn (Result.failure(Exception()))
+        wheneverBlocking { mealRepository.getCategories() } doReturn (Result.success(testCategories))
+        wheneverBlocking { mealRepository.getAreas() } doReturn (Result.success(testAreas))
+        wheneverBlocking { mealRepository.getRandomMeal() } doReturn (Result.failure(Exception()))
         viewModel.uiState.test {
             awaitItem().assertLoadingState()
             awaitItem().assertValidCategories(testCategories)

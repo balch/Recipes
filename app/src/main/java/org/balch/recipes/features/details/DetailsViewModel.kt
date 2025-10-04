@@ -17,7 +17,9 @@ import org.balch.recipes.core.coroutines.DispatcherProvider
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.Meal
+import org.balch.recipes.core.random.RandomProvider
 import org.balch.recipes.core.repository.RecipeRepository
+import org.balch.recipes.features.CodeRecipeRepository
 import kotlin.time.Duration.Companion.seconds
 
 
@@ -34,13 +36,15 @@ import kotlin.time.Duration.Companion.seconds
  * - `UiState.Error`: When an error occurs during data fetching or processing.
  *
  * @property detailType Determines the type of detail being displayed, such as meal content or lookup by ID.
- * @property repository Provides access to data sources for fetching meals and related details.
+ * @property mealRepository Provides access to data sources for fetching meals and related details.
  * @property uiState Represents the current UI state as a `StateFlow` that can emit loading, success, or error states.
  */
 @HiltViewModel(assistedFactory = DetailsViewModel.Factory::class)
 class DetailsViewModel @AssistedInject constructor(
     @Assisted val detailType: DetailType,
-    private val repository: RecipeRepository,
+    private val mealRepository: RecipeRepository,
+    private val codeRecipeRepository: CodeRecipeRepository,
+    private val randomProvider: RandomProvider,
     dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
 
@@ -64,16 +68,21 @@ class DetailsViewModel @AssistedInject constructor(
 
                 is DetailType.MealLookup -> {
                     emit(UiState.Loading)
-                    repository.getMealById(detailType.mealId)
+                    mealRepository.getMealById(detailType.mealId)
                         .onSuccess { emit(UiState.ShowMeal(it)) }
                         .onFailure { emit(UiState.Error(it.message ?: "Unknown Error")) }
                 }
 
-                is DetailType.MealRandom -> {
+                is DetailType.RandomRecipe -> {
                     emit(UiState.Loading)
-                    repository.getRandomMeal()
-                        .onSuccess { emit(UiState.ShowMeal(it)) }
-                        .onFailure { emit(UiState.Error(it.message ?: "Unknown Error")) }
+
+                    if (randomProvider.nextFloat() <= RANDOM_MEAL_PERCENTAGE) {
+                        mealRepository.getRandomMeal()
+                            .onSuccess { emit(UiState.ShowMeal(it)) }
+                            .onFailure { emit(UiState.Error(it.message ?: "Unknown Error")) }
+                    } else {
+                        emit(UiState.ShowCodeRecipe(codeRecipeRepository.getRandomRecipes(1)[0]))
+                    }
                 }
 
                 is DetailType.CodeRecipeContent -> {
@@ -92,6 +101,10 @@ class DetailsViewModel @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(detailType: DetailType): DetailsViewModel
+    }
+
+    companion object {
+        internal const val RANDOM_MEAL_PERCENTAGE = .8f
     }
 }
 
