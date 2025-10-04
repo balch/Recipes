@@ -11,7 +11,7 @@ fun IdeasScreen(
     modifier: Modifier = Modifier,
     viewModel: IdeasViewModel
 ) {
-    // Return to categories if this is not a top level tob
+    // Return to categories if this is not a top level layout
     BackHandler(enabled = !uiState.isTopLevelState) {
         viewModel.changeBrowsableType(BrowsableType.Category)
     }

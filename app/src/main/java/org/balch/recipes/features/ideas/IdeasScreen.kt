@@ -107,7 +107,7 @@ fun IdeasScreen(
 ) {
     val uiState: IdeasUiState by viewModel.uiState.collectAsState()
 
-    // Return to categories if this is not a top level tob
+    // Return to categories if this is not a top level layout
     BackHandler(enabled = !uiState.isTopLevelState) {
         viewModel.changeBrowsableType(BrowsableType.Category)
     }
