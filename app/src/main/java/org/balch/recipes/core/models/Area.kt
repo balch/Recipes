@@ -1,6 +1,7 @@
 package org.balch.recipes.core.models
 
 import android.os.Parcelable
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -14,6 +15,7 @@ data class Area(
     @SerialName("strArea")
     val name: String
 ): UniqueItem, Parcelable {
+    @IgnoredOnParcel
     override val id = name
 }
 
