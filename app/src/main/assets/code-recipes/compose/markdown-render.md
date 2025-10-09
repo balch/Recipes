@@ -20,7 +20,9 @@ fun MarkdownCodeSnippet(
             .language(SyntaxLanguage.KOTLIN)
     }
     Markdown(
-        modifier = modifier.padding(16.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
         content = codeSnippet,
         components = markdownComponents(
             codeBlock = {

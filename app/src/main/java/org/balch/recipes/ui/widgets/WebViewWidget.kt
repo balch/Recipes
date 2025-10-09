@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -20,11 +21,12 @@ fun WebViewWidget(
     modifier: Modifier = Modifier,
     url: String
 ) {
-    var isLoading by remember { mutableStateOf(true) }
+    var isLoading by remember(url) { mutableStateOf(true) }
     val animatedAlpha: Float by animateFloatAsState(
-        if (isLoading) 0.25f else 1f, label = "alpha"
+        targetValue = if (isLoading) 0.25f else 1f,
+        animationSpec = tween(durationMillis = 300),
+        label = "alpha"
     )
-
     Box(modifier = modifier.fillMaxSize()) {
         if (isLoading) {
             FoodLoadingIndicator(
@@ -47,6 +49,11 @@ fun WebViewWidget(
                     loadUrl(url)
                 }
             },
+            onReset = { webView ->
+                webView.stopLoading()
+                webView.loadUrl(url)
+            },
+            onRelease = WebView::destroy
         )
     }
 }

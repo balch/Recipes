@@ -1,6 +1,7 @@
 package org.balch.recipes.ui.widgets
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -26,7 +27,9 @@ fun MarkdownCodeSnippet(
             .language(SyntaxLanguage.KOTLIN)
     }
     Markdown(
-        modifier = modifier.padding(16.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
         content = codeSnippet,
         components = markdownComponents(
             codeBlock = {
