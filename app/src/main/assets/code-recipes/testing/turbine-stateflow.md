@@ -2,11 +2,24 @@
 
 - Use `Turbine` for ***ViewModel*** stateFlow testing
 - Ensures all emissions are accounted for
-- May need to use `StandTestDispatcher` for Conflation issues when the ***ViewModel*** emits initial state too quickly.
+- May need to use `StandardTestDispatcher` for Conflation issues when the ViewModel emits initial state too quickly.
 
 ## Code Snippet
 
 ```
+private val testMeals = listOf(
+    Meal(id = "1", name = "Pasta Carbonara"),
+    Meal(id = "2", name = "Pasta Bolognese")
+)
+
+private fun getViewModel(searchType: SearchType): SearchViewModel {
+    return SearchViewModel(
+        searchType = searchType,
+        repository = repository,
+        dispatcherProvider = dispatcherProvider
+    )
+}
+
 @Test
 fun `clearSearch emits Welcome state`() = runTest {
     val searchType = SearchType.Search("pasta")
