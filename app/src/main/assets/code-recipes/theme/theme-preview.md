@@ -42,12 +42,15 @@ class CodeRecipeProvider : PreviewParameterProvider<CodeRecipe> {
 }
 
 // Combine `@ThemePreview` and `@PreviewParameter(CodeRecipeProvider::class)` to create multiple Previews      
-@Preview
 @ThemePreview
 @Composable
 fun CodeRecipePreview(
     @PreviewParameter(CodeRecipeProvider::class) codeRecipe: CodeRecipe
 ) {
-    // ...
+    RecipesTheme {
+        Surface {
+            CodeRecipeCard(codeRecipe = codeRecipe)
+        }
+    }
 }
 ```
