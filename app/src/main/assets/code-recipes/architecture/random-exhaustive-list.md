@@ -2,7 +2,7 @@
 
 - Sometimes you need to randomly show items from a list 
 - Using a random index is easy, but leads to many repeated items
-- Its better to show all the items in a random list to enure freshness  
+- Its better to show all the items in a random list to ensure freshness  
     - Save shuffled main list to randomize order
     - Return and remove items from front of saved list 
     - Add more shuffled items when capacity runs low
@@ -20,16 +20,16 @@ suspend fun getRandomRecipes(count: Int): List<CodeRecipe> {
         randomRecipes.addAll(rawRecipes().shuffled())
     }
 
-    // use a Set to ensure unique entries when list roles over
+    // use a Set to ensure unique entries when list rolls over
     val result = mutableSetOf<CodeRecipe>()
     repeat(count) {
         var addedToResult = false
         while (!addedToResult) {
-            val nextIem = randomRecipes.removeAt(0)
-            addedToResult = result.add(nextIem)
+            val nextItem = randomRecipes.removeAt(0)
+            addedToResult = result.add(nextItem)
             if (!addedToResult) {
                 // nextItem is in use, so add it to the end of the list
-                randomRecipes.add(nextIem)
+                randomRecipes.add(nextItem)
             }
         }
     }

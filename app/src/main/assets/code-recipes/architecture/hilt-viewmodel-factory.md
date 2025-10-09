@@ -15,17 +15,23 @@ class DetailsViewModel @AssistedInject constructor(
     dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
 
-// ViewModel Factory
-@AssistedFactory
-interface Factory {
-    fun create(detailType: DetailType): DetailsViewModel
+    // ViewModel implementation...    
+
+    // ViewModel Factory
+    @AssistedFactory
+    interface Factory {
+        fun create(detailType: DetailType): DetailsViewModel
+    }
 }
 
-// Create ViewModel
-val viewModel =
-    hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
+// Create ViewModel and pass it to the Screen 
+@Composable
+fun DetailRoute(detailRoute: DetailRoute) {
+    val viewModel = hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
         creationCallback = { factory ->
             factory.create(detailRoute.detailType)
         }
     )
+    DetailScreen(viewModel = viewModel)
+}
 ```

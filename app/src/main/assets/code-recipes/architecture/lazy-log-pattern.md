@@ -33,12 +33,12 @@ class CodeRecipes @Inject constructor() {
         repeat(count) {
             var addedToResult = false
             while (!addedToResult) {
-                val nextIem = randomRecipes.removeAt(0)
-                addedToResult = result.add(nextIem)
+                val nextItem = randomRecipes.removeAt(0)
+                addedToResult = result.add(nextItem)
                 if (!addedToResult) {
                     // nextItem is in use, so add it to the end of the list
-                    logger.d { "Edge Case Alert!!! - $nextIem already in use" }
-                    randomRecipes.add(nextIem)
+                    logger.d { "Edge Case Alert!!! - $nextItem already in use" }
+                    randomRecipes.add(nextItem)
                 }
             }
         }

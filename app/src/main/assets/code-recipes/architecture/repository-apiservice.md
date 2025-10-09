@@ -19,9 +19,11 @@ class ApiService @Inject constructor(
     suspend inline fun <reified T> get(
         url: String,
         parameters: Map<String, String> = emptyMap()
-    ): Result<T> =
-        // ...
-
+    ): Result<T> {
+        // Makes GET request and deserializes JSON response to type T
+        // Wraps in Result for error handling
+    }
+    
     fun close() {
         client.close()
     }
@@ -32,9 +34,9 @@ class TheMealDbApi @Inject constructor(
     private val apiService: ApiService
 ) {
     companion object {
-        private const val BASE_URL = 'https://www.themealdb.com/api/json/v1/1'
-        private const val CATEGORIES = "BASE_URL/categories.php"
-        private const val MEAL_BY_ID = "BASE_URL/lookup.php"
+        private const val BASE_URL = "https://www.themealdb.com/api/json/v1/1"        
+        private const val CATEGORIES = "$BASE_URL/categories.php"
+        private const val MEAL_BY_ID = "$BASE_URL/lookup.php"
     }
     
     suspend fun getCategories(): Result<CategoriesResponse> {
@@ -59,13 +61,9 @@ class RecipeRepositoryImpl @Inject constructor(
         }
     }
     override suspend fun getMealById(id: String): Result<Meal> {
-        return try {
-            api.getMealById(id).map { response ->
-                response.meals.firstOrNull()
-                    ?: throw IllegalArgumentException("Meal not found")
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+        return api.getMealById(id).map { response ->
+            response.meals.firstOrNull()
+                ?: throw IllegalArgumentException("Meal not found")
         }
     }
 }
