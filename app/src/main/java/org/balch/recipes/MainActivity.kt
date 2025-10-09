@@ -118,12 +118,11 @@ class MainActivity : ComponentActivity() {
                                 NavigationBarItem(
                                     selected = isSelected,
                                     onClick = {
-                                        // pop the current screen off the backstack if it not the root
-                                        if (backStack.peek() != TOP_LEVEL_ROUTES[0]) {
-                                            backStack.pop()
-                                        }
-                                        // push the new route onto the backstack
                                         if (backStack.peek() != topLevelRoute) {
+                                            // Navigate to root first if not there
+                                            if (backStack.peek() != TOP_LEVEL_ROUTES[0]) {
+                                                backStack.pop()
+                                            }
                                             backStack.push(topLevelRoute)
                                         }
                                     },

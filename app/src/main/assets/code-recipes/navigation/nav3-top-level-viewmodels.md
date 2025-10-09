@@ -8,9 +8,11 @@
 ## Code Snippet
 
 ```
+val backStack = rememberNavBackStack(TOP_LEVEL_ROUTES[0])
+
 NavDisplay(
-    backStack = backstack,
-    onBack = { repeat(it) { backstack.pop() } },
+    backStack = backStack,
+    onBack = { repeat(it) { backStack.pop() } },    
     entryDecorators = listOf(
         rememberSceneSetupNavEntryDecorator(),
         rememberSavedStateNavEntryDecorator(),
@@ -33,7 +35,8 @@ NavDisplay(
         }
         entry<SearchRoute> { searchRoute ->
         
-            // Note: New ViewModel for every new SearchViewModel instance from this route
+            // Note: Creates a new ViewModel instance for each SearchRoute navigation
+            // (not scoped to Activity, so will be cleared when popped)
             val viewModel =
                 hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
                     creationCallback = { factory ->

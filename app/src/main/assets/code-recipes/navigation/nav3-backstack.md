@@ -3,7 +3,7 @@
 - In **Nav3**, you manage the ***backstack***.
 - Create ***backstack*** using `rememberNavBackStack(navKey)`
   - ***backstack*** survives process death and configuration changes (aka savable)
-  - All route paramaters must be `@Serializable`
+  - All route parameters must be `@Serializable`
 - Push/Pop/Peek works for simple applications
 
 ## Code Snippet
@@ -68,4 +68,5 @@ fun NavBackStack<NavKey>.pop(): NavKey? =
         .also { backStackLogger.d { "pop: $it" } }
 
 fun NavBackStack<NavKey>.peek(): NavKey? = lastOrNull()
+
 ```
