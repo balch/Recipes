@@ -33,6 +33,7 @@ import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.core.repository.RecipeRepository
 import org.balch.recipes.features.CodeRecipeRepository
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.milliseconds
 
 
@@ -150,33 +151,40 @@ class SearchViewModel @AssistedInject constructor(
 
 
     private suspend fun searchMealsAndCode(query: String): SearchUiState {
-        val items = coroutineScope {
-            listOf(
-                async {
-                    repository.searchMeals(query)
-                        .getOrElse { emptyList() }
-                        .map { it.toMealSummary().toItemType() }
-                },
-                async {
-                    codeRecipeRepository.searchRecipes(query)
-                        .map { it.toItemType() }
-                }
-            ).awaitAll()
-                .flatten()
-                .sortedBy {
-                    when (it) {
-                        is ItemType.MealType -> it.meal.name
-                        is ItemType.CodeRecipeType -> it.codeRecipe.title
+        try {
+            val items = coroutineScope {
+                listOf(
+                    async {
+                        repository.searchMeals(query)
+                            .getOrElse { emptyList() }
+                            .map { it.toMealSummary().toItemType() }
+                    },
+                    async {
+                        codeRecipeRepository.searchRecipes(query)
+                            .map { it.toItemType() }
                     }
-                }
-        }
+                ).awaitAll()
+                    .flatten()
+                    .sortedBy {
+                        when (it) {
+                            is ItemType.MealType -> it.meal.name
+                            is ItemType.CodeRecipeType -> it.codeRecipe.title
+                        }
+                    }
+            }
 
-        return SearchUiState.Show(
-            searchType = SearchType.Search(query),
-            items = items,
-            searchTerm = query,
-            isFetching = false
-        )
+            return SearchUiState.Show(
+                searchType = SearchType.Search(query),
+                items = items,
+                searchTerm = query,
+                isFetching = false
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            logger.e(e) { "Error loading in search" }
+            return SearchUiState.Error(e.message ?: "Search failed")
+        }
     }
 
     private suspend fun searchByArea(name: String, text: String): SearchUiState {
@@ -189,6 +197,8 @@ class SearchViewModel @AssistedInject constructor(
                 searchTerm = text,
                 isFetching = false
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             SearchUiState.Error(e.message ?: "Search failed")
         }
@@ -203,6 +213,8 @@ class SearchViewModel @AssistedInject constructor(
                 searchTerm = text,
                 isFetching = false
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             SearchUiState.Error(e.message ?: "Search failed")
         }
@@ -217,6 +229,8 @@ class SearchViewModel @AssistedInject constructor(
                 searchTerm = text,
                 isFetching = false
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             SearchUiState.Error(e.message ?: "Search failed")
         }

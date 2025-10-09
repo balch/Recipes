@@ -26,6 +26,7 @@ import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.repository.RecipeRepository
 import org.balch.recipes.features.CodeRecipeRepository
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * ViewModel responsible for managing and providing UI state for the "Ideas" screen,
@@ -120,6 +121,8 @@ class IdeasViewModel @Inject constructor(
                     )
                 }
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logger.e(e) { "Error loading ideas" }
             IdeasUiState.Error(e.message ?: "Unknown error occurred")

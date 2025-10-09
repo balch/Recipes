@@ -5,6 +5,7 @@
   - Emit `Loading` state to the UI when loading data
   - Create **async jobs** for each API call scoped to `coroutineScope`
   - Wait for all the jobs to complete and emit the results
+- Make sure to re-throw the `CancellationException`
 
 ## Code Snippet
 
@@ -47,6 +48,9 @@ class IdeasViewModel @Inject constructor(
                 }
                 // ...
             }
+        } catch (e: CancellationException) {
+            // lets the system handle the cancellation exception 
+            throw e
         } catch (e: Exception) {
             IdeasUiState.Error(e.message ?: "Unknown error occurred")
         }
