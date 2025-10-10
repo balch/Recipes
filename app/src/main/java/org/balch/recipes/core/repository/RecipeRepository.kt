@@ -54,9 +54,13 @@ class RecipeRepositoryImpl @Inject constructor(
     }
     
     override suspend fun getMealById(id: String): Result<Meal> {
-        return api.getMealById(id).map { response ->
-            response.meals.firstOrNull()
-                ?: throw IllegalArgumentException("Meal not found")
+        return try {
+            api.getMealById(id).map { response ->
+                response.meals.firstOrNull()
+                    ?: throw IllegalArgumentException("Meal not found")
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
     

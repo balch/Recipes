@@ -98,15 +98,21 @@ class SearchViewModel @AssistedInject constructor(
                 }
                 when (searchType) {
                     is SearchType.Area -> {
-                        emit(searchByArea(searchType.searchText, searchType.displayText))
+                        emit(searchType.searchWith {
+                            repository.getMealsByArea(searchType.searchText)
+                        })
                     }
 
                     is SearchType.Category -> {
-                        emit(searchByCategory(searchType.searchText, searchType.displayText))
+                        emit(searchType.searchWith {
+                            repository.getMealsByCategory(searchType.searchText)
+                        })
                     }
 
                     is SearchType.Ingredient -> {
-                        emit(searchByIngredient(searchType.searchText, searchType.displayText))
+                        emit(searchType.searchWith {
+                            repository.getMealsByIngredient(searchType.searchText)
+                        })
                     }
 
                     is SearchType.Search -> {
@@ -187,46 +193,14 @@ class SearchViewModel @AssistedInject constructor(
         }
     }
 
-    private suspend fun searchByArea(name: String, text: String): SearchUiState {
-        val result = repository.getMealsByArea(name)
-
+    private suspend fun SearchType.searchWith(
+        fetcher: suspend () -> Result<List<MealSummary>>
+    ): SearchUiState {
         return try {
             SearchUiState.Show(
-                searchType = SearchType.Area(name),
-                items = result.getOrThrow().map { it.toItemType() },
-                searchTerm = text,
-                isFetching = false
-            )
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            SearchUiState.Error(e.message ?: "Search failed")
-        }
-    }
-
-    private suspend fun searchByCategory(name: String, text: String): SearchUiState {
-        val result = repository.getMealsByCategory(name)
-        return try {
-            SearchUiState.Show(
-                searchType = SearchType.Category(name),
-                items = result.getOrThrow().map { it.toItemType() },
-                searchTerm = text,
-                isFetching = false
-            )
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            SearchUiState.Error(e.message ?: "Search failed")
-        }
-    }
-
-    private suspend fun searchByIngredient(name: String, text: String): SearchUiState {
-        val result = repository.getMealsByIngredient(name)
-        return try {
-            SearchUiState.Show(
-                searchType = SearchType.Ingredient(name),
-                items = result.getOrThrow().map { it.toItemType() },
-                searchTerm = text,
+                searchType = this,
+                items = fetcher().getOrThrow().map { it.toItemType() },
+                searchTerm = this.displayText,
                 isFetching = false
             )
         } catch (e: CancellationException) {
