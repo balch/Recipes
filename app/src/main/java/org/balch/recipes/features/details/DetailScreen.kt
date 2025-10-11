@@ -378,8 +378,8 @@ private fun TopBar(
     // Determine the default title based on UI state
     val defaultTitle = when (uiState) {
         is UiState.ShowMeal -> "Meal Recipe #${uiState.meal.id}"
+        is UiState.Loading -> "Meal Recipe #${uiState.mealSummary?.id ?: "Loading"}"
         is UiState.ShowCodeRecipe -> "Code Recipe #${uiState.codeRecipe.index}"
-        is UiState.Loading -> uiState.mealSummary?.name ?: "Loading"
         is UiState.Error -> "Error"
     }
 
