@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -40,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -72,6 +74,78 @@ enum class StepViewMode {
     List, StepByStep
 }
 
+/**
+ * State holder for the Detail Screen that encapsulates all UI state related to
+ * viewing and interacting with recipe details.
+ *
+ * @property stepViewMode Current view mode for recipe instructions (List or StepByStep)
+ * @property currentStepIndex Current step index when in StepByStep mode
+ * @property listState LazyList scroll state for the detail content
+ * @property showMealTitleInHeader Whether the title should be displayed in the header
+ */
+@Stable
+class DetailScreenState(
+    initialStepViewMode: StepViewMode,
+    initialStepIndex: Int,
+    val listState: LazyListState,
+    private val ingredientsCardPosition: Int = 2,
+) {
+    private var _stepViewMode by mutableStateOf(initialStepViewMode)
+    val stepViewMode: StepViewMode
+        get() = _stepViewMode
+    
+    private var _currentStepIndex by mutableIntStateOf(initialStepIndex)
+    val currentStepIndex: Int
+        get() = _currentStepIndex
+    
+    private val isStickyHeaderStuck: Boolean by derivedStateOf {
+        listState.firstVisibleItemIndex >= ingredientsCardPosition
+    }
+
+    val showMealTitleInHeader: Boolean by derivedStateOf {
+        isStickyHeaderStuck || stepViewMode == StepViewMode.StepByStep
+    }
+
+    /**
+     * Updates the step view mode and resets the current step index
+     */
+    fun setStepViewMode(mode: StepViewMode) {
+        _stepViewMode = mode
+        _currentStepIndex = 0
+    }
+    
+    /**
+     * Navigates to a specific step index
+     */
+    fun navigateToStep(index: Int) {
+        _currentStepIndex = index
+    }
+}
+
+/**
+ * Creates and remembers a [DetailScreenState] instance.
+ *
+ * @param initialStepViewMode Initial view mode for instructions (default: List)
+ * @param initialStepIndex Initial step index (default: 0)
+ * @param ingredientsCardPosition Position of the ingredients card in the lazy list (default: 2)
+ */
+@Composable
+fun rememberDetailScreenState(
+    initialStepViewMode: StepViewMode = StepViewMode.List,
+    initialStepIndex: Int = 0,
+    ingredientsCardPosition: Int = 2,
+): DetailScreenState {
+    val listState = rememberLazyListState()
+    return remember(listState, ingredientsCardPosition) {
+        DetailScreenState(
+            initialStepViewMode = initialStepViewMode,
+            initialStepIndex = initialStepIndex,
+            listState = listState,
+            ingredientsCardPosition = ingredientsCardPosition,
+        )
+    }
+}
+
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun DetailScreen(
@@ -101,8 +175,7 @@ fun DetailLayout(
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     val hazeState = rememberHazeState()
-    var stepViewMode by remember { mutableStateOf(StepViewMode.List) }
-    var currentStepIndex by remember { mutableIntStateOf(0) }
+    val detailState = rememberDetailScreenState()
 
     val instructionSteps = (uiState as? UiState.ShowMeal)?.meal
         ?.instructions?.split("\r\n", "\n", ". ")
@@ -115,13 +188,6 @@ fun DetailLayout(
             .fillMaxSize()
             .safeDrawingPadding(),
         topBar = {
-            val titleText = when (uiState) {
-                is UiState.ShowMeal -> "Meal Recipe #${uiState.meal.id}"
-                is UiState.ShowCodeRecipe -> "Code Recipe #${uiState.codeRecipe.index}"
-                is UiState.Loading -> uiState.mealSummary?.name ?: "Loading"
-                is UiState.Error -> "Error"
-            }
-
             TopBar(
                 modifier = modifier
                     .hazeEffect(state = hazeState, style = LocalHazeStyle.current) {
@@ -130,26 +196,24 @@ fun DetailLayout(
                             endIntensity = 0f,
                         )
                     },
-                titleText = titleText,
+                uiState = uiState,
+                showMealTitle = detailState.showMealTitleInHeader,
                 onBack = onBack,
             )
         },
         bottomBar = {
-            if (stepViewMode == StepViewMode.StepByStep) {
+            if (detailState.stepViewMode == StepViewMode.StepByStep) {
                 Column {
                     RecipeInstructionsHeader(
                         modifier = modifier,
-                        onStepViewModeChange = {
-                            stepViewMode = it
-                            currentStepIndex = 0
-                        },
-                        stepViewMode = stepViewMode,
+                        onStepViewModeChange = { detailState.setStepViewMode(it) },
+                        stepViewMode = detailState.stepViewMode,
                     )
                     RecipeInstructionByStepCard(
                         modifier = modifier,
-                        currentStepIndex = currentStepIndex,
+                        currentStepIndex = detailState.currentStepIndex,
                         instructionSteps = instructionSteps,
-                        onStepChange = { currentStepIndex = it }
+                        onStepChange = { detailState.navigateToStep(it) }
                     )
                 }
             }
@@ -174,12 +238,10 @@ fun DetailLayout(
                     MealDetailItem(
                         modifier = modifier.hazeSource(hazeState),
                         meal = uiState.meal,
-                        stepViewMode = stepViewMode,
+                        stepViewMode = detailState.stepViewMode,
                         instructionSteps = instructionSteps,
-                        onStepViewModeChange = {
-                            stepViewMode = it
-                            currentStepIndex = 0
-                        },
+                        onStepViewModeChange = { detailState.setStepViewMode(it) },
+                        listState = detailState.listState,
                         sharedTransitionScope = sharedTransitionScope,
                         animatedVisibilityScope = animatedVisibilityScope,
                     )
@@ -230,11 +292,10 @@ fun MealDetailItem(
     stepViewMode: StepViewMode,
     instructionSteps: List<String>,
     onStepViewModeChange: (StepViewMode) -> Unit,
+    listState: LazyListState,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
-
-    val listState = rememberLazyListState()
 
     /**
      * Show Compact Ingredients when the Ingredients card scrolls
@@ -317,18 +378,41 @@ private fun CrossfadeIngredients(
 @Composable
 private fun TopBar(
     modifier: Modifier,
-    titleText: String,
+    uiState: UiState,
+    showMealTitle: Boolean,
     onBack: () -> Unit,
 ) {
+    // Determine the default title based on UI state
+    val defaultTitle = when (uiState) {
+        is UiState.ShowMeal -> "Meal Recipe #${uiState.meal.id}"
+        is UiState.ShowCodeRecipe -> "Code Recipe #${uiState.codeRecipe.index}"
+        is UiState.Loading -> uiState.mealSummary?.name ?: "Loading"
+        is UiState.Error -> "Error"
+    }
+
+    // Determine the alternate title (meal name) when sticky header is stuck
+    val mealTitle = when (uiState) {
+        is UiState.ShowMeal -> uiState.meal.name
+        else -> null
+    }
+
+    // Show meal title when sticky header is stuck, otherwise show default
+    val shouldShowMealTitle = showMealTitle && mealTitle != null
+
     TopAppBar(
         modifier = modifier,
         title = {
-            Text(
-                text = titleText,
-                style = MaterialTheme.typography.headlineSmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Crossfade(
+                targetState = shouldShowMealTitle,
+                animationSpec = tween(300)
+            ) { showMealTitle ->
+                Text(
+                    text = if (showMealTitle && mealTitle != null) mealTitle else defaultTitle,
+                    style = MaterialTheme.typography.headlineSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         },
         navigationIcon = {
             IconButton(onClick = onBack) {
