@@ -87,8 +87,21 @@ enum class StepViewMode {
 class DetailScreenState(
     initialStepViewMode: StepViewMode,
     initialStepIndex: Int,
+    val uiState: UiState,
     val listState: LazyListState,
+    val animatedVisibilityScope: AnimatedVisibilityScope?,
 ) {
+
+    private var _showCodeRecipeTitle by mutableStateOf(false)
+
+    val showTitleInHeader by derivedStateOf {
+        (animatedVisibilityScope?.transition?.isRunning != true)
+            && (
+                (showMealTitleInHeader && uiState is UiState.ShowMeal)
+                    || (_showCodeRecipeTitle && uiState is UiState.ShowCodeRecipe)
+            )
+    }
+
     private var _stepViewMode by mutableStateOf(initialStepViewMode)
     val stepViewMode: StepViewMode
         get() = _stepViewMode
@@ -100,6 +113,10 @@ class DetailScreenState(
     val showMealTitleInHeader: Boolean by derivedStateOf {
         listState.firstVisibleItemIndex > 0
             || stepViewMode == StepViewMode.StepByStep
+    }
+
+    fun setShowCodeRecipeTitle(isVisible: Boolean) {
+        _showCodeRecipeTitle = isVisible
     }
 
     /**
@@ -128,13 +145,17 @@ class DetailScreenState(
 fun rememberDetailScreenState(
     initialStepViewMode: StepViewMode = StepViewMode.List,
     initialStepIndex: Int = 0,
+    animatedVisibilityScope: AnimatedVisibilityScope?,
+    uiState: UiState,
 ): DetailScreenState {
     val listState = rememberLazyListState()
-    return remember(listState) {
+    return remember(listState, uiState) {
         DetailScreenState(
             initialStepViewMode = initialStepViewMode,
             initialStepIndex = initialStepIndex,
             listState = listState,
+            animatedVisibilityScope = animatedVisibilityScope,
+            uiState = uiState,
         )
     }
 }
@@ -168,7 +189,10 @@ fun DetailLayout(
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     val hazeState = rememberHazeState()
-    val detailState = rememberDetailScreenState()
+    val detailState = rememberDetailScreenState(
+        animatedVisibilityScope = animatedVisibilityScope,
+        uiState = uiState,
+    )
 
     val instructionSteps = (uiState as? UiState.ShowMeal)?.meal
         ?.instructions?.split("\r\n", "\n", ". ")
@@ -190,7 +214,7 @@ fun DetailLayout(
                         )
                     },
                 uiState = uiState,
-                showMealTitle = detailState.showMealTitleInHeader,
+                showTitleInHeader = detailState.showTitleInHeader,
                 onBack = onBack,
             )
         },
@@ -222,6 +246,7 @@ fun DetailLayout(
                     CodeDetailItem(
                         modifier = modifier.hazeSource(hazeState),
                         codeRecipe = uiState.codeRecipe,
+                        onTittleVisible = { detailState.setShowCodeRecipeTitle(!it) },
                         sharedTransitionScope = sharedTransitionScope,
                         animatedVisibilityScope = animatedVisibilityScope,
                     )
@@ -372,7 +397,7 @@ private fun CrossfadeIngredients(
 private fun TopBar(
     modifier: Modifier,
     uiState: UiState,
-    showMealTitle: Boolean,
+    showTitleInHeader: Boolean,
     onBack: () -> Unit,
 ) {
     // Determine the default title based on UI state
@@ -384,23 +409,24 @@ private fun TopBar(
     }
 
     // Determine the alternate title (meal name) when sticky header is stuck
-    val mealTitle = when (uiState) {
+    val overrideTitle = when (uiState) {
         is UiState.ShowMeal -> uiState.meal.name
+        is UiState.ShowCodeRecipe -> uiState.codeRecipe.title
         else -> null
     }
 
     // Show meal title when sticky header is stuck, otherwise show default
-    val shouldShowMealTitle = showMealTitle && mealTitle != null
+    val shouldShowOverrideTitle = showTitleInHeader && overrideTitle != null
 
     TopAppBar(
         modifier = modifier,
         title = {
             Crossfade(
-                targetState = shouldShowMealTitle,
+                targetState = shouldShowOverrideTitle,
                 animationSpec = tween(300)
             ) { showMealTitle ->
                 Text(
-                    text = if (showMealTitle && mealTitle != null) mealTitle else defaultTitle,
+                    text = if (showMealTitle && overrideTitle != null) overrideTitle else defaultTitle,
                     style = MaterialTheme.typography.headlineSmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

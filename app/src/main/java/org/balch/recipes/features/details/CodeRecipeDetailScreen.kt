@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -35,6 +36,7 @@ import org.balch.recipes.ui.widgets.MarkdownCodeSnippet
 fun CodeDetailItem(
     modifier: Modifier = Modifier,
     codeRecipe: CodeRecipe,
+    onTittleVisible: (Boolean) -> Unit,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
@@ -68,8 +70,8 @@ fun CodeDetailItem(
                         key = "${KEY_CODE_RECIPE_TITLE}-${codeRecipe.id}",
                         animatedVisibilityScope = animatedVisibilityScope,
                         sharedTransitionScope = sharedTransitionScope,
-
                     )
+                    .onVisibilityChanged { isVisible -> onTittleVisible(isVisible) }
             )
 
             MarkdownCodeSnippet(
@@ -96,7 +98,10 @@ private fun CodeRecipeDetailScreenPreview(
             modifier = Modifier.background(MaterialTheme.colorScheme.background)
                 .fillMaxSize()
         ) {
-            CodeDetailItem(codeRecipe = uiState.codeRecipe)
+            CodeDetailItem(
+                codeRecipe = uiState.codeRecipe,
+                onTittleVisible = {},
+            )
         }
     }
 }
