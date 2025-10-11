@@ -88,7 +88,6 @@ class DetailScreenState(
     initialStepViewMode: StepViewMode,
     initialStepIndex: Int,
     val listState: LazyListState,
-    private val ingredientsCardPosition: Int = 2,
 ) {
     private var _stepViewMode by mutableStateOf(initialStepViewMode)
     val stepViewMode: StepViewMode
@@ -97,13 +96,10 @@ class DetailScreenState(
     private var _currentStepIndex by mutableIntStateOf(initialStepIndex)
     val currentStepIndex: Int
         get() = _currentStepIndex
-    
-    private val isStickyHeaderStuck: Boolean by derivedStateOf {
-        listState.firstVisibleItemIndex >= ingredientsCardPosition
-    }
 
     val showMealTitleInHeader: Boolean by derivedStateOf {
-        isStickyHeaderStuck || stepViewMode == StepViewMode.StepByStep
+        listState.firstVisibleItemIndex > 0
+            || stepViewMode == StepViewMode.StepByStep
     }
 
     /**
@@ -127,21 +123,18 @@ class DetailScreenState(
  *
  * @param initialStepViewMode Initial view mode for instructions (default: List)
  * @param initialStepIndex Initial step index (default: 0)
- * @param ingredientsCardPosition Position of the ingredients card in the lazy list (default: 2)
  */
 @Composable
 fun rememberDetailScreenState(
     initialStepViewMode: StepViewMode = StepViewMode.List,
     initialStepIndex: Int = 0,
-    ingredientsCardPosition: Int = 2,
 ): DetailScreenState {
     val listState = rememberLazyListState()
-    return remember(listState, ingredientsCardPosition) {
+    return remember(listState) {
         DetailScreenState(
             initialStepViewMode = initialStepViewMode,
             initialStepIndex = initialStepIndex,
             listState = listState,
-            ingredientsCardPosition = ingredientsCardPosition,
         )
     }
 }
