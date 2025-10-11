@@ -29,8 +29,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
-import androidx.navigation3.scene.rememberSceneSetupNavEntryDecorator
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import dagger.hilt.android.AndroidEntryPoint
@@ -142,14 +141,13 @@ class MainActivity : ComponentActivity() {
                     NavDisplay(
                         modifier = Modifier.hazeSource(state = hazeState),
                         backStack = backStack,
-                        onBack = { repeat(it) { backStack.pop() } },
+                        onBack = { backStack.pop() },
                     // In order to add the `ViewModelStoreNavEntryDecorator` (see comment below for why)
                     // we also need to add the default `NavEntryDecorator`s as well. These provide
                     // extra information to the entry's content to enable it to display correctly
                     // and save its state.
                     entryDecorators = listOf(
-                        rememberSceneSetupNavEntryDecorator(),
-                        rememberSavedStateNavEntryDecorator(),
+                        rememberSaveableStateHolderNavEntryDecorator(),
                         rememberViewModelStoreNavEntryDecorator()
                     ),
 

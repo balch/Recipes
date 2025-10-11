@@ -50,12 +50,6 @@
     },
     {
       "area": "Navigation",
-      "title": "Nav3 EntryDecorators",
-      "bodyMarkdown": "navigation/nav3-entry-decorators.md",
-      "fileName": "MainActivity.kt"
-    },
-    {
-      "area": "Navigation",
       "title": "Nav3 TopLevel ViewModels",
       "bodyMarkdown": "navigation/nav3-top-level-viewmodels.md",
       "fileName": "MainActivity.kt"

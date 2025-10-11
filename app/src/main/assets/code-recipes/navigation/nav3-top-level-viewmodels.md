@@ -12,7 +12,7 @@ val backStack = rememberNavBackStack(TOP_LEVEL_ROUTES[0])
 
 NavDisplay(
     backStack = backStack,
-    onBack = { repeat(it) { backStack.pop() } },    
+    onBack = { backStack.pop() },    
     entryDecorators = listOf(
         rememberSceneSetupNavEntryDecorator(),
         rememberSavedStateNavEntryDecorator(),

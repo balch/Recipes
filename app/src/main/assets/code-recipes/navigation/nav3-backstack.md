@@ -19,7 +19,7 @@ private fun MainContent() {
     
     NavDisplay(
         backStack = backStack,
-        onBack = { repeat(it) { backStack.pop() } },
+        onBack = { backStack.pop() },
 
         entryProvider = entryProvider {
             entry<Ideas> {
