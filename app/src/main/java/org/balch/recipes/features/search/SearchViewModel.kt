@@ -189,7 +189,7 @@ class SearchViewModel @AssistedInject constructor(
             throw e
         } catch (e: Exception) {
             logger.e(e) { "Error loading in search" }
-            return SearchUiState.Error(e.message ?: "Search failed")
+            return SearchUiState.Error(e.message ?: "Search failed", searchType.displayText)
         }
     }
 
@@ -206,7 +206,7 @@ class SearchViewModel @AssistedInject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            SearchUiState.Error(e.message ?: "Search failed")
+            SearchUiState.Error(e.message ?: "Search failed", searchType.displayText)
         }
     }
 
@@ -242,13 +242,14 @@ sealed class SearchUiState {
     val searchText: String
         get() = when (this) {
             is Loading -> searchTerm
+            is Error -> displayText
             is Show -> searchType.searchText
             else -> ""
         }
 
     data object Welcome : SearchUiState()
     data class Loading(val searchTerm: String, val showSearchBar: Boolean) : SearchUiState()
-    data class Error(val message: String) : SearchUiState()
+    data class Error(val message: String, val displayText: String) : SearchUiState()
     data class Show(
         val searchType: SearchType,
         val items: List<ItemType>,

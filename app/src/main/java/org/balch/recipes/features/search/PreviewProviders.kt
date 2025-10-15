@@ -11,7 +11,7 @@ class SearchStateProvider : PreviewParameterProvider<SearchUiState> {
         SearchUiState.Welcome,
         SearchUiState.Loading("Beef", false),
         SearchUiState.Loading("Chick", true),
-        SearchUiState.Error("Something went wrong"),
+        SearchUiState.Error("Something went wrong", "DisplayText"),
         SearchUiState.Show(
             searchType = SearchType.Category("Beef"),
             items = listOf(
