@@ -94,7 +94,7 @@ class IdeasViewModelTest {
 
     private fun IdeasUiState.assertValidIngredients(
         ingredients: List<Ingredient>,
-        thumbnail: String
+        thumbnail: String?
     ) {
         assertThat(this).isInstanceOf(IdeasUiState.Ingredients::class.java)
         val state = this as IdeasUiState.Ingredients
