@@ -23,7 +23,7 @@ data class Meal(
     @SerialName("strInstructions")
     val instructions: String,
     @SerialName("strMealThumb")
-    val thumbnail: String,
+    val thumbnail: String?,
     @SerialName("strTags")
     val tags: String? = null,
     @SerialName("strYoutube")
@@ -116,7 +116,7 @@ data class MealSummary(
     @SerialName("strMeal")
     val name: String,
     @SerialName("strMealThumb")
-    val thumbnail: String
+    val thumbnail: String?,
 ): Parcelable
 
 
