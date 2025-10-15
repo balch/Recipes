@@ -157,7 +157,7 @@ class MainActivity : ComponentActivity() {
                     entryProvider = entryProvider {
                         entry<Ideas> {
                             IdeasScreen(
-                                viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity,),
+                                viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity),
                                 onCategoryClick = { category ->
                                     backStack.push(SearchRoute(SearchType.Category(category.name)))
                                 },
@@ -240,9 +240,11 @@ class MainActivity : ComponentActivity() {
                                 animatedVisibilityScope = LocalNavAnimatedContentScope.current
                             )
                         }
-                        entry<Info> { InfoScreen(
-                            viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity),
-                        ) }
+                        entry<Info> {
+                            InfoScreen(
+                                viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity)
+                            )
+                        }
                     },
                 )
                 }
