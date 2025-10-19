@@ -22,7 +22,7 @@ The goal was to brush up on the the latest **Android** tech stack components and
 Another reason this app came together so nicely is due to the plethora of free and easy to use **Android Tools and Libraries** supplied by both _Big-Biz_ (hello _GOOGLE_ and _JETBRAINS_), and the **Android Community ICs** toiling away on GitHub and Medium. The ***Code Recipes*** mostly originate from these sources and describe the wiring and plumbing used to create a visually complelling **Android Application**.
 
 ### Demo
-|            Dark Mode                                                                                   |           Light Mode                                                                                    |
+|                                           Dark Mode                                           |                                          Light Mode                                           |
 |:---------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------:|
 | <video src="https://github.com/user-attachments/assets/4723386b-970f-4c90-8d60-919193125c62"> | <video src="https://github.com/user-attachments/assets/82fb3350-ffc5-48bd-8030-16ff4972f4b3"> |
 
@@ -49,7 +49,7 @@ Another reason this app came together so nicely is due to the plethora of free a
 <details>
 <summary><b>Detail Screens</b></summary>
   
-|  Dark Mode                                                                                             |   Light Mode                                                                                              | 
+|                                           Dark Mode                                           |                                          Light Mode                                           | 
 |:---------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------:|
 | <video src="https://github.com/user-attachments/assets/36a5b9b5-0a16-4ec8-b9d1-a13194ce5234"> | <video src="https://github.com/user-attachments/assets/4efd0269-0229-47d3-9796-2cfd27a65303"> |
 
