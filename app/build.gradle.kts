@@ -31,6 +31,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Sign release with the debug signing config for internal installability
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
