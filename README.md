@@ -21,27 +21,37 @@ The goal was to brush up on the the latest **Android** tech stack components and
 
 Another reason this app came together so nicely is due to the plethora of free and easy to use **Android Tools and Libraries** supplied by both _Big-Biz_ (hello _GOOGLE_ and _JETBRAINS_), and the **Android Community ICs** toiling away on GitHub and Medium. The ***Code Recipes*** mostly originate from these sources and describe the wiring and plumbing used to create a visually complelling **Android Application**.
 
-### Screenshots
+### Demo
+|  | |
+|:---:|:---:|
+| <video src="https://github.com/user-attachments/assets/4723386b-970f-4c90-8d60-919193125c62"> | <video src="https://github.com/user-attachments/assets/82fb3350-ffc5-48bd-8030-16ff4972f4b3"> |
 
-#### Meal Recipes
+<details>
+<summary><b>Meal Recipes</b></summary>
+
 |                                      Categories                                      |                                       Cuisine                                       |                                        Detail List                                         |                                        Detail Step By Step                                         |
 |:------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------:|
 |  <img src="screenshots/darkmode-category.png" width="200" alt="Dark Mode Category">  | <img src="screenshots/darkmode-cuisine.png" width="200" alt="Dark Mode Cuisine"> |  <img src="screenshots/darkmode-detail-list.png" width="200" alt="Dark Mode Detail List">  |  <img src="screenshots/darkmode-detail-step.png" width="200" alt="Dark Mode Detail Step By Step">  |
 | <img src="screenshots/lightmode-category.png" width="200" alt="Light Mode Category"> | <img src="screenshots/lightmode-cuisine.png" width="200" alt="Light Mode Category"> | <img src="screenshots/lightmode-detail-list.png" width="200" alt="Light Mode Detail List"> | <img src="screenshots/lightmode-detail-step.png" width="200" alt="Light Mode Detail Step By Step"> |
 
-#### Code Recipes
+</details>
+
+<details>
+<summary><b>Code Recipes</b></summary>
+
 |                                    Code Recipes                                    |                                        Code Recipe Detail                                        |
 |:----------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------:|
 | <img src="screenshots/darkmode-code.png" width="200" alt="Dark Mode Code Recipes"> | <img src="screenshots/darkmode-code-detail.png" width="200" alt="Dark Mode Code Recipe Detail">  |
 |   <img src="screenshots/lightmode-code.png" width="200" alt="Light Mode Recipes">   | <img src="screenshots/lightmode-code-detail.png" width="200" alt="Light Mode Code Recipe Detail"> |
 
+</details>
 
 <details>
 <summary><b>Videos</b></summary>
   
-|  |  | | |
-|:----:|:----:|:----:|:----:|
-| <video src="https://github.com/user-attachments/assets/4723386b-970f-4c90-8d60-919193125c62"> | <video src="https://github.com/user-attachments/assets/36a5b9b5-0a16-4ec8-b9d1-a13194ce5234"> | <video src="https://github.com/user-attachments/assets/c21fddfb-1dad-4267-904a-9780d9af45ae"> | <video src="https://github.com/user-attachments/assets/81abdae1-7ea6-415f-aac9-6c5c05c4d76d"> |
+|  |  | 
+|:----:|:----:|
+| <video src="https://github.com/user-attachments/assets/36a5b9b5-0a16-4ec8-b9d1-a13194ce5234"> | <video src="https://github.com/user-attachments/assets/4efd0269-0229-47d3-9796-2cfd27a65303"> |
 
 </details>
 
