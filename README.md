@@ -35,10 +35,16 @@ Another reason this app came together so nicely is due to the plethora of free a
 | <img src="screenshots/darkmode-code.png" width="200" alt="Dark Mode Code Recipes"> | <img src="screenshots/darkmode-code-detail.png" width="200" alt="Dark Mode Code Recipe Detail">  |
 |   <img src="screenshots/lightmode-code.png" width="200" alt="Light Mode Recipes">   | <img src="screenshots/lightmode-code-detail.png" width="200" alt="Light Mode Code Recipe Detail"> |
 
-### Videos
+
+<details>
+<summary><b>Videos</b></summary>
+  
 |  |  | | |
 |:----:|:----:|:----:|:----:|
 | <video src="https://github.com/user-attachments/assets/4723386b-970f-4c90-8d60-919193125c62"> | <video src="https://github.com/user-attachments/assets/36a5b9b5-0a16-4ec8-b9d1-a13194ce5234"> | <video src="https://github.com/user-attachments/assets/c21fddfb-1dad-4267-904a-9780d9af45ae"> | <video src="https://github.com/user-attachments/assets/81abdae1-7ea6-415f-aac9-6c5c05c4d76d"> |
+
+</details>
+
 
 ### Dependencies
 | Dependency                                                                                     | Description                                         | 
