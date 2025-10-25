@@ -482,7 +482,7 @@ private fun RecipeIngredientsCard(
 ) {
 
     val titleAlpha = if (showCompact) 0f else 1f
-    
+
     Column(
         modifier = modifier
             .padding(horizontal = 16.dp)
@@ -506,14 +506,8 @@ private fun RecipeIngredientsCard(
                 contentColor = MaterialTheme.colorScheme.onSurface,
             )
         ) {
-            val modifier =
-                if (showCompact) Modifier
-                    .height(220.dp)
-                    .verticalScroll(rememberScrollState())
-                else Modifier
             RecipeIngredients(
                 meal = meal,
-                modifier = modifier,
                 showCompact = showCompact
             )
         }
@@ -530,8 +524,11 @@ private fun RecipeIngredients(
     val innerPadding = if (showCompact) 2.dp else 4.dp
     val textStyle = if (showCompact) MaterialTheme.typography.bodySmall
                     else MaterialTheme.typography.bodyMedium
+    
     Column(
-        modifier = modifier.padding(outerPadding)
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(outerPadding)
     ) {
         meal.ingredientsWithMeasures.forEach { (ingredient, measure) ->
             Row(
@@ -728,4 +725,25 @@ private fun DetailScreenPreview(
             onBack = {}
         )
     }
+}
+
+@ThemePreview
+@Composable
+private fun RecipeIngredientsCardPreview(
+) {
+    RecipesTheme {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            RecipeIngredientsCard(
+                meal = DetailStateProvider.previewMeal,
+                showCompact = true,
+            )
+            RecipeIngredientsCard(
+                meal = DetailStateProvider.previewMeal,
+                showCompact = false,
+            )
+        }
+    }
+
 }
