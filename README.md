@@ -9,7 +9,7 @@ Keeping up with the latest Android trends is always a challenge. One of the tech
 - Dependency Injection
 - Testing
 
-The latest incarnation for my reference app is called ***Recipes***. 
+The latest incarnation of my reference app is called ***Recipes***. 
 
 Since I love a good double entendre, this app ***conflates*** _Meal_ and _Code_ **Recipes**, creating a UX to demonstrate the techniques it describes. 
 
