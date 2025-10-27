@@ -322,10 +322,10 @@ fun MealDetailItem(
      * Update [ingredientsCardPosition] when moving the stickyHeader element
      */
     val ingredientsCardPosition = 2
-    val showCompactIngredients by remember {
+    val showCompactIngredients by remember(listState, stepViewMode) {
         derivedStateOf {
             listState.firstVisibleItemIndex >= ingredientsCardPosition
-                    && stepViewMode == StepViewMode.List
+                    || stepViewMode == StepViewMode.StepByStep
         }
     }
 
@@ -664,7 +664,7 @@ private fun RecipeInstructionByStepCard(
                 text = instructionSteps[currentStepIndex],
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = modifier.padding(bottom = 24.dp)
-                    .height(70.dp)
+                    .height(120.dp)
                     .verticalScroll(rememberScrollState())
             )
 
