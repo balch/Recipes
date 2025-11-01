@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
@@ -147,6 +148,10 @@ class SearchViewModel @AssistedInject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<SearchUiState> =
         searchFlow
+            .catch { e ->
+                logger.e(e) { "Error loading in search" }
+                emit(SearchUiState.Error(e.message ?: "Search failed", searchType.displayText))
+            }
             .onEach { logger.d { "SearchUiState: ${it.javaClass.simpleName} - ${it.searchText}" } }
             .flowOn(dispatcherProvider.default)
             .stateIn(
@@ -157,40 +162,33 @@ class SearchViewModel @AssistedInject constructor(
 
 
     private suspend fun searchMealsAndCode(query: String): SearchUiState {
-        try {
-            val items = coroutineScope {
-                listOf(
-                    async {
-                        repository.searchMeals(query)
-                            .getOrElse { emptyList() }
-                            .map { it.toMealSummary().toItemType() }
-                    },
-                    async {
-                        codeRecipeRepository.searchRecipes(query)
-                            .map { it.toItemType() }
+        val items = coroutineScope {
+            listOf(
+                async {
+                    repository.searchMeals(query)
+                        .getOrElse { emptyList() }
+                        .map { it.toMealSummary().toItemType() }
+                },
+                async {
+                    codeRecipeRepository.searchRecipes(query)
+                        .map { it.toItemType() }
+                }
+            ).awaitAll()
+                .flatten()
+                .sortedBy {
+                    when (it) {
+                        is ItemType.MealType -> it.meal.name
+                        is ItemType.CodeRecipeType -> it.codeRecipe.title
                     }
-                ).awaitAll()
-                    .flatten()
-                    .sortedBy {
-                        when (it) {
-                            is ItemType.MealType -> it.meal.name
-                            is ItemType.CodeRecipeType -> it.codeRecipe.title
-                        }
-                    }
-            }
-
-            return SearchUiState.Show(
-                searchType = SearchType.Search(query),
-                items = items,
-                searchTerm = query,
-                isFetching = false
-            )
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            logger.e(e) { "Error loading in search" }
-            return SearchUiState.Error(e.message ?: "Search failed", searchType.displayText)
+                }
         }
+
+        return SearchUiState.Show(
+            searchType = SearchType.Search(query),
+            items = items,
+            searchTerm = query,
+            isFetching = false
+        )
     }
 
     private suspend fun SearchType.searchWith(

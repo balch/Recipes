@@ -99,13 +99,17 @@ class DetailsViewModel @AssistedInject constructor(
                 }
             }
         }
-            .onEach { logger.d { "UIState: ${it.javaClass.simpleName} - ${it.let { if (it is UiState.ShowMeal) "meal: ${it.meal.name}" else ""}}"} }
-            .flowOn(dispatcherProvider.default)
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds),
-                initialValue = initialUiState
-            )
+        .catch { e ->
+            logger.e(e) { "Error loading details" }
+            emit(UiState.Error(e.message ?: "Unknown error occurred"))
+        }
+        .onEach { logger.d { "UIState: ${it.javaClass.simpleName} - ${it.let { if (it is UiState.ShowMeal) "meal: ${it.meal.name}" else ""}}"} }
+        .flowOn(dispatcherProvider.default)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5.seconds.inWholeMilliseconds),
+            initialValue = initialUiState
+        )
 
     @AssistedFactory
     interface Factory {

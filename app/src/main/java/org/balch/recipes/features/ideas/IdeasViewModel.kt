@@ -11,6 +11,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
@@ -26,7 +27,6 @@ import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.repository.RecipeRepository
 import org.balch.recipes.features.CodeRecipeRepository
 import javax.inject.Inject
-import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * ViewModel responsible for managing and providing UI state for the "Ideas" screen,
@@ -68,7 +68,11 @@ class IdeasViewModel @Inject constructor(
             emit(IdeasUiState.Loading)
             emit(deriveState(browsableType))
         }
-        .onEach { logger.d { "UIState: ${it.javaClass.simpleName} - ${it.imageUrl?.let { "imageUrl: $it" } ?: "no imageUrl"}"} }
+        .catch { e ->
+            logger.e(e) { "Error loading ideas" }
+            emit(IdeasUiState.Error(e.message ?: "Unknown error occurred"))
+        }
+        .onEach { logger.d { "UIState: ${it.javaClass.simpleName} - ${it.imageUrl?.let { "imageUrl: $it" } ?: "no imageUrl"}" } }
         .flowOn(dispatcherProvider.default)
         .stateIn(
             scope = viewModelScope,
@@ -77,56 +81,54 @@ class IdeasViewModel @Inject constructor(
             initialValue = IdeasUiState.Loading
         )
 
-    private suspend fun deriveState(browsableType: BrowsableType): IdeasUiState =
-        try {
-            // Randomly select 1 or 3 CodeRecipes to sprinkle into the grid
-            val randomCodeRecipes = codeRecipeRepository.getRandomRecipes(3)
-            
-            when (browsableType) {
-                BrowsableType.Category -> {
-                    val categories = mealRepository.getCategories()
-                    IdeasUiState.Categories(
-                        categories = categories.getOrThrow(),
+    private suspend fun deriveState(browsableType: BrowsableType): IdeasUiState {
+
+        // Randomly select 1 or 3 CodeRecipes to sprinkle into the grid
+        val randomCodeRecipes = codeRecipeRepository.getRandomRecipes(3)
+
+        return when (browsableType) {
+            BrowsableType.Category -> {
+                val categories = mealRepository.getCategories()
+                IdeasUiState.Categories(
+                    categories = categories.getOrThrow(),
+                    codeRecipes = randomCodeRecipes
+                )
+            }
+
+            BrowsableType.Area -> {
+                coroutineScope {
+                    val areasJob = async { mealRepository.getAreas() }
+                    val randomMealJob = async { mealRepository.getRandomMeal() }
+
+                    IdeasUiState.Areas(
+                        areas = areasJob.await().getOrThrow(),
+                        imageUrl = randomMealJob.await().getOrNull()?.thumbnail,
                         codeRecipes = randomCodeRecipes
                     )
                 }
-                BrowsableType.Area -> {
-                    coroutineScope {
-                        val areasJob = async { mealRepository.getAreas() }
-                        val randomMealJob = async { mealRepository.getRandomMeal() }
+            }
 
-                        IdeasUiState.Areas(
-                            areas = areasJob.await().getOrThrow(),
-                            imageUrl = randomMealJob.await().getOrNull()?.thumbnail,
-                            codeRecipes = randomCodeRecipes
-                        )
-                    }
-                }
-                BrowsableType.Ingredient -> {
-                    coroutineScope {
-                        val ingredientsJob = async { mealRepository.getIngredients() }
-                        val randomMealJob = async { mealRepository.getRandomMeal() }
+            BrowsableType.Ingredient -> {
+                coroutineScope {
+                    val ingredientsJob = async { mealRepository.getIngredients() }
+                    val randomMealJob = async { mealRepository.getRandomMeal() }
 
-                        IdeasUiState.Ingredients(
-                            ingredients = ingredientsJob.await().getOrThrow(),
-                            imageUrl = randomMealJob.await().getOrNull()?.thumbnail,
-                            codeRecipes = randomCodeRecipes
-                        )
-                    }
-                }
-                BrowsableType.CodeRecipe -> {
-                    IdeasUiState.CodeRecipes(
-                        imageUrl = null,
-                        codeRecipes = codeRecipeRepository.sortedRecipes(),
+                    IdeasUiState.Ingredients(
+                        ingredients = ingredientsJob.await().getOrThrow(),
+                        imageUrl = randomMealJob.await().getOrNull()?.thumbnail,
+                        codeRecipes = randomCodeRecipes
                     )
                 }
             }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            logger.e(e) { "Error loading ideas" }
-            IdeasUiState.Error(e.message ?: "Unknown error occurred")
+
+            BrowsableType.CodeRecipe -> {
+                IdeasUiState.CodeRecipes(
+                    imageUrl = null,
+                    codeRecipes = codeRecipeRepository.sortedRecipes(),
+                )
+            }
         }
+    }
 
     fun retry() {
         loadIntentFlow.value = true
