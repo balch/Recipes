@@ -38,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,6 +56,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
@@ -64,6 +66,7 @@ import dev.chrisbanes.haze.rememberHazeState
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.models.SearchType
+import org.balch.recipes.ui.nav.PreviewNavigationEventDispatcherOwner
 import org.balch.recipes.ui.theme.DeepBrown
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
@@ -109,18 +112,22 @@ fun SearchScreen(
 private fun SearchLayoutPreview(
     @PreviewParameter(SearchStateProvider::class) uiState: SearchUiState,
 ) {
-    RecipesTheme {
-        SearchLayout(
-            uiState = uiState,
-            searchText = "",
-            onMealClick = {},
-            onCodeClick = {},
-            onSearch = {},
-            onRandom = {},
-            clearSearch = {},
-            onBack = {},
-            onScrollChange = {},
-        )
+    CompositionLocalProvider(
+        LocalNavigationEventDispatcherOwner provides PreviewNavigationEventDispatcherOwner()
+    ) {
+        RecipesTheme {
+            SearchLayout(
+                uiState = uiState,
+                searchText = "",
+                onMealClick = {},
+                onCodeClick = {},
+                onSearch = {},
+                onRandom = {},
+                clearSearch = {},
+                onBack = {},
+                onScrollChange = {},
+            )
+        }
     }
 }
 
@@ -229,7 +236,7 @@ private fun SearchLayout(
                             if (searchText.isNotEmpty()) {
                                 onSearch(searchText)
                             } else {
-                                onRandom
+                                onRandom()
                             }
                         }
                     )
