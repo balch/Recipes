@@ -99,7 +99,7 @@ data class Meal(
             return ingredients.zip(measures)
         }
 
-    fun toMealSummary(): MealSummary = MealSummary(id, name, thumbnail)
+    fun toMealSummary(): MealSummary = MealSummary(id, name, thumbnail, youtube)
 }
 
 @Serializable
@@ -117,6 +117,8 @@ data class MealSummary(
     val name: String,
     @SerialName("strMealThumb")
     val thumbnail: String?,
+    @SerialName("strYoutube")
+    val youtube: String? = null,
 ): Parcelable
 
 

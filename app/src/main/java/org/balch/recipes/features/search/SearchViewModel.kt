@@ -75,7 +75,8 @@ class SearchViewModel @AssistedInject constructor(
                 searchType = searchType,
                 items = emptyList(),
                 searchTerm = searchType.searchText,
-                isFetching = true
+                isFetching = true,
+                youtubeVideos = emptyList()
             )
         }.also { logger.d { "Initial UIState: $it" } }
 
@@ -131,7 +132,8 @@ class SearchViewModel @AssistedInject constructor(
                         searchType = previousState.searchType,
                         items = previousState.items,
                         searchTerm = newState.searchTerm,
-                        isFetching = true
+                        isFetching = true,
+                        youtubeVideos = previousState.youtubeVideos
                     )
                 } else {
                     newState
@@ -162,12 +164,12 @@ class SearchViewModel @AssistedInject constructor(
 
 
     private suspend fun searchMealsAndCode(query: String): SearchUiState {
+        val meals = repository.searchMeals(query)
+            .getOrElse { emptyList() }
         val items = coroutineScope {
             listOf(
                 async {
-                    repository.searchMeals(query)
-                        .getOrElse { emptyList() }
-                        .map { it.toMealSummary().toItemType() }
+                    meals.map { it.toMealSummary().toItemType() }
                 },
                 async {
                     codeRecipeRepository.searchRecipes(query)
@@ -187,7 +189,8 @@ class SearchViewModel @AssistedInject constructor(
             searchType = SearchType.Search(query),
             items = items,
             searchTerm = query,
-            isFetching = false
+            isFetching = false,
+            youtubeVideos = meals.mapNotNull { it.youtube }
         )
     }
 
@@ -195,11 +198,13 @@ class SearchViewModel @AssistedInject constructor(
         fetcher: suspend () -> Result<List<MealSummary>>
     ): SearchUiState {
         return try {
+            val meals = fetcher().getOrThrow()
             SearchUiState.Show(
                 searchType = this,
-                items = fetcher().getOrThrow().map { it.toItemType() },
+                items = meals.map { it.toItemType() },
                 searchTerm = this.displayText,
-                isFetching = false
+                isFetching = false,
+                youtubeVideos = meals.mapNotNull { it.youtube }
             )
         } catch (e: CancellationException) {
             throw e
@@ -226,7 +231,6 @@ class SearchViewModel @AssistedInject constructor(
 
 internal fun MealSummary.toItemType(): ItemType = ItemType.MealType(this)
 internal fun CodeRecipe.toItemType(): ItemType = ItemType.CodeRecipeType(this)
-
 sealed class ItemType(val id: String) {
 
     data class MealType(val meal: MealSummary) :
@@ -252,6 +256,7 @@ sealed class SearchUiState {
         val searchType: SearchType,
         val items: List<ItemType>,
         val isFetching: Boolean,
-        val searchTerm: String
+        val searchTerm: String,
+        val youtubeVideos: List<String>
     ) : SearchUiState()
 }

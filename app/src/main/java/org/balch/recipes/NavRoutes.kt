@@ -40,3 +40,6 @@ data class DetailRoute(val detailType: DetailType) : NavKey
 data class SearchRoute(
     val searchType: SearchType,
 ) : NavKey
+
+@Serializable
+data class YouTubePlayer(val videos: List<String>) : NavKey

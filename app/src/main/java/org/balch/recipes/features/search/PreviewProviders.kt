@@ -26,8 +26,8 @@ class SearchStateProvider : PreviewParameterProvider<SearchUiState> {
                     thumbnail = "https://www.themealdb.com/images/media/meals/sytuqu152"
                 ).toItemType(),
             ),
-            isFetching = true,
-            searchTerm = "Beef"
+            isFetching = true, searchTerm = "Beef",
+            youtubeVideos = emptyList()
         ),
         SearchUiState.Show(
             searchType = SearchType.Search("Chicken"),
@@ -56,7 +56,50 @@ class SearchStateProvider : PreviewParameterProvider<SearchUiState> {
                 ).toItemType()
             ),
             isFetching = false,
-            searchTerm = "Chicken"
+            searchTerm = "Chicken",
+            youtubeVideos = emptyList()
+        ),
+        SearchUiState.Show(
+            searchType = SearchType.Search("cu"),
+            items = listOf(
+                CodeRecipe(
+                    index = 1,
+                    area = CodeArea.Architecture,
+                    title = "cu 1",
+                    description = "description 1",
+                ).toItemType(),
+                MealSummary(
+                    id = "1",
+                    name = "Chicken and Mustard Pie",
+                    thumbnail = "https://www.themealdb.com/images/media/meals/sytuqu151",
+                    youtube = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                ).toItemType(),
+                MealSummary(
+                    id = "2",
+                    name = "Chicken Stew",
+                    thumbnail = "https://www.themealdb.com/images/media/meals/sytuqu152",
+                    youtube = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                ).toItemType(),
+                MealSummary(
+                    id = "3",
+                    name = "Chicken Kat",
+                    thumbnail = "https://www.themealdb.com/images/media/meals/sytuqu152",
+                    youtube = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                ).toItemType(),
+                CodeRecipe(
+                    index = 2,
+                    area = CodeArea.Compose,
+                    title = "title 2",
+                    description = "description 2",
+                ).toItemType()
+            ),
+            isFetching = false,
+            searchTerm = "Chicken",
+            youtubeVideos = listOf(
+                "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            )
         ),
     )
 }
