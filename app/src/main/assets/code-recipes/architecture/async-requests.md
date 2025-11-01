@@ -5,7 +5,7 @@
   - Emit `Loading` state to the UI when loading data
   - Create **async jobs** for each API call scoped to `coroutineScope`
   - Wait for all the jobs to complete and emit the results
-- Make sure to re-throw the `CancellationException`
+- Catch exceptions in `.catch` and emit Error state
 
 ## Code Snippet
 
@@ -23,6 +23,10 @@ class IdeasViewModel @Inject constructor(
             emit(IdeasUiState.Loading)
             emit(deriveState(browsableType))
         }
+        .catch { e ->
+            emit(IdeasUiState.Error(e.message ?: "Unknown error occurred"))
+        }
+        .onEach { logger.d { "UIState: ${it.javaClass.simpleName} } }
         .flowOn(dispatcherProvider.default)
         .stateIn(
             scope = viewModelScope,
@@ -31,28 +35,21 @@ class IdeasViewModel @Inject constructor(
         )
 
     private suspend fun deriveState(browsableType: BrowsableType): IdeasUiState =
-        try {
-            when (browsableType) {
-                // ...
-                BrowsableType.Area -> {
-                    coroutineScope {
-                        val areasJob = async { mealRepository.getAreas() }
-                        val randomMealJob = async { mealRepository.getRandomMeal() }
+        when (browsableType) {
+            // ...
+            BrowsableType.Area -> {
+                coroutineScope {
+                    val areasJob = async { mealRepository.getAreas() }
+                    val randomMealJob = async { mealRepository.getRandomMeal() }
 
-                        IdeasUiState.Areas(
-                            areas = areasJob.await().getOrThrow(),
-                            imageUrl = randomMealJob.await().getOrNull()?.thumbnail,
-                            codeRecipes = randomCodeRecipes
-                        )
-                    }
+                    IdeasUiState.Areas(
+                        areas = areasJob.await().getOrThrow(),
+                        imageUrl = randomMealJob.await().getOrNull()?.thumbnail,
+                        codeRecipes = randomCodeRecipes
+                    )
                 }
-                // ...
             }
-        } catch (e: CancellationException) {
-            // lets the system handle the cancellation exception 
-            throw e
-        } catch (e: Exception) {
-            IdeasUiState.Error(e.message ?: "Unknown error occurred")
+            // ...
         }
     }
 
