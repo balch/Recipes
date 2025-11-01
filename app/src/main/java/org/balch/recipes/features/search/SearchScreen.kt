@@ -51,7 +51,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -286,7 +285,6 @@ private fun WelcomeMessage() {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
 private fun TopBar(
     modifier: Modifier = Modifier,
