@@ -3,7 +3,6 @@ package org.balch.recipes.features.search
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,26 +12,22 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells.Adaptive
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -89,7 +84,6 @@ fun SearchScreen(
     onMealLookup: (MealSummary) -> Unit,
     onCodeClick: (CodeRecipe) -> Unit,
     onScrollChange: (Int) -> Unit,
-    onShowVideoPlayer: (List<String>) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
@@ -106,7 +100,6 @@ fun SearchScreen(
         clearSearch = viewModel::clearSearch,
         onSearch = viewModel::updateSearchQuery,
         onBack = onBack,
-        onShowVideoPlayer = onShowVideoPlayer,
         sharedTransitionScope = sharedTransitionScope,
         animatedVisibilityScope = animatedVisibilityScope,
     )
@@ -132,7 +125,6 @@ private fun SearchLayoutPreview(
                 clearSearch = {},
                 onBack = {},
                 onScrollChange = {},
-                onShowVideoPlayer = {},
             )
         }
     }
@@ -151,7 +143,6 @@ private fun SearchLayout(
     clearSearch: () -> Unit,
     onBack: () -> Unit,
     onScrollChange: (Int) -> Unit,
-    onShowVideoPlayer: (List<String>) -> Unit,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
@@ -261,18 +252,6 @@ private fun SearchLayout(
                         sharedTransitionScope = sharedTransitionScope,
                         animatedVisibilityScope = animatedVisibilityScope,
                     )
-                    if (uiState.youtubeVideos.size > 3) {
-                        FloatingActionButton(
-                            onClick = { onShowVideoPlayer(uiState.youtubeVideos) },
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-                                .offset(y = (-120).dp)
-                                .padding(16.dp)
-                        ) {
-                            Icon(Icons.Default.PlayArrow, contentDescription = "Play videos")
-                        }
-                    }
                 }
             }
         }

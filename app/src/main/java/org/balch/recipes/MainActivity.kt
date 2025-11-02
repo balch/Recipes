@@ -197,7 +197,6 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onScrollChange = { firstVisibleIndex = it },
                                 onRandomMeal = { backStack.push(DetailRoute(DetailType.RandomRecipe)) },
-                                onShowVideoPlayer = { backStack.push(YouTubePlayer(it)) },
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedVisibilityScope = LocalNavAnimatedContentScope.current
                             )
@@ -221,7 +220,6 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onScrollChange = { firstVisibleIndex = it },
                                 onRandomMeal = { backStack.push(DetailRoute(DetailType.RandomRecipe)) },
-                                onShowVideoPlayer = { backStack.push(YouTubePlayer(it)) },
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedVisibilityScope = LocalNavAnimatedContentScope.current
 
@@ -243,11 +241,6 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         entry<Info> {
-                            InfoScreen(
-                                viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity)
-                            )
-                        }
-                        entry<YouTubePlayer> {
                             InfoScreen(
                                 viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity)
                             )
