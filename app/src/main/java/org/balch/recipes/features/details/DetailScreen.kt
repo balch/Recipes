@@ -1,5 +1,6 @@
 package org.balch.recipes.features.details
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -45,6 +47,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -74,10 +78,15 @@ import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.widgets.FoodLoadingIndicator
 import org.balch.recipes.ui.widgets.MealImageBadge
+import org.balch.recipes.ui.widgets.PlayerStatus
+import org.balch.recipes.ui.widgets.YouTubePlayerState
 import org.balch.recipes.ui.widgets.YouTubePlayerWidget
+import org.balch.recipes.ui.widgets.rememberYouTubePlayer
 
-enum class StepViewMode {
-    List, StepByStep
+enum class StepViewMode(val showSteps: Boolean) {
+    List(false),
+    StepByStep(true),
+    Video(true)
 }
 
 /**
@@ -101,17 +110,18 @@ class DetailScreenState(
     private var _showCodeRecipeTitle by mutableStateOf(false)
 
     val showTitleInHeader by derivedStateOf {
-        (animatedVisibilityScope?.transition?.isRunning != true)
-            && (
-                (showMealTitleInHeader && uiState is UiState.ShowMeal)
-                    || (_showCodeRecipeTitle && uiState is UiState.ShowCodeRecipe)
-            )
+        when {
+            (animatedVisibilityScope?.transition?.isRunning == true) -> false
+            uiState is UiState.ShowMeal -> showMealTitleInHeader || stepViewMode == StepViewMode.Video
+            uiState is UiState.ShowCodeRecipe -> _showCodeRecipeTitle
+            else -> false
+        }
     }
 
     private var _stepViewMode by mutableStateOf(initialStepViewMode)
     val stepViewMode: StepViewMode
         get() = _stepViewMode
-    
+
     private var _currentStepIndex by mutableIntStateOf(initialStepIndex)
     val currentStepIndex: Int
         get() = _currentStepIndex
@@ -200,6 +210,11 @@ fun DetailLayout(
         uiState = uiState,
     )
 
+    // Return to List View if back out from Video View
+    BackHandler(enabled = detailState.stepViewMode == StepViewMode.Video) {
+        detailState.setStepViewMode(StepViewMode.List)
+    }
+
     val instructionSteps = (uiState as? UiState.ShowMeal)?.meal
         ?.instructions?.split("\r\n", "\n", ". ")
         ?.map { it.trim() }
@@ -221,11 +236,17 @@ fun DetailLayout(
                     },
                 uiState = uiState,
                 showTitleInHeader = detailState.showTitleInHeader,
-                onBack = onBack,
+                onBack = {
+                    if (detailState.stepViewMode == StepViewMode.Video) {
+                        detailState.setStepViewMode(StepViewMode.List)
+                    } else {
+                        onBack()
+                    }
+                },
             )
         },
         bottomBar = {
-            if (detailState.stepViewMode == StepViewMode.StepByStep) {
+            if (detailState.stepViewMode.showSteps) {
                 Column {
                     RecipeInstructionsHeader(
                         modifier = modifier,
@@ -320,8 +341,29 @@ fun MealDetailItem(
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
-    
-    var playVideo by remember(stepViewMode, meal.youtube) { mutableStateOf(false) }
+
+    val playerState = rememberYouTubePlayer(
+        key = meal.id,
+        allowFullScreen = false,
+    )
+    val playerStatus by playerState.status
+
+    // Use LaunchedEffect to react to changes in videoId or the player instance
+    LaunchedEffect(meal, playerStatus) {
+        if (playerStatus == PlayerStatus.IDLE) {
+            if (meal.youtube != null && meal.youtube.isNotEmpty()) {
+                playerState.cueVideo(meal.youtube)
+            } else {
+                playerState.clear()
+            }
+        }
+    }
+
+    DisposableEffect(playerState) {
+        onDispose {
+            playerState.release()
+        }
+    }
 
     /**
      * Show Compact Ingredients when the Ingredients card scrolls
@@ -334,7 +376,7 @@ fun MealDetailItem(
         derivedStateOf {
             listState.firstVisibleItemIndex >= ingredientsCardPosition
                     || stepViewMode == StepViewMode.StepByStep
-                    || playVideo
+                    || stepViewMode == StepViewMode.Video
         }
     }
 
@@ -345,68 +387,124 @@ fun MealDetailItem(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         state = listState,
     ) {
-        if (stepViewMode == StepViewMode.List) {
-            if (!playVideo) {
-                item {
-                    Box {
-                        MealImageBadge(
-                            meal = meal.toMealSummary(),
-                            showBadge = false,
-                            modifier = modifier,
-                            onClick = {},
-                            sharedTransitionScope = sharedTransitionScope,
-                            animatedVisibilityScope = animatedVisibilityScope,
-                        )
-
-                        if (meal.youtube?.isNotEmpty() ?: false) {
-                            FloatingActionButton(
-                                onClick = { playVideo = true },
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(16.dp)
-                            ) {
-                                Icon(
-                                    Icons.Default.PlayArrow,
-                                    contentDescription = "Play videos"
-                                )
-                            }
-                        }
-                    }
-
-                }
-                item { RecipeInfoCard(modifier, meal) }
+        when (stepViewMode) {
+            StepViewMode.List -> {
+                listViewItems(
+                    meal = meal,
+                    playerStatus = playerStatus,
+                    instructionSteps = instructionSteps,
+                    showCompactIngredients = showCompactIngredients,
+                    onPlayVideo = {
+                        playerState.play()
+                        onStepViewModeChange(StepViewMode.Video)
+                    },
+                    onStepViewModeChange = onStepViewModeChange,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = animatedVisibilityScope,
+                )
             }
-
-            stickyHeader {
-                Column(
-                    modifier = modifier
-                        .background(MaterialTheme.colorScheme.surfaceContainer),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-
-                    if (playVideo) {
-                        YouTubePlayerWidget(
-                            meal.youtube!!,
-                            modifier = Modifier
-                                .aspectRatio(16f / 9f)
-                                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
-                        )
-                    }
-
-                    CrossfadeIngredients(modifier, meal, showCompactIngredients)
-                    RecipeInstructionsHeader(modifier, onStepViewModeChange, stepViewMode)
-                    Spacer(modifier = modifier.height(16.dp))
-                }
+            StepViewMode.StepByStep -> {
+                stepByStepViewItems(
+                    meal = meal,
+                    modifier = modifier,
+                )
             }
-
-            itemsIndexed(instructionSteps) { index, step ->
-                RecipeInstructionListStepCard(modifier, step, index)
+            StepViewMode.Video -> {
+                videoViewItems(
+                    playerState = playerState,
+                    meal = meal,
+                    modifier = modifier,
+                )
             }
-        } else {
-            item { CrossfadeIngredients(modifier, meal, showCompactIngredients) }
         }
     }
 }
+
+private fun LazyListScope.videoViewItems(
+    playerState: YouTubePlayerState,
+    meal: Meal,
+    modifier: Modifier = Modifier,
+) {
+    stickyHeader {
+        YouTubePlayerWidget(
+            playerState,
+            modifier = Modifier
+                .aspectRatio(16f / 9f)
+                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+        )
+    }
+    item {
+        CrossfadeIngredients(modifier, meal, false)
+    }
+}
+
+private fun LazyListScope.stepByStepViewItems(
+    meal: Meal,
+    modifier: Modifier = Modifier,
+) {
+    item { CrossfadeIngredients(modifier, meal, true) }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+private fun LazyListScope.listViewItems(
+    meal: Meal,
+    playerStatus: PlayerStatus,
+    instructionSteps: List<String>,
+    showCompactIngredients: Boolean,
+    onPlayVideo: () -> Unit,
+    onStepViewModeChange: (StepViewMode) -> Unit,
+    modifier: Modifier = Modifier,
+    sharedTransitionScope: SharedTransitionScope? = null,
+    animatedVisibilityScope: AnimatedVisibilityScope? = null,
+) {
+    item {
+        Box {
+            MealImageBadge(
+                meal = meal.toMealSummary(),
+                showBadge = false,
+                modifier = modifier,
+                onClick = {},
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope,
+            )
+
+            if (playerStatus == PlayerStatus.LOADED) {
+                FloatingActionButton(
+                    onClick = onPlayVideo,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp),
+                    containerColor = Color(0xBBCD201F),
+                ) {
+                    Icon(
+                        Icons.Default.PlayArrow,
+                        contentDescription = "Play videos"
+                    )
+                }
+            }
+        }
+
+    }
+    item { RecipeInfoCard(modifier, meal) }
+
+    stickyHeader {
+        Column(
+            modifier = modifier
+                .background(MaterialTheme.colorScheme.surfaceContainer),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            CrossfadeIngredients(modifier, meal, showCompactIngredients)
+            RecipeInstructionsHeader(modifier, onStepViewModeChange, StepViewMode.List)
+            Spacer(modifier = modifier.height(16.dp))
+        }
+    }
+
+    itemsIndexed(instructionSteps) { index, step ->
+        RecipeInstructionListStepCard(modifier, step, index)
+    }
+
+}
+
 
 @Composable
 private fun CrossfadeIngredients(
@@ -619,24 +717,27 @@ private fun RecipeInstructionsHeader(
             )
             Spacer(modifier = modifier.weight(2f))
 
-            SingleChoiceSegmentedButtonRow(
-                modifier = modifier.weight(8f),
-            ) {
-                SegmentedButton(
-                    modifier = modifier.height(50.dp),
-                    shape = SegmentedButtonDefaults.itemShape(0, 2),
-                    onClick = { onStepViewModeChange(StepViewMode.List) },
-                    selected = stepViewMode == StepViewMode.List,
-                    label = { Text("List") }
-                )
+            if (stepViewMode == StepViewMode.StepByStep ||
+                stepViewMode == StepViewMode.List) {
+                SingleChoiceSegmentedButtonRow(
+                    modifier = modifier.weight(8f),
+                ) {
+                    SegmentedButton(
+                        modifier = modifier.height(50.dp),
+                        shape = SegmentedButtonDefaults.itemShape(0, 2),
+                        onClick = { onStepViewModeChange(StepViewMode.List) },
+                        selected = stepViewMode == StepViewMode.List,
+                        label = { Text("List") }
+                    )
 
-                SegmentedButton(
-                    modifier = modifier.height(50.dp),
-                    shape = SegmentedButtonDefaults.itemShape(1, 2),
-                    onClick = { onStepViewModeChange(StepViewMode.StepByStep) },
-                    selected = stepViewMode == StepViewMode.StepByStep,
-                    label = { Text("Steps", maxLines = 1, overflow = TextOverflow.Clip) }
-                )
+                    SegmentedButton(
+                        modifier = modifier.height(50.dp),
+                        shape = SegmentedButtonDefaults.itemShape(1, 2),
+                        onClick = { onStepViewModeChange(StepViewMode.StepByStep) },
+                        selected = stepViewMode == StepViewMode.StepByStep,
+                        label = { Text("Steps", maxLines = 1, overflow = TextOverflow.Clip) }
+                    )
+                }
             }
         }
     }
