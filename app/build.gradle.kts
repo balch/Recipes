@@ -105,6 +105,8 @@ dependencies {
     implementation(libs.markdown.android)
     implementation(libs.markdown.code)
 
+    implementation(libs.youtube.player.core)
+
     ksp(libs.hilt.compiler)
 
     testRuntimeOnly(libs.junit5.loader)

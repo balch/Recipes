@@ -1,3 +1,4 @@
+
 [versions]
 agp = "8.13.0"
 kotlin = "2.2.21"
@@ -31,6 +32,7 @@ turbine = "1.2.1"
 truth = "1.4.5"
 kmlogging = "2.1.0"
 markdown = "0.38.0-b01"
+youtubePlayer = "13.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -83,6 +85,7 @@ truth = { module = "com.google.truth:truth", version.ref = "truth" }
 markdown-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown" }
 markdown-android = { module = "com.mikepenz:multiplatform-markdown-renderer-android", version.ref = "markdown" }
 markdown-code = { module = "com.mikepenz:multiplatform-markdown-renderer-code", version.ref = "markdown" }
+youtube-player-core = { module = "com.pierfrancescosoffritti.androidyoutubeplayer:core", version.ref = "youtubePlayer" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

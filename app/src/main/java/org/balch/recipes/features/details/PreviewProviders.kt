@@ -25,6 +25,7 @@ class DetailStateProvider : PreviewParameterProvider<UiState> {
             area = "Italian",
             instructions = "1. Bring a large pot of salted water to boil. Add spaghetti and cook according to package directions.\r\n2. While pasta cooks, heat oil in a large skillet over medium heat.\r\n3. Add pancetta and cook until crispy, about 5-7 minutes.\r\n4. In a bowl, whisk together eggs, parmesan, salt and pepper.\r\n5. Drain pasta, reserving 1 cup pasta water.\r\n6. Add hot pasta to skillet with pancetta.\r\n7. Remove from heat and quickly stir in egg mixture.\r\n8. Add pasta water as needed to create creamy sauce.\r\n9. Serve immediately with extra parmesan.",
             thumbnail = "https://via.placeholder.com/400x300",
+            youtube = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
             ingredient1 = "Spaghetti",
             ingredient2 = "Pancetta",
             ingredient3 = "Eggs",

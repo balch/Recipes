@@ -136,7 +136,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-            ) { innerPadding ->
+            ) { _ ->
                 SharedTransitionLayout {
                     NavDisplay(
                         modifier = Modifier.hazeSource(state = hazeState),
