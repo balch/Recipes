@@ -59,6 +59,7 @@ Another reason this app came together so nicely is due to the plethora of free a
 ### Dependencies
 | Dependency                                                                                     | Description                                           | 
 |------------------------------------------------------------------------------------------------|-------------------------------------------------------|
+| [android-youtube-player](https://github.com/PierfrancescoSoffritti/android-youtube-player)     | YouTube Player library for Android |
 | [Coil](https://coil-kt.github.io/coil/)                                                        | Image Loader for Jetpack Compose                      |  
 | [Compose Material3](https://developer.android.com/jetpack/androidx/releases/compose-material3) | Material Design Components for Jetpack Compose        | 
 | [Compose Navigation3](https://github.com/android/nav3-recipes)                                 | Navigation Component for Jetpack Compose              | 
