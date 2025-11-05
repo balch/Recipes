@@ -1,11 +1,16 @@
 package org.balch.recipes.features.details
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -63,14 +68,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
@@ -349,7 +351,6 @@ fun DetailLayout(
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun MealDetailItem(
@@ -492,28 +493,19 @@ private fun LazyListScope.listViewItems(
                 animatedVisibilityScope = animatedVisibilityScope,
             )
 
-            if (playerStatus == PlayerStatus.LOADED) {
+            AnimatedVisibility(
+                modifier = Modifier
+                    .align(Alignment.Center),
+                visible = playerStatus == PlayerStatus.LOADED,
+                enter = scaleIn() + expandVertically(expandFrom = Alignment.CenterVertically),
+                exit = scaleOut() + shrinkVertically(shrinkTowards = Alignment.CenterVertically),
+            ) {
                 FloatingActionButton(
                     onClick = onPlayVideo,
                     modifier = Modifier
-                        .align(Alignment.Center)
-                        .width(140.dp)
-                        .height(95.dp)
-                        .dropShadow(
-                            shape = RoundedCornerShape(20.dp),
-                            shadow = Shadow(
-                                radius = 8.dp,
-                                spread = 2.dp,
-                                color = Color(0x80000000),
-                                offset = DpOffset(x = 4.dp, 4.dp)
-                            )
-                        )
-                        .align(Alignment.Center)
-                        .background(
-                            color = Color(0x44000000),
-                            shape = RoundedCornerShape(20.dp)
-                        ),
-                    containerColor = Color(0x90CD201F),
+                        .width(120.dp)
+                        .height(85.dp),
+                    containerColor = Color(0xBBCD201F),
                 ) {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
@@ -523,7 +515,6 @@ private fun LazyListScope.listViewItems(
                 }
             }
         }
-
     }
     item { RecipeInfoCard(modifier, meal) }
 

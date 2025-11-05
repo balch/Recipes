@@ -222,7 +222,6 @@ class MainActivity : ComponentActivity() {
                                 onRandomMeal = { backStack.push(DetailRoute(DetailType.RandomRecipe)) },
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedVisibilityScope = LocalNavAnimatedContentScope.current
-
                             )
                         }
                         entry<DetailRoute> { detailRoute ->
