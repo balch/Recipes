@@ -82,6 +82,7 @@ data class Meal(
     val instructionSteps = instructions
         .split("\r\n", "\n")
         .map { it.trim() }
+        .filter { !it.startsWith("step", ignoreCase = true) }
         .filter { it.isNotEmpty() }
 
     // Helper function to get ingredients with measurements
