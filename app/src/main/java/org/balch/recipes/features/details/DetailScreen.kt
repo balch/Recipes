@@ -238,11 +238,9 @@ fun DetailLayout(
         detailState.setDetailViewMode(DetailViewMode.List)
     }
 
-    val instructionSteps = (uiState as? UiState.ShowMeal)?.meal
-        ?.instructions?.split("\r\n", "\n", ". ")
-        ?.map { it.trim() }
-        ?.filter { it.isNotEmpty() }
-        ?: emptyList()
+    val instructionSteps =
+        (uiState as? UiState.ShowMeal)?.meal?.instructionSteps
+            ?:emptyList()
 
     Scaffold(
         modifier = modifier
@@ -909,10 +907,6 @@ private fun RecipeIngredientsCardPreview(
 @Composable
 private fun ListViewItemsPreview() {
     val meal = DetailStateProvider.previewMeal
-    val instructionSteps = meal.instructions
-        .split("\r\n", "\n", ". ")
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
 
     RecipesTheme {
         LazyColumn(
@@ -921,7 +915,7 @@ private fun ListViewItemsPreview() {
             listViewItems(
                 meal = meal,
                 playerStatus = PlayerStatus.LOADED,
-                instructionSteps = instructionSteps,
+                instructionSteps = meal.instructionSteps,
                 showCompactIngredients = false,
                 onPlayVideo = {},
                 onDetailViewModeChange = {},
@@ -938,10 +932,6 @@ private fun ListViewItemsPreview() {
 @Composable
 private fun VideoViewItemsPreview() {
     val meal = DetailStateProvider.previewMeal
-    val instructionSteps = meal.instructions
-        .split("\r\n", "\n", ". ")
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
     val playerState = rememberYouTubePlayer(
         key = meal.id,
         allowFullScreen = false,
@@ -954,7 +944,7 @@ private fun VideoViewItemsPreview() {
             videoViewItems(
                 playerState = playerState,
                 meal = meal,
-                instructionSteps = instructionSteps,
+                instructionSteps = meal.instructionSteps,
                 modifier = Modifier,
             )
         }

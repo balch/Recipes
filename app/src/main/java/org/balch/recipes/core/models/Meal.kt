@@ -79,6 +79,11 @@ data class Meal(
     @SerialName("strMeasure19") val measure19: String? = null,
     @SerialName("strMeasure20") val measure20: String? = null
 ) {
+    val instructionSteps = instructions
+        .split("\r\n", "\n")
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+
     // Helper function to get ingredients with measurements
     val ingredientsWithMeasures: List<Pair<String, String>>
         get() {
