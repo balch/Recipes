@@ -234,7 +234,7 @@ fun DetailLayout(
     )
 
     // Return to List View if back out from Video View
-    BackHandler(enabled = detailState.detailViewMode == DetailViewMode.Video) {
+    BackHandler(enabled = detailState.detailViewMode != DetailViewMode.List) {
         detailState.setDetailViewMode(DetailViewMode.List)
     }
 
@@ -258,7 +258,7 @@ fun DetailLayout(
                 uiState = uiState,
                 showTitleInHeader = detailState.showTitleInHeader,
                 onBack = {
-                    if (detailState.detailViewMode == DetailViewMode.Video) {
+                    if (detailState.detailViewMode != DetailViewMode.List) {
                         detailState.setDetailViewMode(DetailViewMode.List)
                     } else {
                         onBack()
