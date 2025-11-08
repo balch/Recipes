@@ -53,6 +53,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -76,6 +77,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
+import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
@@ -83,6 +85,7 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.ui.nav.PreviewNavigationEventDispatcherOwner
+import org.balch.recipes.ui.nav.isCompact
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.widgets.FoodLoadingIndicator
@@ -566,6 +569,8 @@ private fun TopBar(
     // Show meal title when sticky header is stuck, otherwise show default
     val shouldShowOverrideTitle = showTitleInHeader && overrideTitle != null
 
+    val showBack = currentWindowAdaptiveInfo().isCompact()
+
     TopAppBar(
         modifier = modifier,
         title = {
@@ -582,11 +587,13 @@ private fun TopBar(
             }
         },
         navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBackIosNew,
-                    contentDescription = "Back"
-                )
+            if (showBack) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBackIosNew,
+                        contentDescription = "Back"
+                    )
+                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(

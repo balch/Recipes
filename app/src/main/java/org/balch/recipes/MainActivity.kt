@@ -10,12 +10,16 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
+import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,10 +27,12 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -70,7 +76,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalHazeMaterialsApi::class, ExperimentalHazeApi::class, ExperimentalSharedTransitionApi::class)
+    @OptIn(ExperimentalHazeMaterialsApi::class, ExperimentalHazeApi::class, ExperimentalSharedTransitionApi::class,
+        ExperimentalMaterial3AdaptiveApi::class
+    )
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @Composable
     private fun MainContent() {
@@ -78,6 +86,7 @@ class MainActivity : ComponentActivity() {
 
         // remember backstack in a savable way
         val backStack = rememberNavBackStack(TOP_LEVEL_ROUTES[0])
+        val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
 
         var previousVisibleIndex by remember { mutableIntStateOf(0) }
         var firstVisibleIndex by remember { mutableIntStateOf(0) }
@@ -141,111 +150,164 @@ class MainActivity : ComponentActivity() {
                     NavDisplay(
                         modifier = Modifier.hazeSource(state = hazeState),
                         backStack = backStack,
+                        sceneStrategy = listDetailStrategy,
                         onBack = { backStack.pop() },
-                    // In order to add the `ViewModelStoreNavEntryDecorator` (see comment below for why)
-                    // we also need to add the default `NavEntryDecorator`s as well. These provide
-                    // extra information to the entry's content to enable it to display correctly
-                    // and save its state.
-                    entryDecorators = listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator()
-                    ),
 
-                    // Use the Activities `ViewModelStoreOwner` for ViewModels belonging to
-                    // `TopLevelRoute` NavEntry routes. This allows screens to maintain their last
-                    // states when navigating back to a top level screen
-                    entryProvider = entryProvider {
-                        entry<Ideas> {
-                            IdeasScreen(
-                                viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity),
-                                onCategoryClick = { category ->
-                                    backStack.push(SearchRoute(SearchType.Category(category.name)))
-                                },
-                                onAreaClick = { area ->
-                                    backStack.push(SearchRoute(SearchType.Area(area.name)))
-                                },
-                                onIngredientClick = { ingredient ->
-                                    backStack.push(SearchRoute(SearchType.Ingredient(ingredient.name)))
-                                },
-                                onCodeRecipeClick = { codeRecipe ->
-                                    backStack.push(DetailRoute(DetailType.CodeRecipeContent(codeRecipe)))
-                                },
-                                onScrollChange = { firstVisibleIndex = it },
-                                sharedTransitionScope = this@SharedTransitionLayout,
-                                animatedVisibilityScope = LocalNavAnimatedContentScope.current
-                            )
-                        }
-                        entry<SearchRoute> { searchRoute ->
-                            // Note: We need a new ViewModel for every new SearchViewModel instance.
-                            //
-                            // tl;dr: Make sure you use rememberViewModelStoreNavEntryDecorator()
-                            // if you want a new ViewModel for each new navigation key instance.
-                            val viewModel =
-                                hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
-                                    creationCallback = { factory ->
-                                        factory.create(searchRoute.searchType)
+                        entryDecorators = listOf(
+                            rememberSaveableStateHolderNavEntryDecorator(),
+                            rememberViewModelStoreNavEntryDecorator()
+                        ),
+
+                        // Use the Activities `ViewModelStoreOwner` for ViewModels belonging to
+                        // `TopLevelRoute` NavEntry routes. This allows screens to maintain their last
+                        // states when navigating back to a top level screen
+                        entryProvider = entryProvider {
+                            entry<Ideas>(
+                                metadata = ListDetailSceneStrategy.listPane(
+                                    detailPlaceholder = {
+                                        Box {
+                                            Text(
+                                                modifier = Modifier.align(Alignment.Center),
+                                                text = "Choose an item from the list"
+                                            )
+                                        }
                                     }
                                 )
-                            SearchScreen(
-                                viewModel = viewModel,
-                                onBack = { backStack.pop() },
-                                onMealLookup = { id ->
-                                    backStack.push(DetailRoute(DetailType.MealLookup(id)))
-                                },
-                                onCodeClick = { codeRecipe ->
-                                    backStack.push(DetailRoute(DetailType.CodeRecipeContent(codeRecipe)))
-                                },
-                                onScrollChange = { firstVisibleIndex = it },
-                                onRandomMeal = { backStack.push(DetailRoute(DetailType.RandomRecipe)) },
-                                sharedTransitionScope = this@SharedTransitionLayout,
-                                animatedVisibilityScope = LocalNavAnimatedContentScope.current
-                            )
-                        }
-                        entry<Search> {
-                            val viewModel =
-                                hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
-                                    creationCallback = { factory ->
-                                        factory.create(SearchType.Search(""))
+                            ) {
+                                IdeasScreen(
+                                    viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity),
+                                    onCategoryClick = { category ->
+                                        backStack.push(SearchRoute(SearchType.Category(category.name)))
                                     },
-                                    viewModelStoreOwner = this@MainActivity
+                                    onAreaClick = { area ->
+                                        backStack.push(SearchRoute(SearchType.Area(area.name)))
+                                    },
+                                    onIngredientClick = { ingredient ->
+                                        backStack.push(SearchRoute(SearchType.Ingredient(ingredient.name)))
+                                    },
+                                    onCodeRecipeClick = { codeRecipe ->
+                                        backStack.push(
+                                            DetailRoute(
+                                                DetailType.CodeRecipeContent(
+                                                    codeRecipe
+                                                )
+                                            )
+                                        )
+                                    },
+                                    onScrollChange = { firstVisibleIndex = it },
+                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current
                                 )
-                            SearchScreen(
-                                viewModel = viewModel,
-                                onBack = { backStack.pop() },
-                                onMealLookup = { id ->
-                                    backStack.push(DetailRoute(DetailType.MealLookup(id)))
-                                },
-                                onCodeClick = { codeRecipe ->
-                                    backStack.push(DetailRoute(DetailType.CodeRecipeContent(codeRecipe)))
-                                },
-                                onScrollChange = { firstVisibleIndex = it },
-                                onRandomMeal = { backStack.push(DetailRoute(DetailType.RandomRecipe)) },
-                                sharedTransitionScope = this@SharedTransitionLayout,
-                                animatedVisibilityScope = LocalNavAnimatedContentScope.current
-                            )
-                        }
-                        entry<DetailRoute> { detailRoute ->
-                            val viewModel =
-                                hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
-                                    creationCallback = { factory ->
-                                        factory.create(detailRoute.detailType)
+                            }
+                            entry<SearchRoute>(
+                                metadata = ListDetailSceneStrategy.listPane(
+                                    detailPlaceholder = {
+                                        Box {
+                                            Text(
+                                                modifier = Modifier.align(Alignment.Center),
+                                                text = "Choose an item from the list"
+                                            )
+                                        }
                                     }
                                 )
+                            ) { searchRoute ->
+                                // Note: We need a new ViewModel for every new SearchViewModel instance.
+                                //
+                                // tl;dr: Make sure you use rememberViewModelStoreNavEntryDecorator()
+                                // if you want a new ViewModel for each new navigation key instance.
+                                val viewModel =
+                                    hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
+                                        creationCallback = { factory ->
+                                            factory.create(searchRoute.searchType)
+                                        }
+                                    )
+                                SearchScreen(
+                                    viewModel = viewModel,
+                                    onBack = { backStack.pop() },
+                                    onMealLookup = { id ->
+                                        backStack.push(DetailRoute(DetailType.MealLookup(id)))
+                                    },
+                                    onCodeClick = { codeRecipe ->
+                                        backStack.push(
+                                            DetailRoute(
+                                                DetailType.CodeRecipeContent(
+                                                    codeRecipe
+                                                )
+                                            )
+                                        )
+                                    },
+                                    onScrollChange = { firstVisibleIndex = it },
+                                    onRandomMeal = { backStack.push(DetailRoute(DetailType.RandomRecipe)) },
+                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current
+                                )
+                            }
+                            entry<Search>(
+                                metadata = ListDetailSceneStrategy.listPane(
+                                    detailPlaceholder = {
+                                        Box {
+                                            Text(
+                                                modifier = Modifier.align(Alignment.Center),
+                                                text = "Choose an item from the list"
+                                            )
+                                        }
+                                    }
+                                )
+                            ) {
+                                val viewModel =
+                                    hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
+                                        creationCallback = { factory ->
+                                            factory.create(SearchType.Search(""))
+                                        },
+                                        viewModelStoreOwner = this@MainActivity
+                                    )
+                                SearchScreen(
+                                    viewModel = viewModel,
+                                    onBack = { backStack.pop() },
+                                    onMealLookup = { id ->
+                                        backStack.push(DetailRoute(DetailType.MealLookup(id)))
+                                    },
+                                    onCodeClick = { codeRecipe ->
+                                        backStack.push(
+                                            DetailRoute(
+                                                DetailType.CodeRecipeContent(
+                                                    codeRecipe
+                                                )
+                                            )
+                                        )
+                                    },
+                                    onScrollChange = { firstVisibleIndex = it },
+                                    onRandomMeal = { backStack.push(DetailRoute(DetailType.RandomRecipe)) },
+                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current
+                                )
+                            }
+                            entry<DetailRoute>(
+                                metadata = ListDetailSceneStrategy.detailPane()
+                            ) { detailRoute ->
+                                val viewModel =
+                                    hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
+                                        creationCallback = { factory ->
+                                            factory.create(detailRoute.detailType)
+                                        }
+                                    )
 
-                            DetailScreen(
-                                viewModel = viewModel,
-                                onBack = { backStack.pop() },
-                                sharedTransitionScope = this@SharedTransitionLayout,
-                                animatedVisibilityScope = LocalNavAnimatedContentScope.current
-                            )
-                        }
-                        entry<Info> {
-                            InfoScreen(
-                                viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity)
-                            )
-                        }
-                    },
-                )
+                                DetailScreen(
+                                    viewModel = viewModel,
+                                    onBack = { backStack.pop() },
+                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current
+                                )
+                            }
+                            entry<Info>(
+                                metadata = ListDetailSceneStrategy.extraPane()
+                            ) {
+                                InfoScreen(
+                                    viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity)
+                                )
+                            }
+                        },
+                    )
                 }
             }
         }
