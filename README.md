@@ -1,6 +1,6 @@
 # Recipes Reference App
 
-> **⚠️ BAKING IN PROGRESS** - This app is still cooking under the hood.
+### ⚠️ COOKING IN PROGRESS - <sub>***🥖🥖This app is still baking under the hood🥖🥖</sub>***
 
 ### WHAT IS THIS?
 Keeping up with the latest Android trends is always a challenge. One of the techniques I use is to always have a reference app handy. These apps should showcase the latest Android architecture and patterns for the following areas:
