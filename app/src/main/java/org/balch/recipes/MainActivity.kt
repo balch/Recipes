@@ -10,6 +10,9 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -40,8 +43,11 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.rememberHazeState
-import org.balch.recipes.core.models.DetailType
+import org.balch.recipes.core.ai.Agent
 import org.balch.recipes.core.models.SearchType
+import org.balch.recipes.features.agent.AgentScreen
+import org.balch.recipes.features.agent.AgentViewModel
+import org.balch.recipes.features.agent.MasterChefAgent.Companion.toContext
 import org.balch.recipes.features.details.DetailScreen
 import org.balch.recipes.features.details.DetailsViewModel
 import org.balch.recipes.features.ideas.IdeasScreen
@@ -56,7 +62,12 @@ import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.utils.setEdgeToEdgeConfig
 
 private val TOP_LEVEL_ROUTES : List<TopLevelRoute> =
-    listOf(Ideas, Search(SearchType.Search("")), Info)
+    listOf(
+        Ideas,
+        Search(SearchType.Search("")),
+        Info
+    )
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -135,11 +146,30 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
+                },
+                floatingActionButton = {
+                    // Only show FAB when not already on AI screen
+                    if (Agent.isApiKeySet && backStack.peek() !is AI) {
+                        FloatingActionButton(
+                            onClick = {
+                                // Gather context from current screen
+                                val context = backStack.peek()?.toContext() ?: ""
+                                // Navigate to AI screen with context
+                                backStack.push(AI(context))
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = "AI Assistant"
+                            )
+                        }
+                    }
                 }
-            ) { _ ->
+            ) { innerPadding ->
                 SharedTransitionLayout {
                     NavDisplay(
-                        modifier = Modifier.hazeSource(state = hazeState),
+                        modifier = Modifier
+                            .hazeSource(state = hazeState),
                         backStack = backStack,
                         onBack = { backStack.pop() },
                     // In order to add the `ViewModelStoreNavEntryDecorator` (see comment below for why)
@@ -158,18 +188,7 @@ class MainActivity : ComponentActivity() {
                         entry<Ideas> {
                             IdeasScreen(
                                 viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity),
-                                onCategoryClick = { category ->
-                                    backStack.push(SearchRoute(SearchType.Category(category.name)))
-                                },
-                                onAreaClick = { area ->
-                                    backStack.push(SearchRoute(SearchType.Area(area.name)))
-                                },
-                                onIngredientClick = { ingredient ->
-                                    backStack.push(SearchRoute(SearchType.Ingredient(ingredient.name)))
-                                },
-                                onCodeRecipeClick = { codeRecipe ->
-                                    backStack.push(DetailRoute(DetailType.CodeRecipeContent(codeRecipe)))
-                                },
+                                onNavigateTo = { backStack.push(it) },
                                 onScrollChange = { firstVisibleIndex = it },
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedVisibilityScope = LocalNavAnimatedContentScope.current
@@ -189,14 +208,8 @@ class MainActivity : ComponentActivity() {
                             SearchScreen(
                                 viewModel = viewModel,
                                 onBack = { backStack.pop() },
-                                onMealLookup = { id ->
-                                    backStack.push(DetailRoute(DetailType.MealLookup(id)))
-                                },
-                                onCodeClick = { codeRecipe ->
-                                    backStack.push(DetailRoute(DetailType.CodeRecipeContent(codeRecipe)))
-                                },
+                                onNavigateTo = { backStack.push(it) },
                                 onScrollChange = { firstVisibleIndex = it },
-                                onRandomMeal = { backStack.push(DetailRoute(DetailType.RandomRecipe)) },
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedVisibilityScope = LocalNavAnimatedContentScope.current
                             )
@@ -212,14 +225,8 @@ class MainActivity : ComponentActivity() {
                             SearchScreen(
                                 viewModel = viewModel,
                                 onBack = { backStack.pop() },
-                                onMealLookup = { id ->
-                                    backStack.push(DetailRoute(DetailType.MealLookup(id)))
-                                },
-                                onCodeClick = { codeRecipe ->
-                                    backStack.push(DetailRoute(DetailType.CodeRecipeContent(codeRecipe)))
-                                },
+                                onNavigateTo = { backStack.push(it) },
                                 onScrollChange = { firstVisibleIndex = it },
-                                onRandomMeal = { backStack.push(DetailRoute(DetailType.RandomRecipe)) },
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedVisibilityScope = LocalNavAnimatedContentScope.current
                             )
@@ -233,6 +240,27 @@ class MainActivity : ComponentActivity() {
                                 )
 
                             DetailScreen(
+                                viewModel = viewModel,
+                                onBack = { backStack.pop() },
+                                sharedTransitionScope = this@SharedTransitionLayout,
+                                animatedVisibilityScope = LocalNavAnimatedContentScope.current
+                            )
+                        }
+                        entry<AI> { aiRoute ->
+                            val viewModel =
+                                hiltViewModel<AgentViewModel, AgentViewModel.Factory>(
+                                    creationCallback = { factory ->
+                                        factory.create(aiRoute.context, null)
+                                    }
+                                )
+
+                            LaunchedEffect(viewModel) {
+                                viewModel.navigationFlow.collect {
+                                    backStack.push(it)
+                                }
+                            }
+
+                            AgentScreen(
                                 viewModel = viewModel,
                                 onBack = { backStack.pop() },
                                 sharedTransitionScope = this@SharedTransitionLayout,

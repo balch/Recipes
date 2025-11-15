@@ -11,9 +11,18 @@ import kotlinx.serialization.Transient
 import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.SearchType
 
-sealed interface TopLevelRoute: NavKey {
-    val icon: ImageVector
+/**
+ * A Navigable Route in the Recipe App
+ */
+sealed interface RecipeRoute: NavKey {
     val contentDescription: String
+}
+
+/**
+ * A route that should be placed in the Bottom Nav
+ */
+sealed interface TopLevelRoute: RecipeRoute {
+    val icon: ImageVector
 }
 
 @Serializable
@@ -21,6 +30,7 @@ data object Ideas : TopLevelRoute {
     override val icon = Icons.Default.Lightbulb
     override val contentDescription = "Ideas"
 }
+
 @Serializable
 data object Info : TopLevelRoute {
     override val icon = Icons.Default.Info
@@ -34,9 +44,15 @@ data class Search(val search: SearchType.Search) : TopLevelRoute {
 }
 
 @Serializable
-data class DetailRoute(val detailType: DetailType) : NavKey
+data class DetailRoute(val detailType: DetailType): RecipeRoute {
+    override val contentDescription = "Detail"
+}
 
 @Serializable
-data class SearchRoute(
-    val searchType: SearchType,
-) : NavKey
+data class SearchRoute(val searchType: SearchType) : RecipeRoute {
+    override val contentDescription = "Search"
+}
+@Serializable
+data class AI(val context: String = "") : RecipeRoute {
+    override val contentDescription = "AI"
+}

@@ -4,7 +4,7 @@
 - Create injectable `HttpClientFactory` to configure HTTP connections
 - `ApiService` provides call patterns for HTTP requests
 - Use `ApiService` to create specific services to remote apis
-- Wrap the Specific ApiSerivce in  a Repository pattern to map raw API responses to domain objects
+- Wrap the Specific ApiService in  a Repository pattern to map raw API responses to domain objects
 
 ## Code Snippet
 

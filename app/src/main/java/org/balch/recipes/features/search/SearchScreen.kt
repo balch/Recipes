@@ -62,7 +62,10 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.rememberHazeState
+import org.balch.recipes.DetailRoute
+import org.balch.recipes.RecipeRoute
 import org.balch.recipes.core.models.CodeRecipe
+import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.ui.nav.PreviewNavigationEventDispatcherOwner
@@ -80,9 +83,7 @@ fun SearchScreen(
     modifier: Modifier = Modifier,
     viewModel: SearchViewModel = hiltViewModel(),
     onBack: () -> Unit,
-    onRandomMeal: () -> Unit,
-    onMealLookup: (MealSummary) -> Unit,
-    onCodeClick: (CodeRecipe) -> Unit,
+    onNavigateTo: (RecipeRoute) -> Unit,
     onScrollChange: (Int) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
@@ -94,9 +95,9 @@ fun SearchScreen(
         modifier = modifier,
         searchText = uiState.searchText,
         onScrollChange = onScrollChange,
-        onMealClick = onMealLookup,
-        onCodeClick = onCodeClick,
-        onRandom = onRandomMeal,
+        onMealClick = { onNavigateTo(DetailRoute(DetailType.MealLookup(it))) },
+        onCodeClick = { onNavigateTo(DetailRoute(DetailType.CodeRecipeContent(it))) },
+        onRandom = { onNavigateTo(DetailRoute(DetailType.RandomRecipe)) },
         clearSearch = viewModel::clearSearch,
         onSearch = viewModel::updateSearchQuery,
         onBack = onBack,

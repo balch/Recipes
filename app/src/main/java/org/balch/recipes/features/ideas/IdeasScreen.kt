@@ -70,10 +70,15 @@ import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.parcelize.Parcelize
 import org.balch.recipes.BrowsableType
+import org.balch.recipes.DetailRoute
+import org.balch.recipes.RecipeRoute
+import org.balch.recipes.SearchRoute
 import org.balch.recipes.core.models.Area
 import org.balch.recipes.core.models.Category
 import org.balch.recipes.core.models.CodeRecipe
+import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.Ingredient
+import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.utils.sharedBounds
@@ -101,10 +106,7 @@ sealed interface GridItem {
 fun IdeasScreen(
     modifier: Modifier = Modifier,
     viewModel: IdeasViewModel = hiltViewModel(),
-    onCategoryClick: (Category) -> Unit,
-    onAreaClick: (Area) -> Unit,
-    onIngredientClick: (Ingredient) -> Unit,
-    onCodeRecipeClick: (CodeRecipe) -> Unit,
+    onNavigateTo: (RecipeRoute) -> Unit,
     onScrollChange: (Int) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
@@ -119,10 +121,10 @@ fun IdeasScreen(
     IdeasLayout(
         uiState = uiState,
         onRetry = viewModel::retry,
-        onAreaClick = onAreaClick,
-        onCategoryClick = onCategoryClick,
-        onIngredientClick = onIngredientClick,
-        onCodeRecipeClick = onCodeRecipeClick,
+        onAreaClick = { onNavigateTo(SearchRoute(SearchType.Area(it.name))) },
+        onCategoryClick = { onNavigateTo(SearchRoute(SearchType.Category(it.name))) },
+        onIngredientClick = { onNavigateTo(SearchRoute(SearchType.Ingredient(it.name))) },
+        onCodeRecipeClick = { onNavigateTo(DetailRoute(DetailType.CodeRecipeContent(it))) },
         onScrollChange = onScrollChange,
         onBrowsableTypeChange = viewModel::changeBrowsableType,
         modifier = modifier,
@@ -537,7 +539,8 @@ private fun ResultsGrid(
                 }
                 is GridItem.AreaItem -> {
                     AreaCard(
-                        modifier = Modifier.alpha(0.9f)
+                        modifier = Modifier
+                            .alpha(0.9f)
                             .sharedBounds(
                                 key = "search_area_${item.area.name}",
                                 sharedTransitionScope = sharedTransitionScope,
@@ -550,7 +553,8 @@ private fun ResultsGrid(
                 }
                 is GridItem.IngredientItem -> {
                     IngredientCard(
-                        modifier = Modifier.alpha(0.9f)
+                        modifier = Modifier
+                            .alpha(0.9f)
                             .sharedBounds(
                                 key = "search_ingredient_${item.ingredient.name}",
                                 sharedTransitionScope = sharedTransitionScope,
