@@ -9,19 +9,24 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.transformLatest
 import org.balch.recipes.core.coroutines.DispatcherProvider
 import org.balch.recipes.core.models.Meal
+import org.balch.recipes.features.agent.ai.RecipeMaestroAgent
 
 @HiltViewModel(assistedFactory = AgentViewModel.Factory::class)
 class AgentViewModel @AssistedInject constructor(
-    private val agent: MasterChefAgent,
+    private val agent: RecipeMaestroAgent,
     dispatcherProvider: DispatcherProvider,
     @Assisted private val initialContext: String,
     @Assisted private val meal: Meal?,
@@ -29,14 +34,6 @@ class AgentViewModel @AssistedInject constructor(
 
     private val logger = logging("AgentViewModel")
 
-    private val chatMessages = mutableListOf(
-        ChatMessage(text = "Hi, how can I help?", type = ChatMessageType.Agent)
-    ).apply {
-        if (initialContext.isNotEmpty()) {
-            add(ChatMessage(text = initialContext, type = ChatMessageType.User))
-        }
-    }
-    
     // AI Chat state
     private val chatMessagesIntent = MutableSharedFlow<String>(
         replay = 0,
@@ -48,10 +45,22 @@ class AgentViewModel @AssistedInject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val messages: StateFlow<List<ChatMessage>> =
-        chatMessagesIntent
-            .transformLatest { sendMessage(it) }
+        flow {
+            logger.d { "waiting for first prompt"}
+
+            val fistPrompt = chatMessagesIntent
+                .mapNotNull { it.trim().takeIf { it.isNotEmpty() } }
+                .first()
+
+            logger.d { "sending first prompt: $fistPrompt" }
+            emitAll(agent.runAgent(fistPrompt))
+        }
+            .onEach {
+                logger.d { "AgentState: ${it::class.simpleName} msgCount=${it.messages.size}"}
+            }
+            .map { it.messages }
             .flowOn(dispatcherProvider.default)
-            .stateIn(viewModelScope, SharingStarted.Lazily, chatMessages.toList())
+            .stateIn(viewModelScope, SharingStarted.Lazily, listOf(agent.initialMessage))
 
     /**
      * Send a message to the AI agent and add both user message and AI response to chat
@@ -59,15 +68,7 @@ class AgentViewModel @AssistedInject constructor(
     fun sendMessage(message: String) {
         if (message.isBlank()) return
         chatMessagesIntent.tryEmit(message)
-    }
-
-    private suspend fun FlowCollector<List<ChatMessage>>.sendMessage(message: String) {
-        chatMessages.add(ChatMessage(text = message, type = ChatMessageType.User))
-        chatMessages.add(ChatMessage(text = "Thinking", type = ChatMessageType.Loading))
-        emit(chatMessages.toList())
-        val response = agent.chat(message)
-        chatMessages[chatMessages.lastIndex] = ChatMessage(text = response, type = ChatMessageType.Agent)
-        emit(chatMessages.toList())
+        agent.sendUserMessage(message)
     }
 
     @AssistedFactory

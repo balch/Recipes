@@ -61,7 +61,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.model.DefaultMarkdownColors
 import com.mikepenz.markdown.model.DefaultMarkdownTypography
@@ -77,13 +76,21 @@ import org.balch.recipes.ui.theme.ThemePreview
 @Composable
 fun AgentScreen(
     modifier: Modifier = Modifier,
-    viewModel: AgentViewModel = hiltViewModel(),
+    viewModel: AgentViewModel,
+    initialPrompt: String = "",
     onBack: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val messages by viewModel.messages.collectAsState()
     val view = LocalView.current
+
+    // If we have an initial prompt (from the input box), send it on first composition
+    LaunchedEffect(initialPrompt) {
+        if (initialPrompt.isNotBlank()) {
+            viewModel.sendMessage(initialPrompt)
+        }
+    }
 
     AgentLayout(
         modifier = modifier,
@@ -189,12 +196,12 @@ private fun TopBar(
                     )
                     Column {
                         Text(
-                            text = "Chef AI Assistant",
+                            text = "Recipe Maestro",
                             style = typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Your culinary companion",
+                            text = "Your culinary—coding companion",
                             style = typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
@@ -266,7 +273,7 @@ private fun ChatMessageBubble(message: ChatMessage) {
                             if (message.type != ChatMessageType.User) {
                                 Text(
                                     text = when (message.type) {
-                                        ChatMessageType.Agent -> "👨‍🍳 Chef"
+                                        ChatMessageType.Agent -> "👨‍🍳 Maestro"
                                         ChatMessageType.Error -> "⚠️ Error"
                                         else -> ""
                                     },

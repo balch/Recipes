@@ -1,5 +1,6 @@
 package org.balch.recipes.core.models
 
+import ai.koog.agents.core.tools.annotations.LLMDescription
 import android.os.Parcelable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -14,6 +15,7 @@ import org.balch.recipes.ui.theme.LightBackground
 import org.balch.recipes.ui.theme.StrongTeal
 import org.balch.recipes.ui.theme.WarmOrange
 
+@LLMDescription("Represents a category or area of Android development topics (Theme, Navigation, Architecture, Testing, Compose)")
 @Parcelize
 enum class CodeArea : Parcelable {
     Theme,
@@ -48,14 +50,21 @@ fun CodeArea.textColor(): Color {
     }
 }
 
+@LLMDescription("Represents a code recipe or tutorial demonstrating Android development techniques and patterns")
 @Parcelize
 @Serializable
 data class CodeRecipe(
+    @property:LLMDescription("Unique index number for the code recipe")
     val index: Int,
+    @property:LLMDescription("The development area or category this code recipe belongs to (Theme, Navigation, Architecture, Testing, or Compose)")
     val area: CodeArea,
+    @property:LLMDescription("The title of the code recipe")
     val title: String,
+    @property:LLMDescription("A description explaining what this code recipe demonstrates")
     val description: String,
+    @property:LLMDescription("Optional file name associated with this code recipe")
     val fileName: String? = null,
+    @property:LLMDescription("The actual code snippet or example code")
     val codeSnippet: String = "",
 ): UniqueItem, Parcelable {
     @IgnoredOnParcel

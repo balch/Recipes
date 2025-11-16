@@ -53,6 +53,6 @@ data class SearchRoute(val searchType: SearchType) : RecipeRoute {
     override val contentDescription = "Search"
 }
 @Serializable
-data class AI(val context: String = "") : RecipeRoute {
+data class AI(val context: String = "", val initialPrompt: String = "") : RecipeRoute {
     override val contentDescription = "AI"
 }

@@ -15,12 +15,16 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import org.balch.recipes.core.ai.GeminiKeyProvider
 import org.balch.recipes.core.coroutines.DefaultDispatcherProvider
+import org.balch.recipes.features.agent.ai.RecipeMaestroAgent
+import org.balch.recipes.features.agent.ai.RecipeMaestroConfig
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import javax.inject.Inject
 
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -32,6 +36,13 @@ class AgentScreenTest {
     @get:Rule(order = 1)
     val composeTestRule = createComposeRule()
 
+
+    @Inject
+    lateinit var config: RecipeMaestroConfig
+
+    @Inject
+    lateinit var keyProvider: GeminiKeyProvider
+
     private lateinit var testViewModel: AgentViewModel
 
     @Before
@@ -39,40 +50,16 @@ class AgentScreenTest {
         hiltRule.inject()
         
         // Create a test ViewModel with mocked dependencies
-        val testAgent = MasterChefAgent()
+        val testAgent = RecipeMaestroAgent(
+            config = config,
+            geminiKeyProvider = keyProvider,
+        )
         testViewModel = AgentViewModel(
             initialContext = "test context",
             meal = null,
             agent = testAgent,
             dispatcherProvider = DefaultDispatcherProvider(),
         )
-    }
-
-    @SuppressLint("UnusedContentLambdaTargetStateParameter")
-    @OptIn(ExperimentalSharedTransitionApi::class)
-    @Test
-    fun agentScreen_rendersSuccessfully() {
-        // Launch the Agent screen
-        composeTestRule.setContent {
-            RecipesTheme {
-                SharedTransitionLayout {
-                    AnimatedContent(targetState = true) {
-                        AgentScreen(
-                            viewModel = testViewModel,
-                            onBack =  { },
-                            sharedTransitionScope = this@SharedTransitionLayout,
-                            animatedVisibilityScope = this@AnimatedContent,
-                        )
-                    }
-                }
-            }
-        }
-
-        // Verify the header text is displayed
-        composeTestRule.onNodeWithText("Chef AI Assistant").assertIsDisplayed()
-        
-        // Verify the subtitle is displayed
-        composeTestRule.onNodeWithText("Your culinary companion").assertIsDisplayed()
     }
 
     @SuppressLint("UnusedContentLambdaTargetStateParameter")

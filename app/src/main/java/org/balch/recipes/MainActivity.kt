@@ -43,11 +43,11 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.rememberHazeState
-import org.balch.recipes.core.ai.Agent
+import org.balch.recipes.core.ai.GeminiKeyProvider
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.features.agent.AgentScreen
 import org.balch.recipes.features.agent.AgentViewModel
-import org.balch.recipes.features.agent.MasterChefAgent.Companion.toContext
+import org.balch.recipes.features.agent.ai.RecipeMaestroAgent.Companion.toContext
 import org.balch.recipes.features.details.DetailScreen
 import org.balch.recipes.features.details.DetailsViewModel
 import org.balch.recipes.features.ideas.IdeasScreen
@@ -60,6 +60,7 @@ import org.balch.recipes.ui.nav.pop
 import org.balch.recipes.ui.nav.push
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.utils.setEdgeToEdgeConfig
+import javax.inject.Inject
 
 private val TOP_LEVEL_ROUTES : List<TopLevelRoute> =
     listOf(
@@ -68,9 +69,11 @@ private val TOP_LEVEL_ROUTES : List<TopLevelRoute> =
         Info
     )
 
-
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var geminiKeyProvider: GeminiKeyProvider
 
     @OptIn(ExperimentalMaterial3AdaptiveApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -149,7 +152,7 @@ class MainActivity : ComponentActivity() {
                 },
                 floatingActionButton = {
                     // Only show FAB when not already on AI screen
-                    if (Agent.isApiKeySet && backStack.peek() !is AI) {
+                    if (geminiKeyProvider.isApiKeySet && backStack.peek() !is AI) {
                         FloatingActionButton(
                             onClick = {
                                 // Gather context from current screen
@@ -251,17 +254,13 @@ class MainActivity : ComponentActivity() {
                                 hiltViewModel<AgentViewModel, AgentViewModel.Factory>(
                                     creationCallback = { factory ->
                                         factory.create(aiRoute.context, null)
-                                    }
+                                    },
+                                    viewModelStoreOwner = this@MainActivity
                                 )
-
-                            LaunchedEffect(viewModel) {
-                                viewModel.navigationFlow.collect {
-                                    backStack.push(it)
-                                }
-                            }
 
                             AgentScreen(
                                 viewModel = viewModel,
+                                initialPrompt = aiRoute.initialPrompt,
                                 onBack = { backStack.pop() },
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedVisibilityScope = LocalNavAnimatedContentScope.current
@@ -279,4 +278,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
