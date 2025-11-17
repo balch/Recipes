@@ -3,9 +3,6 @@ package org.balch.recipes.features.agent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diamondedge.logging.logging
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
@@ -21,15 +18,13 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import org.balch.recipes.core.coroutines.DispatcherProvider
-import org.balch.recipes.core.models.Meal
 import org.balch.recipes.features.agent.ai.RecipeMaestroAgent
+import javax.inject.Inject
 
-@HiltViewModel(assistedFactory = AgentViewModel.Factory::class)
-class AgentViewModel @AssistedInject constructor(
+@HiltViewModel
+class AgentViewModel @Inject constructor(
     private val agent: RecipeMaestroAgent,
     dispatcherProvider: DispatcherProvider,
-    @Assisted private val initialContext: String,
-    @Assisted private val meal: Meal?,
 ) : ViewModel() {
 
     private val logger = logging("AgentViewModel")
@@ -69,10 +64,5 @@ class AgentViewModel @AssistedInject constructor(
         if (message.isBlank()) return
         chatMessagesIntent.tryEmit(message)
         agent.sendUserMessage(message)
-    }
-
-    @AssistedFactory
-    interface Factory {
-        fun create(initialContext: String, meal: Meal?): AgentViewModel
     }
 }

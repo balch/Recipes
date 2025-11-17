@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
-import org.balch.recipes.AI
+import org.balch.recipes.AiChatScreen
 import org.balch.recipes.DetailRoute
 import org.balch.recipes.Ideas
 import org.balch.recipes.Info
@@ -190,7 +190,7 @@ class RecipeMaestroAgent @Inject constructor(
                 is DetailType.CodeRecipeContent -> "The user is viewing code recipe: ${detailType.codeRecipe.title}"
             }
             is Info -> "The user is viewing the app information screen"
-            is AI -> "The user is in the AI assistant screen"
+            is AiChatScreen -> "The user is in the AI assistant screen"
             else -> "The user is browsing the Recipes app"
         }
     }

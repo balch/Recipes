@@ -136,6 +136,7 @@ dependencies {
     implementation(libs.youtube.player.core)
 
     implementation(libs.koog.ai)
+    implementation(libs.androidx.material3)
 
     ksp(libs.hilt.compiler)
 

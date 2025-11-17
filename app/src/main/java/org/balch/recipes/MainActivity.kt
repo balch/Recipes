@@ -10,9 +10,9 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -21,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
@@ -47,6 +49,7 @@ import org.balch.recipes.core.ai.GeminiKeyProvider
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.features.agent.AgentScreen
 import org.balch.recipes.features.agent.AgentViewModel
+import org.balch.recipes.features.agent.ai.RecipeMaestroAgent
 import org.balch.recipes.features.agent.ai.RecipeMaestroAgent.Companion.toContext
 import org.balch.recipes.features.details.DetailScreen
 import org.balch.recipes.features.details.DetailsViewModel
@@ -60,6 +63,8 @@ import org.balch.recipes.ui.nav.pop
 import org.balch.recipes.ui.nav.push
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.utils.setEdgeToEdgeConfig
+import org.balch.recipes.ui.widgets.AiInputBoxVisibilityState
+import org.balch.recipes.ui.widgets.AiInputBoxWidget
 import javax.inject.Inject
 
 private val TOP_LEVEL_ROUTES : List<TopLevelRoute> =
@@ -75,6 +80,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var geminiKeyProvider: GeminiKeyProvider
 
+    @Inject
+    lateinit var recipeAgent: RecipeMaestroAgent
+
     @OptIn(ExperimentalMaterial3AdaptiveApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         setEdgeToEdgeConfig()
@@ -89,6 +97,20 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun MainContent() {
         val hazeState = rememberHazeState()
+
+        var aiInputBoxState by remember {
+            mutableStateOf(
+                if (geminiKeyProvider.isApiKeySet) AiInputBoxVisibilityState.FloatingActionBox
+                else AiInputBoxVisibilityState.Gone
+            )
+        }
+
+        val useFixedPosition by remember(aiInputBoxState) {
+            derivedStateOf {
+                aiInputBoxState is AiInputBoxVisibilityState.FloatingActionBox
+            }
+        }
+
 
         // remember backstack in a savable way
         val backStack = rememberNavBackStack(TOP_LEVEL_ROUTES[0])
@@ -150,22 +172,33 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 },
+                floatingActionButtonPosition =
+                    FabPosition.EndOverlay.takeIf { useFixedPosition }
+                        ?: FabPosition.Center,
                 floatingActionButton = {
-                    // Only show FAB when not already on AI screen
-                    if (geminiKeyProvider.isApiKeySet && backStack.peek() !is AI) {
-                        FloatingActionButton(
-                            onClick = {
-                                // Gather context from current screen
-                                val context = backStack.peek()?.toContext() ?: ""
-                                // Navigate to AI screen with context
-                                backStack.push(AI(context))
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AutoAwesome,
-                                contentDescription = "AI Assistant"
-                            )
-                        }
+                    val isVisible = backStack.peek() !is AiChatScreen
+                    if (isVisible) {
+                        val context = backStack.peek()?.toContext() ?: ""
+                        AiInputBoxWidget(
+                            uiState = aiInputBoxState,
+                            onNavigateTo = { recipeRoute ->
+                                if (recipeRoute is AiInquireMode) {
+                                    aiInputBoxState = AiInputBoxVisibilityState.Collapsed("What can I help with?")
+                                } else {
+                                    backStack.push(recipeRoute)
+                                }
+                            },
+                            onSendPrompt = { recipeAgent.sendUserMessage(it) },
+                            prompt = context,
+                            modifier = Modifier
+                                .then(
+                                    if (useFixedPosition) Modifier
+                                        .offset(y = (-20).dp)
+                                        .navigationBarsPadding()
+                                    else Modifier
+                                ),
+                            hazeState = hazeState,
+                        )
                     }
                 }
             ) { innerPadding ->
@@ -249,14 +282,10 @@ class MainActivity : ComponentActivity() {
                                 animatedVisibilityScope = LocalNavAnimatedContentScope.current
                             )
                         }
-                        entry<AI> { aiRoute ->
-                            val viewModel =
-                                hiltViewModel<AgentViewModel, AgentViewModel.Factory>(
-                                    creationCallback = { factory ->
-                                        factory.create(aiRoute.context, null)
-                                    },
+                        entry<AiChatScreen> { aiRoute ->
+                            val viewModel:AgentViewModel = hiltViewModel(
                                     viewModelStoreOwner = this@MainActivity
-                                )
+                            )
 
                             AgentScreen(
                                 viewModel = viewModel,

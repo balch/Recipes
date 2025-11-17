@@ -5,7 +5,6 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,8 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +22,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,9 +29,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.HazeState
+import org.balch.recipes.AiChatScreen
+import org.balch.recipes.AiInquireMode
+import org.balch.recipes.RecipeRoute
+import org.balch.recipes.ui.preview.AiInputBoxVisibilityStatePreviewProvider
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
+import org.balch.recipes.ui.widgets.input.CompactionInputBox
+import org.balch.recipes.ui.widgets.input.FloatingActionMenuButton
+import org.balch.recipes.ui.widgets.input.FloatingActionMenuItem
 
 sealed interface AiInputBoxVisibilityState {
 
@@ -43,6 +50,9 @@ sealed interface AiInputBoxVisibilityState {
     enum class MessageType { Editable, Error, Loading, NotAvailable }
 
     val message: String
+
+    val isError: Boolean
+        get() = messageType == MessageType.Error
 
     val messageType: MessageType
         get() = when (this) {
@@ -67,7 +77,7 @@ sealed interface AiInputBoxVisibilityState {
      */
     data class Collapsed(
         override val message: String,
-        override val isLoading: Boolean,
+        override val isLoading: Boolean = false,
     ) : AiInputBoxVisibilityState, Loadable
 
     /**
@@ -100,7 +110,7 @@ sealed interface AiInputBoxVisibilityState {
      */
     data class Expanded(
         override val message: String,
-        override val isLoading: Boolean,
+        override val isLoading: Boolean = false,
     ) : AiInputBoxVisibilityState, Loadable
 
     /**
@@ -115,43 +125,60 @@ sealed interface AiInputBoxVisibilityState {
 fun AiInputBoxWidget(
     uiState: AiInputBoxVisibilityState,
     prompt: String,
+    hazeState: HazeState,
+    onNavigateTo: (RecipeRoute) -> Unit,
     onSendPrompt: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    val menuItems = remember {
+        listOf(
+            FloatingActionMenuItem(Icons.AutoMirrored.Filled.Chat, "Let's Chat") {
+                onNavigateTo(AiChatScreen())
+            },
+            FloatingActionMenuItem(Icons.AutoMirrored.Filled.Send, "Context Inquiry") {
+                onNavigateTo(AiInquireMode)
+            }
+        )
+    }
+
     SharedTransitionLayout {
         AnimatedContent(
             targetState = uiState,
             modifier = modifier,
         ) {
 
-            var text by remember { mutableStateOf(prompt) }
-            LaunchedEffect(prompt) { text = prompt }
+            var text by remember(prompt) { mutableStateOf(prompt) }
 
-            // AI - TODO - complete this code to match provided screeenshot
             when (it) {
+                AiInputBoxVisibilityState.Gone -> { }// No UI
+                AiInputBoxVisibilityState.FloatingActionBox -> {
+                    FloatingActionMenuButton(
+                        items = menuItems,
+                        onNavigateTo = onNavigateTo,
+                    )
+                }
+
                 is AiInputBoxVisibilityState.Collapsed -> {
-                    val enabled = !it.isLoading
-                    InputRow(
-                        text = text,
-                        onTextChange = { text = it },
-                        enabled = enabled,
-                    ) {
-                        if (enabled) {
-                            IconButton(
-                                onClick = {
-                                    val toSend = text.trim()
-                                    if (toSend.isNotEmpty()) {
-                                        onSendPrompt(toSend)
-                                    }
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.Send,
-                                    contentDescription = "Send prompt"
-                                )
-                            }
-                        }
-                    }
+                    CompactionInputBox(
+                        prompt = it.message,
+                        isError = it.isError,
+                        onNavigateTo = onNavigateTo,
+                        onSendPrompt = onSendPrompt,
+                        enabled = !it.isLoading,
+                        hazeState = hazeState,
+                    )
+                }
+
+                is AiInputBoxVisibilityState.Error -> {
+                    CompactionInputBox(
+                        prompt = it.message,
+                        onNavigateTo = onNavigateTo,
+                        onSendPrompt = onSendPrompt,
+                        enabled =false,
+                        isError = true,
+                        hazeState = hazeState,
+                    )
                 }
 
                 is AiInputBoxVisibilityState.Expanded -> {
@@ -218,128 +245,24 @@ fun AiInputBoxWidget(
                             .padding(start = 28.dp, top = 4.dp)
                     )
                 }
-
-                is AiInputBoxVisibilityState.Error -> {
-                    InputRow(
-                        text = it.message,
-                        onTextChange = {},
-                        enabled = false,
-                        isError = true,
-                        supportingText = it.message,
-                    ) {}
-                }
-
-                AiInputBoxVisibilityState.FloatingActionBox -> {
-                    // Minimal floating action style button, themed
-                    Surface(
-                        tonalElevation = 6.dp,
-                        shadowElevation = 8.dp,
-                        shape = RoundedCornerShape(28.dp),
-                        modifier = Modifier
-                            .wrapContentHeight()
-                            .clickable { onSendPrompt("") }
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp, vertical = 12.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.AutoAwesome,
-                                contentDescription = "AI"
-                            )
-                            Text(text = "Ask AI")
-                        }
-                    }
-                }
-
-                AiInputBoxVisibilityState.Gone -> {
-                    // No UI
-                }
             }
         }
     }
 }
 
-@Composable
-private fun InputRow(
-    text: String,
-    onTextChange: (String) -> Unit,
-    enabled: Boolean,
-    modifier: Modifier = Modifier,
-    isError: Boolean = false,
-    supportingText: String? = null,
-    trailing: @Composable () -> Unit = {},
-) {
-    val shape = RoundedCornerShape(24.dp)
-
-    // Use a Surface to get proper tonal elevation in light/dark
-    Surface(
-        tonalElevation = 6.dp,
-        shadowElevation = 8.dp,
-        shape = shape,
-        modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(horizontal = 16.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .clip(shape)
-                .background(MaterialTheme.colorScheme.surface)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
-                .padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            OutlinedTextField(
-                value = text,
-                onValueChange = onTextChange,
-                enabled = enabled,
-                isError = isError,
-                placeholder = { Text("Ask AI about recipes…") },
-                singleLine = true,
-                shape = shape,
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    disabledContainerColor = MaterialTheme.colorScheme.surface,
-                ),
-                modifier = Modifier
-                    .weight(1f)
-            )
-
-            trailing()
-        }
-    }
-
-    if (supportingText != null) {
-        Text(
-            text = supportingText,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 28.dp, top = 4.dp)
-        )
-    }
-}
 
 @ThemePreview
 @Composable
-private fun AiInputBoxWidgetPreview() {
-
-    // AI TODO - add a PreviewProvider to preview all the states.
-
+private fun AiInputBoxWidgetPreview(
+    @PreviewParameter(AiInputBoxVisibilityStatePreviewProvider::class) visibilityState: AiInputBoxVisibilityState,
+) {
     RecipesTheme {
         AiInputBoxWidget(
-            uiState = AiInputBoxVisibilityState.Collapsed(
-                message = "",
-                isLoading = false
-            ),
+            uiState = visibilityState,
             prompt = "What is the weather like in Boston?",
-            onSendPrompt = {}
+            onNavigateTo = {},
+            onSendPrompt = {},
+            hazeState = HazeState()
         )
     }
 }

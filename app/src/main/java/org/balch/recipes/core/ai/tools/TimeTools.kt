@@ -2,7 +2,6 @@ package org.balch.recipes.core.ai.tools
 
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.core.tools.ToolResult
-import ai.koog.agents.core.tools.ToolResultUtils
 import ai.koog.agents.core.tools.annotations.LLMDescription
 import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.LocalDate

@@ -55,8 +55,6 @@ class AgentScreenTest {
             geminiKeyProvider = keyProvider,
         )
         testViewModel = AgentViewModel(
-            initialContext = "test context",
-            meal = null,
             agent = testAgent,
             dispatcherProvider = DefaultDispatcherProvider(),
         )
