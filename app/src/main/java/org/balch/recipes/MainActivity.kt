@@ -183,12 +183,12 @@ class MainActivity : ComponentActivity() {
                             uiState = aiInputBoxState,
                             onNavigateTo = { recipeRoute ->
                                 if (recipeRoute is AiInquireMode) {
-                                    aiInputBoxState = AiInputBoxVisibilityState.Collapsed("What can I help with?")
+                                    aiInputBoxState = AiInputBoxVisibilityState.Collapsed("Tell me more")
                                 } else {
                                     backStack.push(recipeRoute)
                                 }
                             },
-                            onSendPrompt = { recipeAgent.sendUserMessage(it) },
+                            onSendResponse = { recipeAgent.sendResponseMessage(it) },
                             prompt = context,
                             modifier = Modifier
                                 .then(

@@ -65,8 +65,6 @@ sealed interface AiInputBoxVisibilityState {
             Gone, FloatingActionBox -> MessageType.NotAvailable
         }
 
-    // AI TODO - use the comments below to derive the requirements of the AiInputBoxWidget. This Widget will need to replace the FloatingActionBox in MainActivity
-
     /**
      * Represents a state where the AI input box is collapsed and editable.
      * In this state the input box is editable on a single Single line,
@@ -127,7 +125,7 @@ fun AiInputBoxWidget(
     prompt: String,
     hazeState: HazeState,
     onNavigateTo: (RecipeRoute) -> Unit,
-    onSendPrompt: (String) -> Unit,
+    onSendResponse: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -163,8 +161,7 @@ fun AiInputBoxWidget(
                     CompactionInputBox(
                         prompt = it.message,
                         isError = it.isError,
-                        onNavigateTo = onNavigateTo,
-                        onSendPrompt = onSendPrompt,
+                        onSendPrompt = onSendResponse,
                         enabled = !it.isLoading,
                         hazeState = hazeState,
                     )
@@ -173,8 +170,7 @@ fun AiInputBoxWidget(
                 is AiInputBoxVisibilityState.Error -> {
                     CompactionInputBox(
                         prompt = it.message,
-                        onNavigateTo = onNavigateTo,
-                        onSendPrompt = onSendPrompt,
+                        onSendPrompt = onSendResponse,
                         enabled =false,
                         isError = true,
                         hazeState = hazeState,
@@ -223,7 +219,7 @@ fun AiInputBoxWidget(
                                 onClick = {
                                     val toSend = text.trim()
                                     if (toSend.isNotEmpty()) {
-                                        onSendPrompt(toSend)
+                                        onSendResponse(toSend)
                                     }
                                 }
                             ) {
@@ -261,7 +257,7 @@ private fun AiInputBoxWidgetPreview(
             uiState = visibilityState,
             prompt = "What is the weather like in Boston?",
             onNavigateTo = {},
-            onSendPrompt = {},
+            onSendResponse = {},
             hazeState = HazeState()
         )
     }

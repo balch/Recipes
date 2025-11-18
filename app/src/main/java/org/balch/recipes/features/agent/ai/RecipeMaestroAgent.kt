@@ -11,18 +11,22 @@ import ai.koog.prompt.executor.llms.SingleLLMPromptExecutor
 import androidx.navigation3.runtime.NavKey
 import com.diamondedge.logging.logging
 import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.channels.ProducerScope
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import org.balch.recipes.AiChatScreen
 import org.balch.recipes.DetailRoute
 import org.balch.recipes.Ideas
@@ -31,6 +35,7 @@ import org.balch.recipes.RecipeRoute
 import org.balch.recipes.Search
 import org.balch.recipes.SearchRoute
 import org.balch.recipes.core.ai.GeminiKeyProvider
+import org.balch.recipes.core.coroutines.DispatcherProvider
 import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.features.agent.ChatMessage
@@ -41,10 +46,14 @@ import kotlin.time.ExperimentalTime
  * AI Agent specifically designed for culinary, nutrition, and recipe assistance.
  * Uses Gemini Pro 2.5 Flash to provide expert advice on recipes and food-related questions.
  */
+
+@Singleton
 class RecipeMaestroAgent @Inject constructor(
     private val config: RecipeMaestroConfig,
     private val geminiKeyProvider: GeminiKeyProvider,
+    dispatcherProvider: DispatcherProvider,
 ) {
+    val applicationScope = CoroutineScope(SupervisorJob() + dispatcherProvider.default)
 
     private val logger = logging("MasterChefAgent")
 
@@ -54,12 +63,12 @@ class RecipeMaestroAgent @Inject constructor(
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
-    fun sendUserMessage(message: String) {
+    fun sendResponseMessage(message: String) {
         userIntent.tryEmit(message)
     }
 
     val initialMessage =
-        ChatMessage(text = config.initialAgentMessage, type = ChatMessageType.Agent)
+        ChatMessage(text = "Thinking", type = ChatMessageType.Loading)
 
     private val messages = mutableListOf(initialMessage)
     private val _navigationFlow = MutableSharedFlow<RecipeRoute>(
@@ -70,23 +79,29 @@ class RecipeMaestroAgent @Inject constructor(
 
     val navigationFlow = _navigationFlow.asSharedFlow()
 
-    private var currentAgent: AIAgent<String, String>? = null
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val agentFlow: StateFlow<AgentState> =
+        runAgent(config.initialAgentPrompt)
+            .flowOn(dispatcherProvider.default)
+            .stateIn(
+                scope = applicationScope,
+                initialValue = AgentState.Loading(messages.toList()),
+                started = SharingStarted.Eagerly
+            )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun runAgent(prompt: String): Flow<AgentState> = channelFlow {
-        sendUserMessage(prompt)
-
+    private fun runAgent(prompt: String): Flow<AgentState> = channelFlow {
         val strategy = config
             .agentStrategy(
                 name = "MasterChefAgent",
                 onAssistantMessage = { message ->
-                    sendAgentMessage(message)
+                    send(agentMessageToState(message))
 
                     val userMessage =
                         userIntent.mapNotNull {
                             it.trim().takeIf { trimmed -> trimmed.isNotEmpty() }
                         }.first()
-                    sendUserMessage(userMessage)
+                    send(userMessageToState(userMessage))
                     userMessage
                 }
             )
@@ -95,44 +110,31 @@ class RecipeMaestroAgent @Inject constructor(
             handleEvents {
                 onAgentExecutionFailed { ctx ->
                     logger.error(ctx.throwable) { "Error running agent" }
-                    sendErrorMessage(ctx.throwable, "Whoops!!!")
+                    // Ensure error emission also respects the collector's context
+                    send(errorMessageAsState(ctx.throwable, "Whoops!!!"))
                 }
             }
         }.run(prompt)
-
-        // Keep the channel open for as long as the collector is active
-        // ChannelFlow will handle closing; we just suspend here.
-        awaitClose { }
     }.onEach {
         logger.info { "Agent state: $it" }
     }
 
-    private fun ProducerScope<AgentState>.sendUserMessage(message: String) {
+    private fun userMessageToState(message: String): AgentState {
         messages.add(ChatMessage(text = message, type = ChatMessageType.User))
         messages.add(ChatMessage(text = "Thinking", type = ChatMessageType.Loading))
-        // Always emit a fresh list instance so collectors (Compose) detect changes
-        trySend(AgentState.Chatting(messages.toList())).onFailure {
-            logger.error(it) { "Failed to send user message: $message" }
-        }
+
+        // create new list to fool compose
+        return AgentState.Chatting(messages.toList())
     }
 
-    private fun ProducerScope<AgentState>.sendAgentMessage(message: String) {
+    private fun agentMessageToState(message: String): AgentState {
         addOrReplaceMessage(ChatMessage(text = message, type = ChatMessageType.Agent))
-        // Always emit a fresh list instance so collectors (Compose) detect changes
-        trySend(AgentState.Chatting(messages.toList())).onFailure {
-            logger.error(it) { "Failed to send agent message: $message" }
-        }
+        return AgentState.Chatting(messages.toList())
     }
 
-    private fun ProducerScope<AgentState>.sendErrorMessage(
-        exception: Throwable,
-        message: String
-    ) {
+    private fun errorMessageAsState(exception: Throwable, message: String): AgentState {
         addOrReplaceMessage(ChatMessage(text = message, type = ChatMessageType.Error))
-        // Always emit a fresh list instance so collectors (Compose) detect changes
-        trySend(AgentState.Error(exception, messages.toList())).onFailure {
-            logger.error(it) { "Failed to send error message: $message" }
-        }
+        return AgentState.Error(exception, messages.toList())
     }
 
     private fun addOrReplaceMessage(message: ChatMessage) {
@@ -167,7 +169,7 @@ class RecipeMaestroAgent @Inject constructor(
             agentConfig = agentConfig,
             toolRegistry = config.toolRegistry,
             installFeatures = installFeatures,
-        ).also { currentAgent = it }
+        )
     }
 
     companion object Companion {

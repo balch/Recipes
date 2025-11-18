@@ -17,7 +17,7 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 /**
- * Tools for the weather agent
+ * Tools for getting time information
  */
 @OptIn(ExperimentalTime::class)
 sealed interface TimeTools {
@@ -30,13 +30,13 @@ sealed interface TimeTools {
      * Tool for getting the current date and time
      */
     class CurrentDatetimeTool(
-        val defaultTimeZone: TimeZone = UTC_ZONE,
+        val defaultTimeZone: TimeZone = TimeZone.currentSystemDefault(),
         val clock: Clock = CLOCK,
     ) : Tool<CurrentDatetimeTool.Args, CurrentDatetimeTool.Result>() {
         @Serializable
         data class Args(
-            @property:LLMDescription("The timezone to get the current date and time in (e.g., 'UTC', 'America/New_York', 'Europe/London'). Defaults to UTC.")
-            val timezone: String = "UTC"
+            @property:LLMDescription("The timezone to get the current date and time in (e.g., 'UTC', 'America/New_York', 'Europe/London'). Defaults to null to use the current users timezone.")
+            val timezone: String? = null
         )
 
         @Serializable
@@ -59,11 +59,11 @@ sealed interface TimeTools {
         override val description = "Get the current date and time in the specified timezone"
 
         override suspend fun execute(args: Args): Result {
-            val zoneId = try {
-                TimeZone.of(args.timezone)
-            } catch (_: Exception) {
-                defaultTimeZone
-            }
+            val zoneId =
+                args.timezone?.let {
+                    try { TimeZone.of(it) }
+                    catch( _: Exception) { null }
+                } ?: defaultTimeZone
 
             val now = clock.now()
             val localDateTime = now.toLocalDateTime(zoneId)
