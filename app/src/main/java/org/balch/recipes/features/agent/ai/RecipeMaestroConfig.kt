@@ -24,6 +24,10 @@ class RecipeMaestroConfig @Inject constructor() {
 
     val maxAgentIterations = 50
 
+    val currentContextPrompt = """
+        Tell me more 🤔
+    """.trimIndent()
+
     val initialAgentPrompt = """
         Tactfully and briefly introduce yourself.
         Lookup the current time and suggest a meal or code recipe based on time of day.

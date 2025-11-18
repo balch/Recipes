@@ -66,7 +66,7 @@ sealed interface AiInputBoxVisibilityState {
         }
 
     /**
-     * Represents a state where the AI input box is collapsed and editable.
+     * Represents a state where the AI input box is collapsed
      * In this state the input box is editable on a single Single line,
      * but automatically expands to [Expanded] state when takes
      * input box contains more than one row of text
@@ -122,7 +122,6 @@ sealed interface AiInputBoxVisibilityState {
 @Composable
 fun AiInputBoxWidget(
     uiState: AiInputBoxVisibilityState,
-    prompt: String,
     hazeState: HazeState,
     onNavigateTo: (RecipeRoute) -> Unit,
     onSendResponse: (String) -> Unit,
@@ -146,7 +145,7 @@ fun AiInputBoxWidget(
             modifier = modifier,
         ) {
 
-            var text by remember(prompt) { mutableStateOf(prompt) }
+            var text by remember { mutableStateOf("") }
 
             when (it) {
                 AiInputBoxVisibilityState.Gone -> { }// No UI
@@ -255,7 +254,6 @@ private fun AiInputBoxWidgetPreview(
     RecipesTheme {
         AiInputBoxWidget(
             uiState = visibilityState,
-            prompt = "What is the weather like in Boston?",
             onNavigateTo = {},
             onSendResponse = {},
             hazeState = HazeState()

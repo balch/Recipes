@@ -1,7 +1,6 @@
 package org.balch.recipes.features.agent
 
 import android.view.HapticFeedbackConstants
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -11,8 +10,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -88,7 +85,7 @@ fun AgentScreen(
     // If we have an initial prompt (from the input box), send it on first composition
     LaunchedEffect(initialPrompt) {
         if (initialPrompt.isNotBlank()) {
-            viewModel.sendMessage(initialPrompt)
+            viewModel.sendPrompt(initialPrompt)
         }
     }
 
@@ -97,7 +94,7 @@ fun AgentScreen(
         messages = messages,
         onSendMessage = { message ->
             view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            viewModel.sendMessage(message)
+            viewModel.sendPrompt(message)
         },
         onBack = onBack,
         sharedTransitionScope = sharedTransitionScope,
@@ -151,7 +148,7 @@ private fun AgentLayout(
                 contentPadding = innerPadding,
             ) {
                 items(messages, key = { it.id }) { message ->
-                    AnimatedChatMessage(message)
+                    ChatMessageBubble(message = message)
                 }
                 item {
                     Spacer(modifier = Modifier.height(60.dp))
@@ -221,22 +218,6 @@ private fun TopBar(
                 titleContentColor = MaterialTheme.colorScheme.onSurface,
             )
         )
-    }
-}
-
-
-@Composable
-private fun AnimatedChatMessage(
-    message: ChatMessage,
-) {
-    AnimatedVisibility(
-        visible = true,
-        enter = slideInHorizontally(
-            initialOffsetX = { if (message.type == ChatMessageType.User) it else -it },
-            animationSpec = tween(durationMillis = 400)
-        ) + fadeIn(animationSpec = tween(durationMillis = 400))
-    ) {
-        ChatMessageBubble(message = message)
     }
 }
 

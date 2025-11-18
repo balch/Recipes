@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.balch.recipes.core.coroutines.DispatcherProvider
+import org.balch.recipes.features.agent.ai.PromptIntent
 import org.balch.recipes.features.agent.ai.RecipeMaestroAgent
 import javax.inject.Inject
 
@@ -32,10 +33,18 @@ class AgentViewModel @Inject constructor(
             .stateIn(viewModelScope, SharingStarted.Lazily, listOf(agent.initialMessage))
 
     /**
-     * Send a message to the AI agent and add both user message and AI response to chat
+     * Send a prompt to the AI agent and add both user message and AI response to chat
      */
-    fun sendMessage(message: String) {
-        if (message.isBlank()) return
-        agent.sendResponseMessage(message)
+    fun sendPrompt(intent: PromptIntent) {
+        if (intent.prompt.isBlank()) return
+        agent.sendResponsePrompt(intent)
     }
+
+    /**
+     * Send a prompt to the AI agent and add both user message and AI response to chat
+     */
+    fun sendPrompt(prompt: String) {
+        sendPrompt(PromptIntent(prompt))
+    }
+
 }

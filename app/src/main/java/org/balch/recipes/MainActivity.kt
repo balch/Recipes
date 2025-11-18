@@ -49,8 +49,10 @@ import org.balch.recipes.core.ai.GeminiKeyProvider
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.features.agent.AgentScreen
 import org.balch.recipes.features.agent.AgentViewModel
+import org.balch.recipes.features.agent.ai.PromptIntent
 import org.balch.recipes.features.agent.ai.RecipeMaestroAgent
 import org.balch.recipes.features.agent.ai.RecipeMaestroAgent.Companion.toContext
+import org.balch.recipes.features.agent.ai.RecipeMaestroConfig
 import org.balch.recipes.features.details.DetailScreen
 import org.balch.recipes.features.details.DetailsViewModel
 import org.balch.recipes.features.ideas.IdeasScreen
@@ -83,6 +85,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var recipeAgent: RecipeMaestroAgent
 
+    @Inject
+    lateinit var recipeMaestroConfig: RecipeMaestroConfig
+
     @OptIn(ExperimentalMaterial3AdaptiveApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         setEdgeToEdgeConfig()
@@ -92,7 +97,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalHazeMaterialsApi::class, ExperimentalHazeApi::class, ExperimentalSharedTransitionApi::class)
+    @OptIn(
+        ExperimentalHazeMaterialsApi::class,
+        ExperimentalHazeApi::class,
+        ExperimentalSharedTransitionApi::class
+    )
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @Composable
     private fun MainContent() {
@@ -176,20 +185,29 @@ class MainActivity : ComponentActivity() {
                     FabPosition.EndOverlay.takeIf { useFixedPosition }
                         ?: FabPosition.Center,
                 floatingActionButton = {
+                    fun derivePromptIntent(prompt: String) =
+                        if (prompt == recipeMaestroConfig.currentContextPrompt) {
+                            PromptIntent(
+                                prompt = prompt + (backStack.peek()?.toContext() ?: ""),
+                                displayPrompt = prompt
+                            )
+                        } else { PromptIntent(prompt) }
+
                     val isVisible = backStack.peek() !is AiChatScreen
                     if (isVisible) {
-                        val context = backStack.peek()?.toContext() ?: ""
                         AiInputBoxWidget(
                             uiState = aiInputBoxState,
                             onNavigateTo = { recipeRoute ->
                                 if (recipeRoute is AiInquireMode) {
-                                    aiInputBoxState = AiInputBoxVisibilityState.Collapsed("Tell me more")
+                                    aiInputBoxState =
+                                        AiInputBoxVisibilityState.Collapsed(recipeMaestroConfig.currentContextPrompt)
                                 } else {
                                     backStack.push(recipeRoute)
                                 }
                             },
-                            onSendResponse = { recipeAgent.sendResponseMessage(it) },
-                            prompt = context,
+                            onSendResponse = { prompt ->
+                                recipeAgent.sendResponsePrompt(derivePromptIntent(prompt))
+                            },
                             modifier = Modifier
                                 .then(
                                     if (useFixedPosition) Modifier
@@ -208,102 +226,103 @@ class MainActivity : ComponentActivity() {
                             .hazeSource(state = hazeState),
                         backStack = backStack,
                         onBack = { backStack.pop() },
-                    // In order to add the `ViewModelStoreNavEntryDecorator` (see comment below for why)
-                    // we also need to add the default `NavEntryDecorator`s as well. These provide
-                    // extra information to the entry's content to enable it to display correctly
-                    // and save its state.
-                    entryDecorators = listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator()
-                    ),
+                        // In order to add the `ViewModelStoreNavEntryDecorator` (see comment below for why)
+                        // we also need to add the default `NavEntryDecorator`s as well. These provide
+                        // extra information to the entry's content to enable it to display correctly
+                        // and save its state.
+                        entryDecorators = listOf(
+                            rememberSaveableStateHolderNavEntryDecorator(),
+                            rememberViewModelStoreNavEntryDecorator()
+                        ),
 
-                    // Use the Activities `ViewModelStoreOwner` for ViewModels belonging to
-                    // `TopLevelRoute` NavEntry routes. This allows screens to maintain their last
-                    // states when navigating back to a top level screen
-                    entryProvider = entryProvider {
-                        entry<Ideas> {
-                            IdeasScreen(
-                                viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity),
-                                onNavigateTo = { backStack.push(it) },
-                                onScrollChange = { firstVisibleIndex = it },
-                                sharedTransitionScope = this@SharedTransitionLayout,
-                                animatedVisibilityScope = LocalNavAnimatedContentScope.current
-                            )
-                        }
-                        entry<SearchRoute> { searchRoute ->
-                            // Note: We need a new ViewModel for every new SearchViewModel instance.
-                            //
-                            // tl;dr: Make sure you use rememberViewModelStoreNavEntryDecorator()
-                            // if you want a new ViewModel for each new navigation key instance.
-                            val viewModel =
-                                hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
-                                    creationCallback = { factory ->
-                                        factory.create(searchRoute.searchType)
-                                    }
+                        // Use the Activities `ViewModelStoreOwner` for ViewModels belonging to
+                        // `TopLevelRoute` NavEntry routes. This allows screens to maintain their last
+                        // states when navigating back to a top level screen
+                        entryProvider = entryProvider {
+                            entry<Ideas> {
+                                IdeasScreen(
+                                    viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity),
+                                    onNavigateTo = { backStack.push(it) },
+                                    onScrollChange = { firstVisibleIndex = it },
+                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current
                                 )
-                            SearchScreen(
-                                viewModel = viewModel,
-                                onBack = { backStack.pop() },
-                                onNavigateTo = { backStack.push(it) },
-                                onScrollChange = { firstVisibleIndex = it },
-                                sharedTransitionScope = this@SharedTransitionLayout,
-                                animatedVisibilityScope = LocalNavAnimatedContentScope.current
-                            )
-                        }
-                        entry<Search> {
-                            val viewModel =
-                                hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
-                                    creationCallback = { factory ->
-                                        factory.create(SearchType.Search(""))
-                                    },
+                            }
+                            entry<SearchRoute> { searchRoute ->
+                                // Note: We need a new ViewModel for every new SearchViewModel instance.
+                                //
+                                // tl;dr: Make sure you use rememberViewModelStoreNavEntryDecorator()
+                                // if you want a new ViewModel for each new navigation key instance.
+                                val viewModel =
+                                    hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
+                                        creationCallback = { factory ->
+                                            factory.create(searchRoute.searchType)
+                                        }
+                                    )
+                                SearchScreen(
+                                    viewModel = viewModel,
+                                    onBack = { backStack.pop() },
+                                    onNavigateTo = { backStack.push(it) },
+                                    onScrollChange = { firstVisibleIndex = it },
+                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current
+                                )
+                            }
+                            entry<Search> {
+                                val viewModel =
+                                    hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
+                                        creationCallback = { factory ->
+                                            factory.create(SearchType.Search(""))
+                                        },
+                                        viewModelStoreOwner = this@MainActivity
+                                    )
+                                SearchScreen(
+                                    viewModel = viewModel,
+                                    onBack = { backStack.pop() },
+                                    onNavigateTo = { backStack.push(it) },
+                                    onScrollChange = { firstVisibleIndex = it },
+                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current
+                                )
+                            }
+                            entry<DetailRoute> { detailRoute ->
+                                val viewModel =
+                                    hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
+                                        creationCallback = { factory ->
+                                            factory.create(detailRoute.detailType)
+                                        }
+                                    )
+
+                                DetailScreen(
+                                    viewModel = viewModel,
+                                    onBack = { backStack.pop() },
+                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current
+                                )
+                            }
+                            entry<AiChatScreen> { aiRoute ->
+                                val viewModel: AgentViewModel = hiltViewModel(
                                     viewModelStoreOwner = this@MainActivity
                                 )
-                            SearchScreen(
-                                viewModel = viewModel,
-                                onBack = { backStack.pop() },
-                                onNavigateTo = { backStack.push(it) },
-                                onScrollChange = { firstVisibleIndex = it },
-                                sharedTransitionScope = this@SharedTransitionLayout,
-                                animatedVisibilityScope = LocalNavAnimatedContentScope.current
-                            )
-                        }
-                        entry<DetailRoute> { detailRoute ->
-                            val viewModel =
-                                hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
-                                    creationCallback = { factory ->
-                                        factory.create(detailRoute.detailType)
-                                    }
+
+                                AgentScreen(
+                                    viewModel = viewModel,
+                                    initialPrompt = aiRoute.initialPrompt,
+                                    onBack = { backStack.pop() },
+                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current
                                 )
-
-                            DetailScreen(
-                                viewModel = viewModel,
-                                onBack = { backStack.pop() },
-                                sharedTransitionScope = this@SharedTransitionLayout,
-                                animatedVisibilityScope = LocalNavAnimatedContentScope.current
-                            )
-                        }
-                        entry<AiChatScreen> { aiRoute ->
-                            val viewModel:AgentViewModel = hiltViewModel(
-                                    viewModelStoreOwner = this@MainActivity
-                            )
-
-                            AgentScreen(
-                                viewModel = viewModel,
-                                initialPrompt = aiRoute.initialPrompt,
-                                onBack = { backStack.pop() },
-                                sharedTransitionScope = this@SharedTransitionLayout,
-                                animatedVisibilityScope = LocalNavAnimatedContentScope.current
-                            )
-                        }
-                        entry<Info> {
-                            InfoScreen(
-                                viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity)
-                            )
-                        }
-                    },
-                )
+                            }
+                            entry<Info> {
+                                InfoScreen(
+                                    viewModel = hiltViewModel(viewModelStoreOwner = this@MainActivity)
+                                )
+                            }
+                        },
+                    )
                 }
             }
         }
     }
 }
+

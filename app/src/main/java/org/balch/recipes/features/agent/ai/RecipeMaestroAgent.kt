@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import org.balch.recipes.AiChatScreen
@@ -42,11 +41,15 @@ import org.balch.recipes.features.agent.ChatMessage
 import org.balch.recipes.features.agent.ChatMessageType
 import kotlin.time.ExperimentalTime
 
+data class PromptIntent(
+    val prompt: String,
+    val displayPrompt: String = prompt,
+)
+
 /**
  * AI Agent specifically designed for culinary, nutrition, and recipe assistance.
  * Uses Gemini Pro 2.5 Flash to provide expert advice on recipes and food-related questions.
  */
-
 @Singleton
 class RecipeMaestroAgent @Inject constructor(
     private val config: RecipeMaestroConfig,
@@ -55,16 +58,16 @@ class RecipeMaestroAgent @Inject constructor(
 ) {
     val applicationScope = CoroutineScope(SupervisorJob() + dispatcherProvider.default)
 
-    private val logger = logging("MasterChefAgent")
+    private val logger = logging("RecipeMaestroAgent")
 
-    private val userIntent = MutableSharedFlow<String>(
+    private val userIntent = MutableSharedFlow<PromptIntent>(
         replay = 0,
         extraBufferCapacity = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
-    fun sendResponseMessage(message: String) {
-        userIntent.tryEmit(message)
+    fun sendResponsePrompt(prompt: PromptIntent) {
+        userIntent.tryEmit(prompt)
     }
 
     val initialMessage =
@@ -97,12 +100,9 @@ class RecipeMaestroAgent @Inject constructor(
                 onAssistantMessage = { message ->
                     send(agentMessageToState(message))
 
-                    val userMessage =
-                        userIntent.mapNotNull {
-                            it.trim().takeIf { trimmed -> trimmed.isNotEmpty() }
-                        }.first()
-                    send(userMessageToState(userMessage))
-                    userMessage
+                    val userPrompt = userIntent.first()
+                    send(userMessageToState(userPrompt.displayPrompt))
+                    userPrompt.prompt
                 }
             )
 
