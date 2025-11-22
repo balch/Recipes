@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.balch.recipes.AiChatScreen
 import org.balch.recipes.RecipeRoute
+import org.balch.recipes.features.agent.ai.AppContextData
 import org.balch.recipes.features.agent.ai.RecipeMaestroConfig
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
@@ -28,7 +29,7 @@ import org.balch.recipes.ui.utils.sharedBounds
 @Composable
 fun AiFloatingActionWidget(
     modifier: Modifier = Modifier,
-    appContext: RecipeMaestroConfig.AppContextData,
+    appContext: AppContextData,
     onNavigateTo: (RecipeRoute) -> Unit,
     expanded: Boolean,
     moodTintColor: Color?,
@@ -82,7 +83,7 @@ fun AiFloatingActionWidgetPreview(
         AiFloatingActionWidget(
             onNavigateTo = {},
             expanded = expanded,
-            appContext = RecipeMaestroConfig.AppContextData("Preview Context", "Test"),
+            appContext = AppContextData("Preview Context", "Test"),
             moodTintColor = Color.Green,
             animatedVisibilityScope = null,
             sharedTransitionScope = null,

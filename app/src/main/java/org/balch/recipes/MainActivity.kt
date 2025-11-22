@@ -47,9 +47,9 @@ import org.balch.recipes.core.ai.GeminiKeyProvider
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.features.agent.AgentScreen
 import org.balch.recipes.features.agent.AgentViewModel
+import org.balch.recipes.features.agent.ai.AppContextData
 import org.balch.recipes.features.agent.ai.RecipeMaestroAgent
 import org.balch.recipes.features.agent.ai.RecipeMaestroConfig
-import org.balch.recipes.features.agent.ai.RecipeMaestroConfig.AppContextData
 import org.balch.recipes.features.details.DetailScreen
 import org.balch.recipes.features.details.DetailsViewModel
 import org.balch.recipes.features.ideas.IdeasScreen
