@@ -20,16 +20,21 @@ import org.balch.recipes.Info
 import org.balch.recipes.Search
 import org.balch.recipes.SearchRoute
 import org.balch.recipes.core.ai.tools.ExitTool
+import org.balch.recipes.core.ai.tools.NavigationTool
 import org.balch.recipes.core.ai.tools.TimeTools
 import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.models.SearchType
+import org.balch.recipes.features.agent.ai.code.CodeRecipeTools
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.ExperimentalTime
 
 @Singleton
-class RecipeMaestroConfig @Inject constructor() {
+class RecipeMaestroConfig @Inject constructor(
+    private val codeRecipeTools: CodeRecipeTools,
+    private val navigationTool: NavigationTool,
+) {
     data class RandomAgentPromptData(
         val prompt: String,
         val chance: Int,
@@ -37,6 +42,19 @@ class RecipeMaestroConfig @Inject constructor() {
         val tintColor: Color? = null,
     )
 
+    @OptIn(ExperimentalTime::class)
+    val toolRegistry = ToolRegistry {
+        tool(TimeTools.CurrentDatetimeTool())
+        tool(TimeTools.AddDatetimeTool())
+        tools(codeRecipeTools.tools)
+        tool(navigationTool)
+        tool(ExitTool)
+    }
+
+    /**
+     * Indicates whether the initial agent prompt should be sent at app launch
+     * or first subscription
+     */
     val promptAgentAtAppLaunch: Boolean = false
 
     val model = GoogleModels.Gemini2_5Flash
@@ -55,7 +73,7 @@ class RecipeMaestroConfig @Inject constructor() {
     """.trimIndent()
 
     val initialAgentPrompts = listOf(
-        RandomAgentPromptData("Energetic(Crazy Train)", 50, tintColor = Color.Green),
+        RandomAgentPromptData("Energetic()", 50, tintColor = Color.Green),
         RandomAgentPromptData("Optimistic(Rockin' in the Free World)", 10, tintColor = Color.Green.copy(alpha = 0.6f)),
         RandomAgentPromptData("Overly Enthused(Helter Skelter)", 10, tintColor = Color.Green.copy(alpha = 0.25f)),
         RandomAgentPromptData("Not Funny Today(Get Off My Cloud)", 10, tintColor = Color.Magenta),
@@ -107,6 +125,7 @@ class RecipeMaestroConfig @Inject constructor() {
             - The user should be able to infer this persona over a few prompts using the gen-ai's creativity
             - Act according to your mood of the day
             - Act according to the song of the day
+                 - if the song is blank or empty, get creative and pick an obscure song
                  - Use obscure references
                    Reference the song/artist without using the FULL title/name
                  - ALLUDE TO partial lyrics or other related references
@@ -195,14 +214,6 @@ class RecipeMaestroConfig @Inject constructor() {
                         onAssistantMessage { true }
             )
         }
-
-    @OptIn(ExperimentalTime::class)
-    val toolRegistry = ToolRegistry {
-        tool(TimeTools.CurrentDatetimeTool())
-        tool(TimeTools.AddDatetimeTool())
-        // ExitTool allows the agent to properly terminate, ensuring the finish node is reachable
-        tool(ExitTool)
-    }
 
     /**
      * Converts the current NavKey to a descriptive context string for the AI agent

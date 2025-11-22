@@ -10,8 +10,10 @@ import kotlinx.serialization.json.Json
 import org.balch.recipes.core.coroutines.DispatcherProvider
 import org.balch.recipes.core.models.CodeArea
 import org.balch.recipes.core.models.CodeRecipe
+import org.balch.recipes.core.models.CodeRecipeSummary
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.collections.mapIndexed
 
 @Singleton
 class CodeRecipeAssetLoader @Inject constructor(
@@ -21,18 +23,35 @@ class CodeRecipeAssetLoader @Inject constructor(
 ) {
     private val logger = logging(this::class.simpleName)
 
-    suspend fun loadRecipes(): List<CodeRecipe> = withContext(dispatcherProvider.io) {
+    suspend fun loadRecipesAreaMap(): Map<CodeArea, List<CodeRecipeSummary>> = withContext(dispatcherProvider.io) {
+        loadRecipesRaw()
+            .groupBy(
+                keySelector = { it.area },
+                valueTransform = { it }
+            )
+    }
+
+    suspend fun getCodeRecipe(recipeSummary: CodeRecipeSummary): CodeRecipe = withContext(dispatcherProvider.io) {
+        recipeSummary.loadRecipe(0)
+    }
+
+    private suspend fun loadRecipesRaw(): List<CodeRecipeSummary> = withContext(dispatcherProvider.io) {
         try {
             val indexJson = context.assets.open("code-recipes/recipes-index.json")
                 .bufferedReader()
                 .use { it.readText() }
 
-            val index = json.decodeFromString<RecipeIndex>(indexJson)
-            index.recipes
-                .mapIndexed { index, codeRecipeRaw ->
-                    val (description, codeSnippet) = loadRecipeContent(codeRecipeRaw.bodyMarkdown)
-                    codeRecipeRaw.toCodeRecipe(index + 1, description, codeSnippet)
-                }
+            json.decodeFromString<RecipeIndex>(indexJson).recipes
+        } catch (e: Exception) {
+            logger.e(e) { "Failed to load code recipes from assets" }
+            emptyList()
+        }
+    }
+
+    suspend fun loadRecipes(): List<CodeRecipe> = withContext(dispatcherProvider.io) {
+        try {
+            loadRecipesRaw()
+                .mapIndexed { index, codeRecipeRaw -> codeRecipeRaw.loadRecipe(index) }
                 .also { logger.d { "Loaded ${it.size} code recipes from assets" }
             }
         } catch (e: Exception) {
@@ -40,6 +59,12 @@ class CodeRecipeAssetLoader @Inject constructor(
             emptyList()
         }
     }
+
+    private suspend fun CodeRecipeSummary.loadRecipe(index: Int) =
+        loadRecipeContent(markdownAsset)
+            .let { (description, codeSnippet) ->
+                toCodeRecipe(index + 1, description, codeSnippet)
+            }
 
     suspend fun loadRecipeContent(bodyMarkdown: String): Pair<String, String> = withContext(Dispatchers.IO) {
         try {
@@ -69,27 +94,6 @@ class CodeRecipeAssetLoader @Inject constructor(
 }
 
 @Serializable
-private data class CodeRecipeRaw(
-    val area: CodeArea,
-    val title: String,
-    val bodyMarkdown: String,
-    val fileName: String? = null,
-) {
-    fun toCodeRecipe(
-        index: Int,
-        description: String,
-        codeSnippet: String,
-    ) = CodeRecipe(
-        index = index,
-        area = area,
-        title = title,
-        description = description,
-        fileName = fileName,
-        codeSnippet = codeSnippet,
-    )
-}
-
-@Serializable
 private data class RecipeIndex(
-    val recipes: List<CodeRecipeRaw>
+    val recipes: List<CodeRecipeSummary>
 )

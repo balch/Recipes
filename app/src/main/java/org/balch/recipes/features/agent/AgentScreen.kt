@@ -116,10 +116,13 @@ private fun AgentLayout(
 
     val isLoading = messages.lastOrNull()?.type == ChatMessageType.Loading
 
-    LaunchedEffect(messages.size) {
+    LaunchedEffect(isLoading) {
         if (messages.isNotEmpty()) {
             // Always bring the latest message into view
-            listState.animateScrollToItem(messages.size)
+            listState.animateScrollToItem(
+                index = messages.lastIndex,
+                scrollOffset = -1
+            )
         }
     }
 

@@ -4,10 +4,14 @@ import com.google.common.truth.Truth.assertThat
 import org.balch.recipes.core.ai.GeminiKeyProvider
 import org.balch.recipes.core.coroutines.TestDispatcherProvider
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.mock
 
 class RecipeMaestroAgentTest {
 
-    private val config = RecipeMaestroConfig()
+    private val config = RecipeMaestroConfig(
+        mock(),
+        mock(),
+    )
 
     private val dispatcherProvider = TestDispatcherProvider()
 

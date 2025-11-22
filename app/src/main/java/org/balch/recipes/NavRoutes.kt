@@ -1,5 +1,6 @@
 package org.balch.recipes
 
+import ai.koog.agents.core.tools.annotations.LLMDescription
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lightbulb
@@ -44,7 +45,11 @@ data class Search(val search: SearchType.Search) : TopLevelRoute {
 }
 
 @Serializable
-data class DetailRoute(val detailType: DetailType): RecipeRoute {
+@LLMDescription("The route for a single recipe detail page")
+data class DetailRoute(
+    @property:LLMDescription("The type of recipe to display")
+    val detailType: DetailType
+): RecipeRoute {
     override val contentDescription = "Detail"
 }
 

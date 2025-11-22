@@ -23,8 +23,6 @@ class AgentViewModel @Inject constructor(
 
     private val logger = logging("AgentViewModel")
 
-    val navigationFlow = agent.navigationFlow
-
     // Expose the agent's current mood tint color to the UI
     val moodTintColor = agent.mood.tintColor
 
@@ -49,5 +47,4 @@ class AgentViewModel @Inject constructor(
     fun sendPrompt(prompt: String) {
         sendPrompt(PromptIntent(prompt))
     }
-
 }

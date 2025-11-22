@@ -3,134 +3,134 @@
     {
       "area": "Architecture",
       "title": "Separation of Concerns",
-      "bodyMarkdown": "architecture/separation-of-concerns.md",
-      "fileName": null
+      "markdownAsset": "architecture/separation-of-concerns.md",
+      "appExampleFileName": null
     },
     {
       "area": "Architecture",
       "title": "Hilt ViewModel Factory",
-      "bodyMarkdown": "architecture/hilt-viewmodel-factory.md",
-      "fileName": "DetailsViewModel.kt"
+      "markdownAsset": "architecture/hilt-viewmodel-factory.md",
+      "appExampleFileName": "DetailsViewModel.kt"
     },
     {
       "area": "Architecture",
       "title": "Repository with ApiService",
-      "bodyMarkdown": "architecture/repository-apiservice.md",
-      "fileName": null
+      "markdownAsset": "architecture/repository-apiservice.md",
+      "appExampleFileName": null
     },
     {
       "area": "Architecture",
       "title": "Async Requests",
-      "bodyMarkdown": "architecture/async-requests.md",
-      "fileName": null
+      "markdownAsset": "architecture/async-requests.md",
+      "appExampleFileName": null
     },
     {
       "area": "Architecture",
       "title": "Lazy Logging",
-      "bodyMarkdown": "architecture/lazy-log-pattern.md",
-      "fileName": null
+      "markdownAsset": "architecture/lazy-log-pattern.md",
+      "appExampleFileName": null
     },
     {
       "area": "Theme",
       "title": "ThemePreview + PreviewParameter",
-      "bodyMarkdown": "theme/theme-preview.md",
-      "fileName": "ThemePreview.kt"
+      "markdownAsset": "theme/theme-preview.md",
+      "appExampleFileName": "ThemePreview.kt"
     },
     {
       "area": "Compose",
       "title": "PreviewParameter + ThemePreview",
-      "bodyMarkdown": "theme/theme-preview.md",
-      "fileName": "ThemePreview.kt"
+      "markdownAsset": "theme/theme-preview.md",
+      "appExampleFileName": "ThemePreview.kt"
     },
     {
       "area": "Navigation",
       "title": "Bottom Nav",
-      "bodyMarkdown": "navigation/bottom-nav.md",
-      "fileName": "MainActivity.kt"
+      "markdownAsset": "navigation/bottom-nav.md",
+      "appExampleFileName": "MainActivity.kt"
     },
     {
       "area": "Navigation",
       "title": "Nav3 TopLevel ViewModels",
-      "bodyMarkdown": "navigation/nav3-top-level-viewmodels.md",
-      "fileName": "MainActivity.kt"
+      "markdownAsset": "navigation/nav3-top-level-viewmodels.md",
+      "appExampleFileName": "MainActivity.kt"
     },
     {
       "area": "Navigation",
       "title": "Nav3 EntryProvider DSL Syntax",
-      "bodyMarkdown": "navigation/nav3-entry-provider.md",
-      "fileName": "MainActivity.kt"
+      "markdownAsset": "navigation/nav3-entry-provider.md",
+      "appExampleFileName": "MainActivity.kt"
     },
     {
       "area": "Navigation",
       "title": "Nav3 Backstack Management",
-      "bodyMarkdown": "navigation/nav3-backstack.md",
-      "fileName": "NavBackStackExt.kt"
+      "markdownAsset": "navigation/nav3-backstack.md",
+      "appExampleFileName": "NavBackStackExt.kt"
     },
     {
       "area": "Compose",
       "title": "PullToRefreshBox + Haze = 🎨👑",
-      "bodyMarkdown": "compose/pulltorefresh-haze.md",
-      "fileName": "RecipesTheme.kt"
+      "markdownAsset": "compose/pulltorefresh-haze.md",
+      "appExampleFileName": "RecipesTheme.kt"
     },
     {
       "area": "Compose",
       "title": "Markdown Render🎨💰",
-      "bodyMarkdown": "compose/markdown-render.md",
-      "fileName": "MarkdownCodeSnippet.kt"
+      "markdownAsset": "compose/markdown-render.md",
+      "appExampleFileName": "MarkdownCodeSnippet.kt"
     },
     {
       "area": "Testing",
       "title": "TestDispatcher on MainThread",
-      "bodyMarkdown": "testing/testdispatcher-mainthread.md",
-      "fileName": "DetailsViewModelTest.kt"
+      "markdownAsset": "testing/testdispatcher-mainthread.md",
+      "appExampleFileName": "DetailsViewModelTest.kt"
     },
     {
       "area": "Testing",
       "title": "Turbine For StateFlow Testing",
-      "bodyMarkdown": "testing/turbine-stateflow.md",
-      "fileName": "SearchViewModelTest.kt"
+      "markdownAsset": "testing/turbine-stateflow.md",
+      "appExampleFileName": "SearchViewModelTest.kt"
     },
     {
       "area": "Testing",
       "title": "Test Assertion Extensions",
-      "bodyMarkdown": "testing/assertion-extensions.md",
-      "fileName": "DetailsViewModelTest.kt"
+      "markdownAsset": "testing/assertion-extensions.md",
+      "appExampleFileName": "DetailsViewModelTest.kt"
     },
     {
       "area": "Navigation",
       "title": "BackHandler in Screens",
-      "bodyMarkdown": "navigation/backhandler-screens.md",
-      "fileName": "IdeasScreen.kt"
+      "markdownAsset": "navigation/backhandler-screens.md",
+      "appExampleFileName": "IdeasScreen.kt"
     },
     {
       "area": "Theme",
       "title": "Glass Blur with Haze",
-      "bodyMarkdown": "theme/glass-blur-haze.md",
-      "fileName": "MainActivity.kt"
+      "markdownAsset": "theme/glass-blur-haze.md",
+      "appExampleFileName": "MainActivity.kt"
     },
     {
       "area": "Navigation",
       "title": "Bottom Nav AutoHide",
-      "bodyMarkdown": "navigation/bottom-nav-autohide.md",
-      "fileName": "MainActivity.kt"
+      "markdownAsset": "navigation/bottom-nav-autohide.md",
+      "appExampleFileName": "MainActivity.kt"
     },
     {
       "area": "Architecture",
       "title": "Random Exhaustive List",
-      "bodyMarkdown": "architecture/random-exhaustive-list.md",
-      "fileName": "CodeRecipes.kt"
+      "markdownAsset": "architecture/random-exhaustive-list.md",
+      "appExampleFileName": "CodeRecipes.kt"
     },
     {
       "area": "Theme",
       "title": "ColorScheme",
-      "bodyMarkdown": "theme/colorscheme.md",
-      "fileName": "RecipesTheme.kt"
+      "markdownAsset": "theme/colorscheme.md",
+      "appExampleFileName": "RecipesTheme.kt"
     },
     {
       "area": "Compose",
       "title": "WebView Fade-in",
-      "bodyMarkdown": "compose/webview-fadein.md",
-      "fileName": "WebViewScreen.kt"
+      "markdownAsset": "compose/webview-fadein.md",
+      "appExampleFileName": "WebViewScreen.kt"
     }
   ]
 }

@@ -44,6 +44,7 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.rememberHazeState
 import org.balch.recipes.core.ai.GeminiKeyProvider
+import org.balch.recipes.core.ai.tools.NavigationTool
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.features.agent.AgentScreen
 import org.balch.recipes.features.agent.AgentViewModel
@@ -77,6 +78,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var recipeMaestroConfig: RecipeMaestroConfig
 
+    @Inject
+    lateinit var navigationTool: NavigationTool
+
     private val topLevelRoutes by lazy {
         listOf(
             Ideas,
@@ -105,6 +109,12 @@ class MainActivity : ComponentActivity() {
         val hazeState = rememberHazeState()
 
         val backStack = rememberNavBackStack(topLevelRoutes.first())
+        LaunchedEffect(Unit) {
+            navigationTool.navigationRoute.collect {
+                backStack.push(it)
+            }
+        }
+
         val aiAppContext by rememberAppContext(backStack.peek())
 
         var previousVisibleIndex by remember { mutableIntStateOf(0) }
