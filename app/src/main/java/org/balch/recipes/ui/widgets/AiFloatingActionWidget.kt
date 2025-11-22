@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import org.balch.recipes.AiChatScreen
 import org.balch.recipes.RecipeRoute
 import org.balch.recipes.features.agent.ai.AppContextData
-import org.balch.recipes.features.agent.ai.RecipeMaestroConfig
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.utils.sharedBounds

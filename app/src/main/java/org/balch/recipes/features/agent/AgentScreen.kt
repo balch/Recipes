@@ -260,7 +260,7 @@ private fun ChatMessageBubble(message: ChatMessage) {
             color = message.type.containerColor(),
             shadowElevation = 2.dp
         ) {
-            Box(modifier = Modifier.padding(16.dp)) {
+            Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                 when (message.type) {
                     ChatMessageType.Loading -> ChefThinkingAnimation()
                     else -> {

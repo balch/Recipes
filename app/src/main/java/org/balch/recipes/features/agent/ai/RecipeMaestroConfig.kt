@@ -37,6 +37,8 @@ class RecipeMaestroConfig @Inject constructor() {
         val tintColor: Color? = null,
     )
 
+    val promptAgentAtAppLaunch: Boolean = false
+
     val model = GoogleModels.Gemini2_5Flash
 
     val maxAgentIterations = 40

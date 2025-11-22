@@ -90,7 +90,9 @@ class RecipeMaestroAgent @Inject constructor(
             .stateIn(
                 scope = applicationScope,
                 initialValue = AgentState.Loading(messages.toList()),
-                started = SharingStarted.Eagerly
+                started =
+                    SharingStarted.Eagerly.takeIf { config.promptAgentAtAppLaunch }
+                    ?: SharingStarted.Lazily
             )
 
     private fun randomInitialPrompt(): String =
