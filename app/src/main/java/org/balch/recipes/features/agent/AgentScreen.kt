@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -32,10 +33,9 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontWeight
@@ -62,32 +63,28 @@ import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.model.DefaultMarkdownColors
 import com.mikepenz.markdown.model.DefaultMarkdownTypography
 import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.rememberHazeState
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
+import org.balch.recipes.ui.utils.sharedBounds
+import org.balch.recipes.ui.widgets.RecipeMaestroWidget
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun AgentScreen(
     modifier: Modifier = Modifier,
     viewModel: AgentViewModel,
-    initialPrompt: String = "",
     onBack: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val messages by viewModel.messages.collectAsState()
     val view = LocalView.current
-
-    // If we have an initial prompt (from the input box), send it on first composition
-    LaunchedEffect(initialPrompt) {
-        if (initialPrompt.isNotBlank()) {
-            viewModel.sendPrompt(initialPrompt)
-        }
-    }
 
     AgentLayout(
         modifier = modifier,
@@ -99,10 +96,11 @@ fun AgentScreen(
         onBack = onBack,
         sharedTransitionScope = sharedTransitionScope,
         animatedVisibilityScope = animatedVisibilityScope,
+        moodTintColor = viewModel.moodTintColor,
     )
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalHazeMaterialsApi::class)
 @Composable
 private fun AgentLayout(
     messages: List<ChatMessage>,
@@ -111,6 +109,7 @@ private fun AgentLayout(
     sharedTransitionScope: SharedTransitionScope?,
     animatedVisibilityScope: AnimatedVisibilityScope?,
     modifier: Modifier = Modifier,
+    moodTintColor: Color? = null,
 ) {
     val listState = rememberLazyListState()
     val hazeState = rememberHazeState()
@@ -118,7 +117,10 @@ private fun AgentLayout(
     val isLoading = messages.lastOrNull()?.type == ChatMessageType.Loading
 
     LaunchedEffect(messages.size) {
-        listState.animateScrollToItem(messages.lastIndex)
+        if (messages.isNotEmpty()) {
+            // Always bring the latest message into view
+            listState.animateScrollToItem(messages.size)
+        }
     }
 
     Scaffold(
@@ -132,6 +134,9 @@ private fun AgentLayout(
                         )
                     },
                 onBack = onBack,
+                iconTint = moodTintColor,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope =  animatedVisibilityScope,
             )
         }
     ) { innerPadding ->
@@ -151,34 +156,36 @@ private fun AgentLayout(
                     ChatMessageBubble(message = message)
                 }
                 item {
-                    Spacer(modifier = Modifier.height(60.dp))
+                    Spacer(modifier = Modifier.height(55.dp))
                 }
             }
 
             // Input area
-            ChatInputField(
-                isEnabled = !isLoading,
-                onSendMessage = onSendMessage,
+            Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .hazeEffect(state = hazeState, style = LocalHazeStyle.current) {
-                        HazeProgressive.verticalGradient(
-                            startIntensity = 1f,
-                            endIntensity = 0f,
-                        )
-                    }
-                    .fillMaxWidth()
-                    .padding(4.dp)
-            )
+            ) {
+                ChatInputField(
+                    isEnabled = !isLoading,
+                    onSendMessage = onSendMessage,
+                    modifier = Modifier,
+                    hazeState = hazeState,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = animatedVisibilityScope,
+                )
+            }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 private fun TopBar(
     modifier: Modifier = Modifier,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    iconTint: Color? = null,
+    sharedTransitionScope: SharedTransitionScope?,
+    animatedVisibilityScope: AnimatedVisibilityScope?,
 ) {
     Box(
         modifier = modifier.fillMaxWidth(),
@@ -186,11 +193,18 @@ private fun TopBar(
     ) {
         TopAppBar(
             title = {
-                Row {
-                    Text(
-                        text = "👨‍🍳",
-                        fontSize = 32.sp
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    RecipeMaestroWidget(
+                        fontSize = 32.sp,
+                        iconTint = iconTint,
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        sharedTransitionScope = sharedTransitionScope,
                     )
+
                     Column {
                         Text(
                             text = "Recipe Maestro",
@@ -200,7 +214,7 @@ private fun TopBar(
                         Text(
                             text = "Your culinary—coding companion",
                             style = typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            color = colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                     }
                 }
@@ -215,7 +229,7 @@ private fun TopBar(
             },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent,
-                titleContentColor = MaterialTheme.colorScheme.onSurface,
+                titleContentColor = colorScheme.onSurface,
             )
         )
     }
@@ -258,7 +272,7 @@ private fun ChatMessageBubble(message: ChatMessage) {
                                         ChatMessageType.Error -> "⚠️ Error"
                                         else -> ""
                                     },
-                                    style = typography.labelSmall,
+                                    style = typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = message.type.textColor().copy(alpha = 0.8f),
                                     modifier = Modifier.padding(bottom = 4.dp)
@@ -266,6 +280,7 @@ private fun ChatMessageBubble(message: ChatMessage) {
                             }
                             Markdown(
                                 content = message.text,
+                                modifier = Modifier.fillMaxWidth(),
                                 colors = message.markdownColors(),
                                 typography = message.markdownTypography()
                             )
@@ -311,7 +326,7 @@ private fun ChefThinkingAnimation() {
                     .size(10.dp)
                     .scale(scale)
                     .background(
-                        MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                        colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
                         shape = RoundedCornerShape(50)
                     )
             )
@@ -319,72 +334,79 @@ private fun ChefThinkingAnimation() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalHazeMaterialsApi::class,
+    ExperimentalSharedTransitionApi::class
+)
 @Composable
 private fun ChatInputField(
     isEnabled: Boolean,
     onSendMessage: (String) -> Unit,
-    modifier: Modifier = Modifier
+    hazeState: HazeState,
+    modifier: Modifier = Modifier,
+    sharedTransitionScope: SharedTransitionScope?,
+    animatedVisibilityScope: AnimatedVisibilityScope?,
+    onMeasuredHeight: (Int) -> Unit = {},
 ) {
     var message by remember { mutableStateOf("") }
 
-    Surface(
-        modifier = modifier,
-        color = Color.Transparent,
-        shadowElevation = 8.dp
+    Row(
+        modifier = modifier
+            .hazeEffect(state = hazeState, style = LocalHazeStyle.current)
+            .fillMaxWidth()
+            .padding(16.dp)
+            // Respect the IME (keyboard) and system navigation bars
+            .imePadding(),
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Row(
+        OutlinedTextField(
+            value = message,
+            onValueChange = { message = it },
+            enabled = isEnabled,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            OutlinedTextField(
-                value = message,
-                onValueChange = { message = it },
-                enabled = isEnabled,
-                modifier = Modifier.weight(1f),
-                placeholder = {
-                    if (isEnabled) {
-                        Text(
-                            "Ask me about recipes...",
-                            style = typography.bodyLarge
-                        )
-                    } else {
-                        Text(
-                            "Pinging LLM Friend...",
-                            style = typography.bodyLarge
-                        )
-                    }
-                },
-                leadingIcon = {
-                    IconButton(
-                        enabled = isEnabled,
-                        onClick = {
-                            onSendMessage(message)
+                .sharedBounds(
+                    key = "RecipeMaestroText",
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    sharedTransitionScope = sharedTransitionScope,
+                )
+                .onSizeChanged { onMeasuredHeight(it.height) },
+            placeholder = {
+                if (isEnabled) {
+                    Text(
+                        "Ask me about recipes...",
+                        style = typography.bodyLarge
+                    )
+                } else {
+                    Text(
+                        "Pinging LLM Friend...",
+                        style = typography.bodyLarge
+                    )
+                }
+            },
+            trailingIcon = {
+                IconButton(
+                    enabled = isEnabled,
+                    onClick = {
+                        val trimmed = message.trim()
+                        if (trimmed.isNotEmpty()) {
+                            onSendMessage(trimmed)
                             message = ""
-                          },
-                        modifier = Modifier.size(28.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Send,
-                            contentDescription = "Send message",
-                        )
-                    }
-                },
-                textStyle = typography.bodyLarge.copy(fontSize = 18.sp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                ),
-                shape = RoundedCornerShape(24.dp),
-                minLines = 1,
-                maxLines = 4,
-            )
-        }
+                        }
+                    },
+                    modifier = Modifier.size(28.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Send,
+                        contentDescription = "Send message",
+                    )
+                }
+            },
+            textStyle = typography.bodyLarge.copy(fontSize = 18.sp),
+            shape = RoundedCornerShape(24.dp),
+            minLines = 1,
+            maxLines = 4,
+        )
     }
 }
 
@@ -518,7 +540,7 @@ private fun ChatMessageBubbleErrorPreview() {
 private fun ChefThinkingAnimationPreview() {
     RecipesTheme {
         Surface(
-            color = MaterialTheme.colorScheme.tertiaryContainer,
+            color = colorScheme.tertiaryContainer,
             shape = RoundedCornerShape(20.dp)
         ) {
             Box(modifier = Modifier.padding(16.dp)) {
@@ -528,6 +550,7 @@ private fun ChefThinkingAnimationPreview() {
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @ThemePreview
 @Composable
 private fun ChatInputFieldPreview() {
@@ -537,11 +560,17 @@ private fun ChatInputFieldPreview() {
                 onSendMessage = {},
                 modifier = Modifier.fillMaxWidth(),
                 isEnabled = true,
+                hazeState = HazeState(),
+                sharedTransitionScope = null,
+                animatedVisibilityScope = null,
             )
             ChatInputField(
                 onSendMessage = {},
                 modifier = Modifier.fillMaxWidth(),
                 isEnabled = false,
+                hazeState = HazeState(),
+                sharedTransitionScope = null,
+                animatedVisibilityScope = null,
             )
         }
     }

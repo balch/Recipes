@@ -10,8 +10,6 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -29,9 +27,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -49,10 +47,9 @@ import org.balch.recipes.core.ai.GeminiKeyProvider
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.features.agent.AgentScreen
 import org.balch.recipes.features.agent.AgentViewModel
-import org.balch.recipes.features.agent.ai.PromptIntent
 import org.balch.recipes.features.agent.ai.RecipeMaestroAgent
-import org.balch.recipes.features.agent.ai.RecipeMaestroAgent.Companion.toContext
 import org.balch.recipes.features.agent.ai.RecipeMaestroConfig
+import org.balch.recipes.features.agent.ai.RecipeMaestroConfig.AppContextData
 import org.balch.recipes.features.details.DetailScreen
 import org.balch.recipes.features.details.DetailsViewModel
 import org.balch.recipes.features.ideas.IdeasScreen
@@ -65,16 +62,8 @@ import org.balch.recipes.ui.nav.pop
 import org.balch.recipes.ui.nav.push
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.utils.setEdgeToEdgeConfig
-import org.balch.recipes.ui.widgets.AiInputBoxVisibilityState
-import org.balch.recipes.ui.widgets.AiInputBoxWidget
+import org.balch.recipes.ui.widgets.AiFloatingActionWidget
 import javax.inject.Inject
-
-private val TOP_LEVEL_ROUTES : List<TopLevelRoute> =
-    listOf(
-        Ideas,
-        Search(SearchType.Search("")),
-        Info
-    )
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -87,6 +76,14 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var recipeMaestroConfig: RecipeMaestroConfig
+
+    private val topLevelRoutes by lazy {
+        listOf(
+            Ideas,
+            Search(SearchType.Search("")),
+            Info
+        )
+    }
 
     @OptIn(ExperimentalMaterial3AdaptiveApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,22 +104,8 @@ class MainActivity : ComponentActivity() {
     private fun MainContent() {
         val hazeState = rememberHazeState()
 
-        var aiInputBoxState by remember {
-            mutableStateOf(
-                if (geminiKeyProvider.isApiKeySet) AiInputBoxVisibilityState.FloatingActionBox
-                else AiInputBoxVisibilityState.Gone
-            )
-        }
-
-        val useFixedPosition by remember(aiInputBoxState) {
-            derivedStateOf {
-                aiInputBoxState is AiInputBoxVisibilityState.FloatingActionBox
-            }
-        }
-
-
-        // remember backstack in a savable way
-        val backStack = rememberNavBackStack(TOP_LEVEL_ROUTES[0])
+        val backStack = rememberNavBackStack(topLevelRoutes.first())
+        val aiAppContext by rememberAppContext(backStack.peek())
 
         var previousVisibleIndex by remember { mutableIntStateOf(0) }
         var firstVisibleIndex by remember { mutableIntStateOf(0) }
@@ -131,6 +114,10 @@ class MainActivity : ComponentActivity() {
             showNavigationBar = firstVisibleIndex == 0 || firstVisibleIndex < previousVisibleIndex
             previousVisibleIndex = firstVisibleIndex
         }
+
+        val agentViewModel: AgentViewModel = hiltViewModel(
+            viewModelStoreOwner = this@MainActivity
+        )
 
         // override back button behavior to prevent closing the app when
         // there is only one screen and the nav bar is down
@@ -157,14 +144,14 @@ class MainActivity : ComponentActivity() {
                                     )
                                 },
                         ) {
-                            TOP_LEVEL_ROUTES.forEach { topLevelRoute ->
+                            topLevelRoutes.forEach { topLevelRoute ->
                                 val isSelected = topLevelRoute == backStack.peek()
                                 NavigationBarItem(
                                     selected = isSelected,
                                     onClick = {
                                         if (backStack.peek() != topLevelRoute) {
                                             // Navigate to root first if not there
-                                            if (backStack.peek() != TOP_LEVEL_ROUTES[0]) {
+                                            if (backStack.peek() != topLevelRoutes.first()) {
                                                 backStack.pop()
                                             }
                                             backStack.push(topLevelRoute)
@@ -181,41 +168,16 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 },
-                floatingActionButtonPosition =
-                    FabPosition.EndOverlay.takeIf { useFixedPosition }
-                        ?: FabPosition.Center,
+                floatingActionButtonPosition = FabPosition.End,
                 floatingActionButton = {
-                    fun derivePromptIntent(prompt: String) =
-                        if (prompt == recipeMaestroConfig.currentContextPrompt) {
-                            PromptIntent(
-                                prompt = prompt + (backStack.peek()?.toContext() ?: ""),
-                                displayPrompt = prompt
-                            )
-                        } else { PromptIntent(prompt) }
-
-                    val isVisible = backStack.peek() !is AiChatScreen
-                    if (isVisible) {
-                        AiInputBoxWidget(
-                            uiState = aiInputBoxState,
+                    aiAppContext?.let { aiContext ->
+                        AiFloatingActionWidget(
+                            expanded = showNavigationBar,
+                            appContext = aiContext,
                             onNavigateTo = { recipeRoute ->
-                                if (recipeRoute is AiInquireMode) {
-                                    aiInputBoxState =
-                                        AiInputBoxVisibilityState.Collapsed(recipeMaestroConfig.currentContextPrompt)
-                                } else {
-                                    backStack.push(recipeRoute)
-                                }
+                                backStack.push(recipeRoute)
                             },
-                            onSendResponse = { prompt ->
-                                recipeAgent.sendResponsePrompt(derivePromptIntent(prompt))
-                            },
-                            modifier = Modifier
-                                .then(
-                                    if (useFixedPosition) Modifier
-                                        .offset(y = (-20).dp)
-                                        .navigationBarsPadding()
-                                    else Modifier
-                                ),
-                            hazeState = hazeState,
+                            moodTintColor = agentViewModel.moodTintColor,
                         )
                     }
                 }
@@ -301,16 +263,11 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             entry<AiChatScreen> { aiRoute ->
-                                val viewModel: AgentViewModel = hiltViewModel(
-                                    viewModelStoreOwner = this@MainActivity
-                                )
-
                                 AgentScreen(
-                                    viewModel = viewModel,
-                                    initialPrompt = aiRoute.initialPrompt,
+                                    viewModel = agentViewModel,
                                     onBack = { backStack.pop() },
                                     sharedTransitionScope = this@SharedTransitionLayout,
-                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current
+                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
                                 )
                             }
                             entry<Info> {
@@ -324,5 +281,28 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    @Composable
+    fun rememberAppContext(
+        navKey: NavKey?,
+    ): State<AppContextData?> = remember(navKey) {
+        mutableStateOf(
+            navKey?.let { screen ->
+                if (geminiKeyProvider.isApiKeySet
+                    && when (screen) {
+                        Ideas,
+                        Info,
+                        is SearchRoute,
+                        is DetailRoute -> true
+
+                        else -> false
+                    }
+                ) {
+                    recipeMaestroConfig.appContext(screen)
+                } else null
+            }
+        )
+    }
 }
+
 

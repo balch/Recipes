@@ -8,7 +8,7 @@ import ai.koog.agents.features.eventHandler.feature.handleEvents
 import ai.koog.prompt.dsl.prompt
 import ai.koog.prompt.executor.clients.google.GoogleLLMClient
 import ai.koog.prompt.executor.llms.SingleLLMPromptExecutor
-import androidx.navigation3.runtime.NavKey
+import androidx.annotation.VisibleForTesting
 import com.diamondedge.logging.logging
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -26,19 +26,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import org.balch.recipes.AiChatScreen
-import org.balch.recipes.DetailRoute
-import org.balch.recipes.Ideas
-import org.balch.recipes.Info
 import org.balch.recipes.RecipeRoute
-import org.balch.recipes.Search
-import org.balch.recipes.SearchRoute
 import org.balch.recipes.core.ai.GeminiKeyProvider
 import org.balch.recipes.core.coroutines.DispatcherProvider
-import org.balch.recipes.core.models.DetailType
-import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.features.agent.ChatMessage
 import org.balch.recipes.features.agent.ChatMessageType
+import kotlin.random.Random
 import kotlin.time.ExperimentalTime
 
 data class PromptIntent(
@@ -56,7 +49,7 @@ class RecipeMaestroAgent @Inject constructor(
     private val geminiKeyProvider: GeminiKeyProvider,
     dispatcherProvider: DispatcherProvider,
 ) {
-    val applicationScope = CoroutineScope(SupervisorJob() + dispatcherProvider.default)
+    private val applicationScope = CoroutineScope(SupervisorJob() + dispatcherProvider.default)
 
     private val logger = logging("RecipeMaestroAgent")
 
@@ -65,6 +58,14 @@ class RecipeMaestroAgent @Inject constructor(
         extraBufferCapacity = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
+
+    val mood by lazy {
+        val chance = Random.nextInt(1, 101)
+        deriveRandomPromptData(chance)
+            .also {
+                logger.info {  "Random Mood: chance=${chance}%\n$it" }
+            }
+    }
 
     fun sendResponsePrompt(prompt: PromptIntent) {
         userIntent.tryEmit(prompt)
@@ -84,7 +85,7 @@ class RecipeMaestroAgent @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val agentFlow: StateFlow<AgentState> =
-        runAgent(config.initialAgentPrompt)
+        runAgent(randomInitialPrompt())
             .flowOn(dispatcherProvider.default)
             .stateIn(
                 scope = applicationScope,
@@ -92,11 +93,25 @@ class RecipeMaestroAgent @Inject constructor(
                 started = SharingStarted.Eagerly
             )
 
+    private fun randomInitialPrompt(): String =
+        if (mood.isReplacement) mood.prompt
+            else config.initialAgentPrompt(mood.prompt)
+
+    @VisibleForTesting
+    fun deriveRandomPromptData(chance: Int): RecipeMaestroConfig.RandomAgentPromptData {
+        var acc = 0
+        return config.initialAgentPrompts
+            .firstOrNull {
+                acc += it.chance
+                (chance <= acc)
+            } ?: config.initialAgentPrompts.random()
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun runAgent(prompt: String): Flow<AgentState> = channelFlow {
         val strategy = config
             .agentStrategy(
-                name = "MasterChefAgent",
+                name = "RecipeMaestroAgent",
                 onAssistantMessage = { message ->
                     send(agentMessageToState(message))
 
@@ -170,31 +185,6 @@ class RecipeMaestroAgent @Inject constructor(
             toolRegistry = config.toolRegistry,
             installFeatures = installFeatures,
         )
-    }
-
-    companion object Companion {
-        /**
-         * Converts the current NavKey to a descriptive context string for the AI agent
-         */
-        fun NavKey.toContext(): String = when (this) {
-            is Ideas -> "The user is currently browsing recipe ideas and categories"
-            is Search -> "The user is currently searching for recipes with query: ${search.searchText}"
-            is SearchRoute -> when (searchType) {
-                is SearchType.Category -> "The user is browsing recipes in category: ${searchType.searchText}"
-                is SearchType.Area -> "The user is browsing recipes from area: ${searchType.searchText}"
-                is SearchType.Ingredient -> "The user is browsing recipes with ingredient: ${searchType.searchText}"
-                is SearchType.Search -> "The user is searching for: ${searchType.searchText}"
-            }
-            is DetailRoute -> when (detailType) {
-                is DetailType.MealLookup -> "The user is viewing a recipe: ${detailType.mealSummary.name}"
-                is DetailType.MealContent -> "The user is viewing a recipe: ${detailType.meal.name}"
-                is DetailType.RandomRecipe -> "The user is viewing a random recipe"
-                is DetailType.CodeRecipeContent -> "The user is viewing code recipe: ${detailType.codeRecipe.title}"
-            }
-            is Info -> "The user is viewing the app information screen"
-            is AiChatScreen -> "The user is in the AI assistant screen"
-            else -> "The user is browsing the Recipes app"
-        }
     }
 
     sealed interface AgentState {

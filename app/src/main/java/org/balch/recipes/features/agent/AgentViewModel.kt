@@ -25,6 +25,9 @@ class AgentViewModel @Inject constructor(
 
     val navigationFlow = agent.navigationFlow
 
+    // Expose the agent's current mood tint color to the UI
+    val moodTintColor = agent.mood.tintColor
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val messages: StateFlow<List<ChatMessage>> =
         agent.agentFlow

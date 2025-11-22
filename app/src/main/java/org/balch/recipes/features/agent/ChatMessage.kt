@@ -3,6 +3,7 @@ package org.balch.recipes.features.agent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import kotlinx.serialization.Serializable
 
 
 enum class ChatMessageType {
@@ -15,6 +16,7 @@ enum class ChatMessageType {
 /**
  * Represents a chat message in the AI conversation
  */
+@Serializable
 data class ChatMessage(
     val id: String = java.util.UUID.randomUUID().toString(),
     val text: String,

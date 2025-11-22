@@ -27,19 +27,19 @@ sealed interface TopLevelRoute: RecipeRoute {
 
 @Serializable
 data object Ideas : TopLevelRoute {
-    override val icon = Icons.Default.Lightbulb
+    override val icon = Icons.Filled.Lightbulb
     override val contentDescription = "Ideas"
 }
 
 @Serializable
 data object Info : TopLevelRoute {
-    override val icon = Icons.Default.Info
+    override val icon = Icons.Filled.Info
     override val contentDescription = "Info"
 }
 
 @Serializable
 data class Search(val search: SearchType.Search) : TopLevelRoute {
-    @Transient override val icon = Icons.Default.Search
+    @Transient override val icon = Icons.Filled.Search
     override val contentDescription = "Search"
 }
 
@@ -53,11 +53,6 @@ data class SearchRoute(val searchType: SearchType) : RecipeRoute {
     override val contentDescription = "Search"
 }
 @Serializable
-data class AiChatScreen(val initialPrompt: String = "") : RecipeRoute {
+data object AiChatScreen : RecipeRoute {
     override val contentDescription = "AI"
-}
-
-@Serializable
-data object AiInquireMode : RecipeRoute {
-    override val contentDescription = "AI Compact"
 }

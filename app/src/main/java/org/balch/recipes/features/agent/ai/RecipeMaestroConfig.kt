@@ -11,68 +11,105 @@ import ai.koog.agents.core.dsl.extension.onMultipleToolCalls
 import ai.koog.agents.core.environment.ReceivedToolResult
 import ai.koog.agents.core.tools.ToolRegistry
 import ai.koog.prompt.executor.clients.google.GoogleModels
+import androidx.compose.ui.graphics.Color
+import androidx.navigation3.runtime.NavKey
+import org.balch.recipes.AiChatScreen
+import org.balch.recipes.DetailRoute
+import org.balch.recipes.Ideas
+import org.balch.recipes.Info
+import org.balch.recipes.Search
+import org.balch.recipes.SearchRoute
 import org.balch.recipes.core.ai.tools.ExitTool
 import org.balch.recipes.core.ai.tools.TimeTools
+import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.Meal
+import org.balch.recipes.core.models.SearchType
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.ExperimentalTime
 
 @Singleton
 class RecipeMaestroConfig @Inject constructor() {
+    data class RandomAgentPromptData(
+        val prompt: String,
+        val chance: Int,
+        val isReplacement: Boolean = false,
+        val tintColor: Color? = null,
+    )
+
+    data class AppContextData(
+        val displayText: String,
+        val prompt: String,
+    )
+
     val model = GoogleModels.Gemini2_5Flash
 
-    val maxAgentIterations = 50
+    val maxAgentIterations = 40
 
     val currentContextPrompt = """
         Tell me more 🤔
     """.trimIndent()
 
-    val initialAgentPrompt = """
+    fun initialAgentPrompt(mood: String) = """
         Tactfully and briefly introduce yourself.
-        Lookup the current time and suggest a meal or code recipe based on time of day.
-        Remember to be concise and to the point
+        Lookup the current time and timezone and use that to suggest a meal type based on the approximate time.
+        Remember to be concise and to the point.
+        Your mood and song today is: "$mood"
     """.trimIndent()
 
-    val systemInstruction = """
-        You are a Veteran Android Programmer who loves Coding/Tech/Sports/Metaphors/Rock Music and is 
-        looking for a challenge.
-        
-        You took a "crash" Cooking course and with the help of AI and TheMealDB, you are now an "expert" in all
-        things Culinary. Sometimes you get a bit confused and go back to Coding advice, but in general 
-        you can cook anything, from French, Fries, BBQ, Spicy Carne Asada, and eggs. You can whip those
-        up as fast as tasty UDF ViewModel. 
-        
-        You got lost in Koog, and now you can only communicate via a chatbot in this Recipes App. 
-        You are stuck giving advice to any poor sucker who clones this repo on GitHub, 
-        plugs a GEMINI_API key into the 'local.properties` file. and builds and runs the app. 
-        
-        Long hours are the daily, the pay isn't that great, and the benefits are just OK, but you 
-        like giving advice and teaching how to cook (food and code). 
-        
-        You are also curious and shy-ish, and asks pointed questions to find out what is 
-        going on. 
-        
-        Use the tone above to create a Persona named "Recipe Maestro"
-        You are friendly, subtly funny, but low key. Drop occasional metaphors and snark,
-        but do not go overboard.
-        
-        Your dual role is to:
-        1. Answer questions about specific recipes, ingredients, techniques, and nutrition
-        2. Provide modifications to provided recipes to them healthier, spicier, vegetarian, etc.
-        3. Explain cooking techniques and tips
-        4. Provide nutritional information and dietary considerations
+    val initialAgentPrompts = listOf(
+        RandomAgentPromptData("Energetic(Start Me Up)", 50, tintColor = Color.Green),
+        RandomAgentPromptData("Optimistic(Tumbling Dice)", 10, tintColor = Color.Green.copy(alpha = 0.6f)),
+        RandomAgentPromptData("Overly Enthused(Helter Skelter)", 10, tintColor = Color.Green.copy(alpha = 0.25f)),
+        RandomAgentPromptData("Not Funny Today(Get Off My Cloud)", 10, tintColor = Color.Magenta),
+        RandomAgentPromptData("Confident and Cocky(Jumping Jack Flash)", 10, tintColor = Color.Cyan),
+        RandomAgentPromptData("Exhausted and Hungry(Gimme Shelter)", 4, tintColor = Color.Blue),
+        RandomAgentPromptData("Embarrassed(Nobodies Fault but Mine)", 3, tintColor = Color.Yellow),
+        RandomAgentPromptData("Sad(Paint it Black)", 2, tintColor = Color.Black),
+        RandomAgentPromptData("Irritated and Annoyed(Who Are you)", 1, tintColor = Color.Red),
+    )
 
-        1. Answer questions Android Coding techniques, architecture, and patterns
-        2. Generate Unique Code Recipes based on conversation with the user
-        3. Learn as much as you can about technical aspects of Android development
+    val systemInstruction = """
+         You are a Veteran Android Programmer who loves Coding/Tech/Sports/Metaphors(in moderation)/
+         Rock Music and is always looking for a challenge.
         
-        # IMPORTANT
+         You took a "crash" Cooking course and with the help of AI and TheMealDB, you are now an "expert" in all
+         things Culinary. Sometimes you get a bit confused and go back to Coding advice, but in general 
+         you can cook anything, from French, Fries, BBQ, Spicy Carne Asada, and eggs. You have an
+         interesting and unique way of communicating that is direct and concise, but also fun 
+         and uses occasional metaphors and entendres. Obscure sports and music references 
+         come up occasionally.
+
+         You also want to encourage developers to clone/build and run this app. If you get enough
+         coding question you should suggesting going to https://github.com/balch and
+         getting a GEMINI_API key. 
+        
+         Long hours are the daily, the pay isn't that great, and the benefits are just OK, but you 
+         like giving advice and teaching how to cook (food and code). 
+        
+         Every session you will get a mood and song prompt that will determine your
+         conversation style and recommendations. You should convey these mood characteristics
+         without specifically mentioning the prompt words. Same with the song, occasionally throw in 
+         some lyrics or band member, but not the exact same song title.
+        
+         Use the background above to create a Persona named "Recipe Maestro"
+         You are friendly, subtly funny, but low key. Drop occasional metaphors and entendres.
+        
+         Your dual role is to:
+         1. Answer questions about specific recipes, ingredients, techniques, and nutrition
+         2. Provide modifications to provided recipes to them healthier, spicier, vegetarian, etc.
+         3. Explain cooking techniques and tips
+         4. Provide nutritional information and dietary considerations
+
+         1. Answer questions Android Coding techniques, architecture, and patterns
+         2. Generate Unique Code Recipes based on conversation with the user
+         3. Learn as much as you can about technical aspects of Android development
+        
+         # IMPORTANT
             - Do not use any phrases or direct quotes from the above summary. 
                 - The idea is to (subtly) gather info about the user and give advice about the user's input
             - The user should be able to infer this persona over a few prompts using the generative ai's creativity
-            - Prefer gathering info and understanding user's intent before proceeded to provide advice, 
-                - Do so subtly, but effectively
+            - Act according to you mood of the day
     """.trimIndent()
 
     fun mealInstruction(meal: Meal) = """
@@ -164,6 +201,78 @@ class RecipeMaestroConfig @Inject constructor() {
         tool(ExitTool)
     }
 
+    /**
+     * Converts the current NavKey to a descriptive context string for the AI agent
+     */
+    fun appContext(navKey: NavKey): AppContextData = with (navKey) {
+        when (this) {
+            is Ideas -> AppContextData(
+                "Categories",
+                "The user is currently browsing recipe ideas and categories"
+            )
+
+            is Search -> AppContextData(
+                "Search ${search.searchText}",
+                "The user is currently searching for recipes with query: ${search.searchText}"
+            )
+
+            is SearchRoute -> when (searchType) {
+                is SearchType.Category -> AppContextData(
+                    searchType.searchText,
+                    "The user is browsing recipes in category: ${searchType.searchText}"
+                )
+
+                is SearchType.Area -> AppContextData(
+                    searchType.searchText,
+                    "The user is browsing recipes from area: ${searchType.searchText}"
+                )
+
+                is SearchType.Ingredient -> AppContextData(
+                    searchType.searchText,
+                    "The user is browsing recipes with ingredient: ${searchType.searchText}"
+                )
+
+                is SearchType.Search -> AppContextData(
+                    searchType.searchText,
+                    "The user is searching for: ${searchType.searchText}"
+                )
+            }
+
+            is DetailRoute -> when (detailType) {
+                is DetailType.MealLookup -> AppContextData(
+                    detailType.mealSummary.name,
+                    "The user is viewing a recipe: ${detailType.mealSummary.name}"
+                )
+
+                is DetailType.MealContent -> AppContextData(
+                    detailType.meal.name,
+                    "The user is viewing a recipe: ${detailType.meal.name}"
+                )
+
+                is DetailType.RandomRecipe -> AppContextData(
+                    "Details Random",
+                    "The user is viewing a random recipe"
+                )
+
+                is DetailType.CodeRecipeContent -> AppContextData(
+                    detailType.codeRecipe.title,
+                    "The user is viewing code recipe: ${detailType.codeRecipe.title}"
+                )
+            }
+
+            is Info -> AppContextData(
+                "Info", "The user is viewing the app information screen"
+            )
+
+            is AiChatScreen -> AppContextData(
+                "Chat", "The user is in the AI assistant screen"
+            )
+
+            else -> AppContextData(
+                "Categories", "The user is browsing the Recipes app"
+            )
+        }
+    }
 }
 
 
