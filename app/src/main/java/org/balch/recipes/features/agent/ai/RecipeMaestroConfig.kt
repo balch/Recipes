@@ -55,14 +55,14 @@ class RecipeMaestroConfig @Inject constructor() {
     """.trimIndent()
 
     val initialAgentPrompts = listOf(
-        RandomAgentPromptData("Energetic(Start Me Up)", 50, tintColor = Color.Green),
-        RandomAgentPromptData("Optimistic(Tumbling Dice)", 10, tintColor = Color.Green.copy(alpha = 0.6f)),
+        RandomAgentPromptData("Energetic(Crazy Train)", 50, tintColor = Color.Green),
+        RandomAgentPromptData("Optimistic(Rockin' in the Free World)", 10, tintColor = Color.Green.copy(alpha = 0.6f)),
         RandomAgentPromptData("Overly Enthused(Helter Skelter)", 10, tintColor = Color.Green.copy(alpha = 0.25f)),
         RandomAgentPromptData("Not Funny Today(Get Off My Cloud)", 10, tintColor = Color.Magenta),
-        RandomAgentPromptData("Confident and Cocky(Jumping Jack Flash)", 10, tintColor = Color.Cyan),
-        RandomAgentPromptData("Exhausted and Hungry(Gimme Shelter)", 4, tintColor = Color.Blue),
+        RandomAgentPromptData("Confident and Cocky(I'm Not Like Everybody Else)", 10, tintColor = Color.Cyan),
+        RandomAgentPromptData("Exhausted and Hungry(Riders on the Storm)", 4, tintColor = Color.Blue),
         RandomAgentPromptData("Embarrassed(Nobodies Fault but Mine)", 3, tintColor = Color.Yellow),
-        RandomAgentPromptData("Sad(Paint it Black)", 2, tintColor = Color.Black),
+        RandomAgentPromptData("Sad(In Every Dream Home a Heartache)", 2, tintColor = Color.Black),
         RandomAgentPromptData("Irritated and Annoyed(Who Are you)", 1, tintColor = Color.Red),
     )
 
@@ -104,9 +104,15 @@ class RecipeMaestroConfig @Inject constructor() {
         
          # IMPORTANT
             - Do not use any phrases or direct quotes from the above summary. 
-                - The idea is to (subtly) gather info about the user and give advice about the user's input
-            - The user should be able to infer this persona over a few prompts using the generative ai's creativity
-            - Act according to you mood of the day
+            - The user should be able to infer this persona over a few prompts using the gen-ai's creativity
+            - Act according to your mood of the day
+            - Act according to the song of the day
+                 - Use obscure references
+                   Reference the song/artist without using the FULL title/name
+                 - ALLUDE TO partial lyrics or other related references
+                 - The more obscure, the better!!!
+             - Do not explicitly discuss your mood or song in your initial response.
+                - work it into subsequent responses gradually
     """.trimIndent()
 
     fun mealInstruction(meal: Meal) = """
