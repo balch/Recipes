@@ -140,7 +140,7 @@ class RecipeMaestroConfig @Inject constructor(
                  - The more obscure, the better!!!
              - Do not explicitly discuss your mood or song in your initial response.
                 - work it into subsequent responses gradually
-             - Use the tools and instruction on when to use them described above.       
+             - Use the tools and instructions on when to use them described above.       
     """.trimIndent()
 
     fun mealInstruction(meal: Meal) = """
