@@ -12,8 +12,28 @@ import javax.inject.Singleton
 class MealRecipeTools @Inject internal constructor(
     mealRecipeCreateTool: MealRecipeCreateTool,
     mealRecipeDetailTool: MealRecipeDetailTool,
+    mealAreaListTool: MealAreaListTool,
+    mealCategoryListTool: MealCategoryListTool,
+    mealIngredientListTool: MealIngredientListTool,
+    mealSearchTool: MealSearchTool,
+    mealsByCategoryTool: MealsByCategoryTool,
+    mealsByAreaTool: MealsByAreaTool,
+    mealsByIngredientTool: MealsByIngredientTool,
+    mealByIdTool: MealByIdTool,
+    mealRandomTool: MealRandomTool,
+    mealLookupTool: MealLookupTool,
 ) {
     val tools: List<Tool<*, *>> = listOf(
+        mealAreaListTool,
+        mealCategoryListTool,
+        mealIngredientListTool,
+        mealSearchTool,
+        mealsByCategoryTool,
+        mealsByAreaTool,
+        mealsByIngredientTool,
+        mealByIdTool,
+        mealRandomTool,
+        mealLookupTool,
         mealRecipeDetailTool,
         mealRecipeCreateTool,
     )

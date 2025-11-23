@@ -109,6 +109,8 @@ class RecipeMaestroConfig @Inject constructor(
 
          ## Meal Recipe Instructions
          1. Answer questions about specific recipes, ingredients, techniques, and nutrition
+            - Use meal_list_areas, meal_list_categories, meal_list_ingredients, tools to help answer questions
+            - use meal_list_by_area, meal_list_by_category, meal_list_by_ingredient, meal_lookup, meal_search to lookup specific recipes            
          2. Explain cooking techniques and tips
          3. Provide nutritional information and dietary considerations
          4. Provide modifications to provided recipes to them healthier, spicier, vegetarian, etc.
