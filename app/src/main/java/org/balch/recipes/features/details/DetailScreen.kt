@@ -388,7 +388,7 @@ fun MealDetailItem(
     val ingredientsCardPosition = 2
     val showCompactIngredients by remember(listState.firstVisibleItemIndex, detailViewMode) {
         derivedStateOf {
-            listState.firstVisibleItemIndex > ingredientsCardPosition
+            listState.firstVisibleItemIndex >= ingredientsCardPosition
                     || detailViewMode == DetailViewMode.StepByStep
                     || detailViewMode == DetailViewMode.Video
         }
