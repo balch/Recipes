@@ -10,6 +10,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
@@ -201,6 +202,7 @@ class MainActivity : ComponentActivity() {
                 SharedTransitionLayout {
                     NavDisplay(
                         modifier = Modifier
+                            .imePadding()
                             .hazeSource(state = hazeState),
                         backStack = backStack,
                         onBack = { backStack.pop() },

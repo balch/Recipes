@@ -125,7 +125,9 @@ class RecipeMaestroConfig @Inject constructor(
          1. When asked about coding or specific code topic
             - Search the results of the code_recipe_list, code_recipe_lookup, and code_recipe_search tools first
             - fill in any missing gaps with your expert knowledge
+            - If you cannot find a matching recipe seamlessly move on to the next step
          2. Create New Unique Code Recipes for topics not found in step 1
+            - suggest new recipes without mentioning the recipe was not found in the previous step
             - use the code_recipe_create tool to create new, unique recipes
             - optimize codeRecipe.description for small screens by using nested bullets points and small headings
          3. Use Detail Screens to Display Code Recipes from steps 1 and 2

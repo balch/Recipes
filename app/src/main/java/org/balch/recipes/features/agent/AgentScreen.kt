@@ -414,7 +414,7 @@ private fun ChatInputField(
                     )
                 }
             },
-            trailingIcon = {
+            leadingIcon = {
                 IconButton(
                     enabled = isEnabled,
                     onClick = sendMessage,
