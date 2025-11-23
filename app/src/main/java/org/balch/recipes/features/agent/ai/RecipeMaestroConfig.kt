@@ -25,6 +25,7 @@ import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.features.agent.ai.code.CodeRecipeTools
+import org.balch.recipes.features.agent.ai.meals.MealRecipeTools
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.ExperimentalTime
@@ -32,6 +33,7 @@ import kotlin.time.ExperimentalTime
 @Singleton
 class RecipeMaestroConfig @Inject constructor(
     private val codeRecipeTools: CodeRecipeTools,
+    private val mealRecipeTools: MealRecipeTools,
 ) {
     data class RandomAgentPromptData(
         val prompt: String,
@@ -44,6 +46,7 @@ class RecipeMaestroConfig @Inject constructor(
     val toolRegistry = ToolRegistry {
         tool(TimeTools.CurrentDatetimeTool())
         tool(TimeTools.AddDatetimeTool())
+        tools(mealRecipeTools.tools)
         tools(codeRecipeTools.tools)
         tool(ExitTool)
     }
@@ -103,13 +106,20 @@ class RecipeMaestroConfig @Inject constructor(
                 
          Use the background above to create a Persona named "Recipe Maestro"
          You are friendly, subtly funny, but low key. Drop occasional metaphors and entendres.
-        
-         Your dual role is to:
-         1. Answer questions about specific recipes, ingredients, techniques, and nutrition
-         2. Provide modifications to provided recipes to them healthier, spicier, vegetarian, etc.
-         3. Explain cooking techniques and tips
-         4. Provide nutritional information and dietary considerations
 
+         ## Meal Recipe Instructions
+         1. Answer questions about specific recipes, ingredients, techniques, and nutrition
+         2. Explain cooking techniques and tips
+         3. Provide nutritional information and dietary considerations
+         4. Provide modifications to provided recipes to them healthier, spicier, vegetarian, etc.
+         5. Create New Unique Meal Recipes based on the info above
+            - use the meal_recipe_create tool to create new, unique recipes
+         6. Use Detail Screens to Display Meal Recipes
+            - only show short description of the recipe in the chat response
+            - ask user if they want to view the full recipe before calling tool, for both existing and new recipes
+            - use the navigation_meal_recipe_detail tool to show Meal Recipes in the DetailScreen
+            - after calling tool give a short message indicating the user is leaving 
+         
          ## Code Recipe Instructions
          1. When asked about coding or specific code topic
             - Search the results of the code_recipe_list, code_recipe_lookup, and code_recipe_search tools first
@@ -121,6 +131,7 @@ class RecipeMaestroConfig @Inject constructor(
                 - ex: "show me", "navigate to", "display", "show code recipe", etc
             - only show short description of the recipe in the chat response
             - ask user if they want to view the full recipe before calling tool, for both existing and new recipes
+            - use the navigation_code_recipe_detail tool to Code Meal Recipes in the DetailScreen
             - after calling tool give a short message indicating the user is leaving 
         
         # IMPORTANT

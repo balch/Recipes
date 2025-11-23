@@ -10,6 +10,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
@@ -182,6 +184,10 @@ class MainActivity : ComponentActivity() {
                 floatingActionButton = {
                     aiAppContext?.let { aiContext ->
                         AiFloatingActionWidget(
+                            modifier = Modifier
+                                .then(if (backStack.peek() is DetailRoute) Modifier.offset(y = -(380).dp)
+                                    else Modifier
+                                ),
                             expanded = showNavigationBar,
                             appContext = aiContext,
                             onNavigateTo = { recipeRoute ->
@@ -300,11 +306,7 @@ class MainActivity : ComponentActivity() {
             navKey?.let { screen ->
                 if (geminiKeyProvider.isApiKeySet
                     && when (screen) {
-                        Ideas,
-                        Info,
-                        is SearchRoute,
-                        is DetailRoute -> true
-
+                        Ideas, Info, is SearchRoute, is DetailRoute -> true
                         else -> false
                     }
                 ) {

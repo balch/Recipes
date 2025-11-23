@@ -188,7 +188,7 @@ fun rememberDetailScreenState(
         else -> "transient" // Loading/Error
     }
     
-    return remember(listState, stateKey) {
+    return remember(listState.firstVisibleItemIndex, stateKey) {
         DetailScreenState(
             initialDetailViewMode = initialDetailViewMode,
             initialStepIndex = initialStepIndex,
@@ -386,9 +386,9 @@ fun MealDetailItem(
      * Update [ingredientsCardPosition] when moving the stickyHeader element
      */
     val ingredientsCardPosition = 2
-    val showCompactIngredients by remember(listState, detailViewMode) {
+    val showCompactIngredients by remember(listState.firstVisibleItemIndex, detailViewMode) {
         derivedStateOf {
-            listState.firstVisibleItemIndex >= ingredientsCardPosition
+            listState.firstVisibleItemIndex > ingredientsCardPosition
                     || detailViewMode == DetailViewMode.StepByStep
                     || detailViewMode == DetailViewMode.Video
         }

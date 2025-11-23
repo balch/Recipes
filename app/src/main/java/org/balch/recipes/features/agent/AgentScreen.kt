@@ -27,6 +27,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ArrowBackIosNew
@@ -52,10 +54,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -351,6 +360,13 @@ private fun ChatInputField(
     onMeasuredHeight: (Int) -> Unit = {},
 ) {
     var message by remember { mutableStateOf("") }
+    val sendMessage = {
+        val trimmed = message.trim()
+        if (trimmed.isNotEmpty()) {
+            onSendMessage(trimmed)
+            message = ""
+        }
+    }
 
     Row(
         modifier = modifier
@@ -373,7 +389,18 @@ private fun ChatInputField(
                     animatedVisibilityScope = animatedVisibilityScope,
                     sharedTransitionScope = sharedTransitionScope,
                 )
-                .onSizeChanged { onMeasuredHeight(it.height) },
+                .onSizeChanged { onMeasuredHeight(it.height) }
+                .onKeyEvent { keyEvent ->
+                    if (keyEvent.type == KeyEventType.KeyDown &&
+                        (keyEvent.key == Key.Enter || keyEvent.key == Key.NumPadEnter) &&
+                        !keyEvent.isShiftPressed
+                    ) {
+                        sendMessage()
+                        true // Consume the event
+                    } else {
+                        false // Do not consume the event
+                    }
+                },
             placeholder = {
                 if (isEnabled) {
                     Text(
@@ -390,13 +417,7 @@ private fun ChatInputField(
             trailingIcon = {
                 IconButton(
                     enabled = isEnabled,
-                    onClick = {
-                        val trimmed = message.trim()
-                        if (trimmed.isNotEmpty()) {
-                            onSendMessage(trimmed)
-                            message = ""
-                        }
-                    },
+                    onClick = sendMessage,
                     modifier = Modifier.size(28.dp)
                 ) {
                     Icon(
@@ -409,6 +430,8 @@ private fun ChatInputField(
             shape = RoundedCornerShape(24.dp),
             minLines = 1,
             maxLines = 4,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+            keyboardActions = KeyboardActions(onSend = { sendMessage() })
         )
     }
 }

@@ -8,7 +8,7 @@ import org.mockito.Mockito.mock
 
 class RecipeMaestroAgentTest {
 
-    private val config = RecipeMaestroConfig(mock())
+    private val config = RecipeMaestroConfig(mock(), mock())
 
     private val dispatcherProvider = TestDispatcherProvider()
 

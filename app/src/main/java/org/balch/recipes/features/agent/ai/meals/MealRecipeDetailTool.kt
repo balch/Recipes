@@ -1,27 +1,27 @@
-package org.balch.recipes.features.agent.ai.code
+package org.balch.recipes.features.agent.ai.meals
 
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.core.tools.annotations.LLMDescription
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import org.balch.recipes.DetailRoute
-import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.DetailType
+import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.navigation.NavigationRouter
 import javax.inject.Inject
 
 /**
- * Tool for Routine to a CodeRecipe or CodeRecipeSummary
+ * Tool for Routine to a Meal Recipe
  */
-class CodeRecipeDetailTool @Inject internal constructor(
+class MealRecipeDetailTool @Inject internal constructor(
     private val navigationRouter: NavigationRouter,
-) : Tool<CodeRecipeDetailTool.Args, CodeRecipeDetailTool.Result>() {
+) : Tool<MealRecipeDetailTool.Args, MealRecipeDetailTool.Result>() {
 
     @Serializable
-    @LLMDescription("Navigate to the DetailScreen for the specified CodeRecipe")
+    @LLMDescription("Navigate to the DetailScreen for the specified Meal")
     data class Args(
-        @property:LLMDescription("The codeRecipe from the code_recipe_create, code_recipe_lookup and code_recipe_search tools.\n")
-        val codeRecipe: CodeRecipe,
+        @property:LLMDescription("The Meal meal_recipe_create tools.\n")
+        val meal: Meal,
     )
 
     @Serializable
@@ -35,15 +35,15 @@ class CodeRecipeDetailTool @Inject internal constructor(
     override val argsSerializer = Args.serializer()
     override val resultSerializer: KSerializer<Result> = Result.serializer()
 
-    override val name = "navigation_code_recipe_detail"
+    override val name = "navigation_meal_recipe_detail"
     override val description = """
-        Navigates the application to the specified CodeRecipe.
-        Used to display Code Recipes from user requests.
-        The input comes from the code_recipe_create, code_recipe_lookup and code_recipe_search tools.
+        Navigates the application to the specified Meal.
+        Used to display Meal Recipes from user requests.
+        The input comes from the meal_recipe_create tools.
     """.trimIndent()
 
     override suspend fun execute(args: Args): Result {
-        val detailRoute = DetailRoute(DetailType.CodeRecipeContent(args.codeRecipe))
+        val detailRoute = DetailRoute(DetailType.MealContent(args.meal))
         val success = navigationRouter.navigateTo(detailRoute)
         return Result(
             success = success,
