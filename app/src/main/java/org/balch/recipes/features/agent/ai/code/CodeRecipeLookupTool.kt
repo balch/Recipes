@@ -5,7 +5,6 @@ import ai.koog.agents.core.tools.annotations.LLMDescription
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import org.balch.recipes.core.assets.CodeRecipeAssetLoader
-import org.balch.recipes.core.models.CodeArea
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.CodeRecipeSummary
 import javax.inject.Inject

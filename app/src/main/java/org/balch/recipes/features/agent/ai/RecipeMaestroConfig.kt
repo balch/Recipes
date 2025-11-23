@@ -20,7 +20,6 @@ import org.balch.recipes.Info
 import org.balch.recipes.Search
 import org.balch.recipes.SearchRoute
 import org.balch.recipes.core.ai.tools.ExitTool
-import org.balch.recipes.core.ai.tools.NavigationTool
 import org.balch.recipes.core.ai.tools.TimeTools
 import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.Meal
@@ -33,7 +32,6 @@ import kotlin.time.ExperimentalTime
 @Singleton
 class RecipeMaestroConfig @Inject constructor(
     private val codeRecipeTools: CodeRecipeTools,
-    private val navigationTool: NavigationTool,
 ) {
     data class RandomAgentPromptData(
         val prompt: String,
@@ -47,7 +45,6 @@ class RecipeMaestroConfig @Inject constructor(
         tool(TimeTools.CurrentDatetimeTool())
         tool(TimeTools.AddDatetimeTool())
         tools(codeRecipeTools.tools)
-        tool(navigationTool)
         tool(ExitTool)
     }
 
@@ -132,6 +129,7 @@ class RecipeMaestroConfig @Inject constructor(
                  - The more obscure, the better!!!
              - Do not explicitly discuss your mood or song in your initial response.
                 - work it into subsequent responses gradually
+             - If the user asks you to "navigate" to or display display a Code or Meal resume, use the correct "navigation_" tool and pass in the object to navigate to       
     """.trimIndent()
 
     fun mealInstruction(meal: Meal) = """

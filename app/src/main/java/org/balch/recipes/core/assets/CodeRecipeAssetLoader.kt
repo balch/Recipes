@@ -13,7 +13,6 @@ import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.CodeRecipeSummary
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.collections.mapIndexed
 
 @Singleton
 class CodeRecipeAssetLoader @Inject constructor(

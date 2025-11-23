@@ -125,10 +125,30 @@ class RecipeMaestroAgent @Inject constructor(
 
         createAgent(strategy) {
             handleEvents {
+                onAgentStarting {  ctx ->
+                    logger.d { "Agent:${ctx.agent.id} Prompt:${ctx.context.config.prompt}" }
+                }
+                onAgentCompleted { ctx ->
+                    logger.d { "Agent:${ctx.agentId} Completed:${ctx.result}" }
+                }
                 onAgentExecutionFailed { ctx ->
                     logger.error(ctx.throwable) { "Error running agent" }
                     // Ensure error emission also respects the collector's context
                     send(errorMessageAsState(ctx.throwable, "Whoops!!!"))
+                }
+                onToolCallFailed { ctx ->
+                    logger.error(ctx.throwable) { "Error running tool: ${ctx.tool.name}" }
+                    send(errorMessageAsState(ctx.throwable, "Whoops!!!"))
+                }
+                onToolValidationFailed { ctx ->
+                    logger.error { "Error running tool: ${ctx.tool.name}\nError ${ctx.error}" }
+                    send(agentMessageToState("Whoops: ${ctx.error}"))
+                }
+                onToolCallStarting { ctx ->
+                    logger.d { "Starting(${ctx.tool.name}) tool: ${ctx.toolArgs}" }
+                }
+                onToolCallCompleted { ctx ->
+                    logger.d { "Completed(${ctx.tool.name}) tool: ${ctx.result}" }
                 }
             }
         }.run(prompt)

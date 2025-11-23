@@ -15,6 +15,8 @@ import org.balch.recipes.core.models.SearchType
 /**
  * A Navigable Route in the Recipe App
  */
+@Serializable
+@LLMDescription("A route used to navigate in the Recipe App")
 sealed interface RecipeRoute: NavKey {
     val contentDescription: String
 }
@@ -22,6 +24,8 @@ sealed interface RecipeRoute: NavKey {
 /**
  * A route that should be placed in the Bottom Nav
  */
+@Serializable
+@LLMDescription("A route used for items in the bottom navigation bar")
 sealed interface TopLevelRoute: RecipeRoute {
     val icon: ImageVector
 }

@@ -13,11 +13,13 @@ class CodeRecipeTools @Inject internal constructor(
     codeRecipeListTool: CodeRecipeListTool,
     codeRecipeSearchTool: CodeRecipeSearchTool,
     codeRecipeLookupTool: CodeRecipeLookupTool,
+    codeRecipeDetailTool: CodeRecipeDetailTool,
 ) {
     val tools: List<Tool<*, *>> = listOf(
         codeRecipeListTool,
         codeRecipeLookupTool,
         codeRecipeSearchTool,
+        codeRecipeDetailTool
     )
 }
 
