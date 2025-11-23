@@ -10,6 +10,7 @@ import ai.koog.agents.core.dsl.extension.onAssistantMessage
 import ai.koog.agents.core.dsl.extension.onMultipleToolCalls
 import ai.koog.agents.core.environment.ReceivedToolResult
 import ai.koog.agents.core.tools.ToolRegistry
+import ai.koog.agents.ext.tool.ExitTool
 import ai.koog.prompt.executor.clients.google.GoogleModels
 import androidx.compose.ui.graphics.Color
 import androidx.navigation3.runtime.NavKey
@@ -19,7 +20,6 @@ import org.balch.recipes.Ideas
 import org.balch.recipes.Info
 import org.balch.recipes.Search
 import org.balch.recipes.SearchRoute
-import org.balch.recipes.core.ai.tools.ExitTool
 import org.balch.recipes.core.ai.tools.TimeTools
 import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.Meal
@@ -48,7 +48,6 @@ class RecipeMaestroConfig @Inject constructor(
         tool(TimeTools.AddDatetimeTool())
         tools(mealRecipeTools.tools)
         tools(codeRecipeTools.tools)
-        tool(ExitTool)
     }
 
     /**
@@ -209,7 +208,7 @@ class RecipeMaestroConfig @Inject constructor(
             edge(
                 nodeExecuteToolMultiple forwardTo nodeFinish
                         onCondition { it.singleOrNull()?.tool == ExitTool.name }
-                        transformed { it.single().result!!.toString() }
+                        transformed { it.single().result?.toString() ?: "Unknown" }
             )
 
             edge(
