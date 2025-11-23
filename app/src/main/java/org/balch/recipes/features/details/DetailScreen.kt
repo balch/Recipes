@@ -125,7 +125,7 @@ class DetailScreenState(
         when {
             (animatedVisibilityScope?.transition?.isRunning == true) -> false
             uiState is UiState.ShowMeal -> showMealTitleInHeader || detailViewMode == DetailViewMode.Video
-            uiState is UiState.ShowCodeRecipe -> _showCodeRecipeTitle
+            uiState is UiState.ShowCodeRecipe -> _showCodeRecipeTitle || uiState.codeRecipe.aiGenerated
             else -> false
         }
     }
