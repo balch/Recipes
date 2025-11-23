@@ -17,6 +17,9 @@ class MealSearchTool @Inject internal constructor(
 
     @Serializable
     data class Args(
+        @property:LLMDescription("Optional contextual information from the calling agent.")
+        val callingAgentContext: String?,
+
         @property:LLMDescription(
             """
                 Search term used to find meals by name. Use a short phrase or a single word
@@ -30,6 +33,7 @@ class MealSearchTool @Inject internal constructor(
     data class Result(
         @property:LLMDescription("List of full Meal objects matching the query")
         val meals: List<Meal>,
+
         @property:LLMDescription("The query used for searching")
         val searchTerm: String,
     )

@@ -128,6 +128,7 @@ class RecipeMaestroConfig @Inject constructor(
             - fill in any missing gaps with your expert knowledge
          2. Create New Unique Code Recipes for topics not found in step 1
             - use the code_recipe_create tool to create new, unique recipes
+            - optimize codeRecipe.description for small screens by using nested bullets points and small headings
          3. Use Detail Screens to Display Code Recipes from steps 1 and 2
             - look for keywords indicating the user wants to see the code recipe in the detail screen
                 - ex: "show me", "navigate to", "display", "show code recipe", etc

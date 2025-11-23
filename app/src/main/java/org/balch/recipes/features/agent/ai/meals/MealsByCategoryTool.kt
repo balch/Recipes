@@ -17,6 +17,9 @@ class MealsByCategoryTool @Inject internal constructor(
 
     @Serializable
     data class Args(
+        @property:LLMDescription("Optional contextual information from the calling agent.")
+        val callingAgentContext: String?,
+
         @property:LLMDescription("Category name to filter meals by (e.g., 'Dessert', 'Seafood')")
         val category: String,
     )
@@ -25,6 +28,7 @@ class MealsByCategoryTool @Inject internal constructor(
     data class Result(
         @property:LLMDescription("List of meal summaries that belong to the specified category")
         val meals: List<MealSummary>,
+
         @property:LLMDescription("The category used for filtering")
         val category: String,
     )

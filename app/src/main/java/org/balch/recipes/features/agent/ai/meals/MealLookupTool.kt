@@ -18,6 +18,9 @@ class MealLookupTool @Inject internal constructor(
 
     @Serializable
     data class Args(
+        @property:LLMDescription("Optional contextual information from the calling agent.")
+        val callingAgentContext: String?,
+
         @property:LLMDescription("MealSummary to lookup the full Meal from")
         val mealSummary: MealSummary,
     )

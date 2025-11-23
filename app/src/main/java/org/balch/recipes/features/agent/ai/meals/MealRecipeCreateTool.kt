@@ -16,6 +16,9 @@ class MealRecipeCreateTool @Inject internal constructor(
 ) : Tool<MealRecipeCreateTool.Args, MealRecipeCreateTool.Result>() {
     @Serializable
     data class Args(
+        @property:LLMDescription("Optional contextual information from the calling agent.")
+        val callingAgentContext: String?,
+
         @property:LLMDescription("The name of the meal or recipe")
         val name: String,
 
@@ -25,8 +28,7 @@ class MealRecipeCreateTool @Inject internal constructor(
         @property:LLMDescription("The geographical area or cuisine type (e.g., 'Italian', 'Mexican')")
         val area: String,
 
-        @property:LLMDescription("""
-            
+        @property:LLMDescription("""            
         - Complete cooking instructions for preparing the meal. 
         - Use `\n` to separate steps
         - DO NOT number the steps. Number will be added when parsing and rendering

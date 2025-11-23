@@ -16,6 +16,9 @@ class CodeRecipeSearchTool @Inject internal constructor(
 ) : Tool<CodeRecipeSearchTool.Args, CodeRecipeSearchTool.Result>() {
     @Serializable
     data class Args(
+        @property:LLMDescription("Optional contextual information from the calling agent.")
+        val callingAgentContext: String?,
+
         @property:LLMDescription(
             """
                 Query input term to search for app code recipes for. The 

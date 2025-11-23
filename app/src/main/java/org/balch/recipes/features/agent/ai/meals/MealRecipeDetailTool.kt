@@ -20,6 +20,9 @@ class MealRecipeDetailTool @Inject internal constructor(
     @Serializable
     @LLMDescription("Navigate to the DetailScreen for the specified Meal")
     data class Args(
+        @property:LLMDescription("Optional contextual information from the calling agent.")
+        val callingAgentContext: String?,
+
         @property:LLMDescription("The Meal meal_recipe_create tools.\n")
         val meal: Meal,
     )
@@ -28,6 +31,7 @@ class MealRecipeDetailTool @Inject internal constructor(
     data class Result(
         @property:LLMDescription("Contains status of the navigation operation")
         val success: Boolean,
+
         @property:LLMDescription("Message describing the result of the navigation operation")
         val message: String
     )

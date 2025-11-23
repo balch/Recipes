@@ -17,6 +17,8 @@ class CodeRecipeLookupTool @Inject internal constructor(
 ) : Tool<CodeRecipeLookupTool.Args, CodeRecipeLookupTool.Result>() {
     @Serializable
     data class Args(
+        @property:LLMDescription("Optional contextual information from the calling agent.")
+        val callingAgentContext: String?,
         @property:LLMDescription("Used to to return a CodeRecipe from a CodeRecipeSummary")
         val codeRecipeSummary: CodeRecipeSummary,
     )

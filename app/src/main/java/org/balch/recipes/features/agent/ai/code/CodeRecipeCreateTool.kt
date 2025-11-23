@@ -17,13 +17,15 @@ class CodeRecipeCreateTool @Inject internal constructor(
 ) : Tool<CodeRecipeCreateTool.Args, CodeRecipeCreateTool.Result>() {
     @Serializable
     data class Args(
+        @property:LLMDescription("Optional contextual information from the calling agent.")
+        val callingAgentContext: String?,
         @property:LLMDescription("The Category of the code recipe")
         val area: CodeArea,
         @property:LLMDescription("The title of the code recipe")
         val title: String,
-        @property:LLMDescription("A description explaining what this code recipe demonstrates using markdown. ")
+        @property:LLMDescription("A description explaining what this code recipe demonstrates using markdown. Use bullet point (-) format for description info. Only use (####) tags for headings.")
         val markdownDescription: String,
-        @property:LLMDescription("The actual code snippet or example code used in the markdown. Make sure to wrap all code in markdown ``` ``` blocks")
+        @property:LLMDescription("The actual code snippet or example code used in the markdown. Use a triple backtick (```) to surround code")
         val markdownCodeSnippet: String = "",
     )
 

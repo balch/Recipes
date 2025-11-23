@@ -17,6 +17,9 @@ class MealByIdTool @Inject internal constructor(
 
     @Serializable
     data class Args(
+        @property:LLMDescription("Optional contextual information from the calling agent.")
+        val callingAgentContext: String?,
+
         @property:LLMDescription("The id of the meal to retrieve")
         val id: String,
     )

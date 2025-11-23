@@ -17,6 +17,9 @@ class MealsByAreaTool @Inject internal constructor(
 
     @Serializable
     data class Args(
+        @property:LLMDescription("Optional contextual information from the calling agent.")
+        val callingAgentContext: String?,
+
         @property:LLMDescription("Area/cuisine name to filter meals by (e.g., 'Italian', 'American')")
         val area: String,
     )
@@ -25,6 +28,7 @@ class MealsByAreaTool @Inject internal constructor(
     data class Result(
         @property:LLMDescription("List of meal summaries that belong to the specified area/cuisine")
         val meals: List<MealSummary>,
+
         @property:LLMDescription("The area used for filtering")
         val area: String,
     )

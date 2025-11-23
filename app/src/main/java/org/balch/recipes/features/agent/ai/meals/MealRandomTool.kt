@@ -17,8 +17,8 @@ class MealRandomTool @Inject internal constructor(
 
     @Serializable
     data class Args(
-        @property:LLMDescription("Not used; call to get any random Meal")
-        val notUsed: String = "",
+        @property:LLMDescription("Optional contextual information from the calling agent.")
+        val callingAgentContext: String?,
     )
 
     @Serializable

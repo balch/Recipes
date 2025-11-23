@@ -17,8 +17,8 @@ class CodeRecipeListTool @Inject internal constructor(
 ) : Tool<CodeRecipeListTool.Args, CodeRecipeListTool.Result>() {
     @Serializable
     data class Args(
-        @property:LLMDescription("Not used as it is not needed")
-        val notUsed: String
+        @property:LLMDescription("Optional contextual information from the calling agent.")
+        val callingAgentContext: String?
     )
 
     @Serializable

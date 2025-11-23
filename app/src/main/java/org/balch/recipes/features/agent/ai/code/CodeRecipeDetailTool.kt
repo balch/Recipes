@@ -20,6 +20,8 @@ class CodeRecipeDetailTool @Inject internal constructor(
     @Serializable
     @LLMDescription("Navigate to the DetailScreen for the specified CodeRecipe")
     data class Args(
+        @property:LLMDescription("Optional contextual information from the calling agent.")
+        val callingAgentContext: String?,
         @property:LLMDescription("The codeRecipe from the code_recipe_create, code_recipe_lookup and code_recipe_search tools.\n")
         val codeRecipe: CodeRecipe,
     )
