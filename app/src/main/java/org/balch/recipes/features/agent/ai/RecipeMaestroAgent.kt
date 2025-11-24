@@ -20,13 +20,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import org.balch.recipes.RecipeRoute
 import org.balch.recipes.core.ai.GeminiKeyProvider
 import org.balch.recipes.core.coroutines.DispatcherProvider
 import org.balch.recipes.features.agent.ChatMessage
@@ -63,7 +61,7 @@ class RecipeMaestroAgent @Inject constructor(
         val chance = Random.nextInt(1, 101)
         deriveRandomPromptData(chance)
             .also {
-                logger.info {  "Random Mood: chance=${chance}%\n$it" }
+                logger.info { "Random Mood: chance=${chance}%\n$it" }
             }
     }
 
@@ -75,13 +73,6 @@ class RecipeMaestroAgent @Inject constructor(
         ChatMessage(text = "Thinking", type = ChatMessageType.Loading)
 
     private val messages = mutableListOf(initialMessage)
-    private val _navigationFlow = MutableSharedFlow<RecipeRoute>(
-        replay = 0,
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-
-    val navigationFlow = _navigationFlow.asSharedFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val agentFlow: StateFlow<AgentState> =
