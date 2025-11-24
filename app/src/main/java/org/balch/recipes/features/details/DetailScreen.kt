@@ -188,7 +188,7 @@ fun rememberDetailScreenState(
         else -> "transient" // Loading/Error
     }
     
-    return remember(listState.firstVisibleItemIndex, stateKey) {
+    return remember(stateKey) {
         DetailScreenState(
             initialDetailViewMode = initialDetailViewMode,
             initialStepIndex = initialStepIndex,
