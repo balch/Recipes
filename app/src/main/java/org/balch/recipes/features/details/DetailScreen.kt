@@ -385,6 +385,8 @@ fun MealDetailItem(
      *
      * Update [ingredientsCardPosition] when moving the stickyHeader element
      */
+    val showCompactIngredients = true
+/*
     val ingredientsCardPosition = 2
     val showCompactIngredients by remember(listState.firstVisibleItemIndex, detailViewMode) {
         derivedStateOf {
@@ -393,6 +395,7 @@ fun MealDetailItem(
                     || detailViewMode == DetailViewMode.Video
         }
     }
+ */
 
     LazyColumn(
         modifier = modifier

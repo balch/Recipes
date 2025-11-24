@@ -52,21 +52,26 @@ fun MealImageBadge(
         shape = RoundedCornerShape(12.dp)
     ) {
         Box {
-            AsyncImage(
-                model = meal.thumbnail,
-                contentDescription = meal.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f)
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
-                contentScale = ContentScale.Crop
-            )
+            if (meal.thumbnail != null) {
+                AsyncImage(
+                    model = meal.thumbnail,
+                    contentDescription = meal.name,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
 
             // Gradient overlay for text readability
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f)
+                    .then(
+                        if (meal.thumbnail != null) Modifier.aspectRatio(1f)
+                        else Modifier
+                    )
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(
