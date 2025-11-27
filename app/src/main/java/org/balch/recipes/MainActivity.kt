@@ -21,6 +21,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.WindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
@@ -56,7 +58,6 @@ import org.balch.recipes.core.navigation.NavigationRouter
 import org.balch.recipes.core.navigation.rememberSharedTransitionDecorator
 import org.balch.recipes.features.agent.AgentScreen
 import org.balch.recipes.features.agent.AgentViewModel
-import org.balch.recipes.features.agent.ai.AppContextData
 import org.balch.recipes.features.agent.ai.RecipeMaestroAgent
 import org.balch.recipes.features.agent.ai.RecipeMaestroConfig
 import org.balch.recipes.features.details.DetailScreen
@@ -65,13 +66,14 @@ import org.balch.recipes.features.ideas.IdeasScreen
 import org.balch.recipes.features.info.InfoScreen
 import org.balch.recipes.features.search.SearchScreen
 import org.balch.recipes.features.search.SearchViewModel
+import org.balch.recipes.ui.nav.isCompact
 import org.balch.recipes.ui.nav.isLastScreen
 import org.balch.recipes.ui.nav.peek
 import org.balch.recipes.ui.nav.pop
 import org.balch.recipes.ui.nav.push
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.utils.setEdgeToEdgeConfig
-import org.balch.recipes.ui.widgets.AiFloatingActionWidget
+import org.balch.recipes.ui.widgets.AiFloatingToolbar
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -120,7 +122,10 @@ class MainActivity : ComponentActivity() {
         val backStack = rememberNavBackStack(topLevelRoutes.first())
         val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
 
-        val aiAppContext by rememberAppContext(backStack.peek())
+        val aiToolbarVisible by rememberAiFlotatingToolbarVisible(
+            navKey = backStack.peek(),
+            windowInfo = currentWindowAdaptiveInfo()
+        )
 
         var previousVisibleIndex by remember { mutableIntStateOf(0) }
         var firstVisibleIndex by remember { mutableIntStateOf(0) }
@@ -131,7 +136,13 @@ class MainActivity : ComponentActivity() {
         }
         LaunchedEffect(Unit) {
             navigationRouter.navigationRoute.collect {
-                backStack.push(it)
+                backStack.push(it.recipeRoute)
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            navigationRouter.navigationRoute.collect { navInfo ->
+                backStack.push(navInfo.recipeRoute)
             }
         }
 
@@ -190,15 +201,14 @@ class MainActivity : ComponentActivity() {
                 },
                 floatingActionButtonPosition = FabPosition.End,
                 floatingActionButton = {
-                    aiAppContext?.let { aiContext ->
-                        AiFloatingActionWidget(
+                    if (aiToolbarVisible) {
+                        AiFloatingToolbar(
                             modifier = Modifier
                                 .then(
                                     if (backStack.peek() is DetailRoute) Modifier.offset(y = -(380).dp)
                                     else Modifier
                                 ),
                             expanded = showNavigationBar,
-                            appContext = aiContext,
                             onNavigateTo = { recipeRoute ->
                                 navigationRouter.navigateTo(recipeRoute)
                             },
@@ -302,22 +312,24 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    fun rememberAppContext(
+    fun rememberAiFlotatingToolbarVisible(
         navKey: NavKey?,
-    ): State<AppContextData?> = remember(navKey) {
-        mutableStateOf(
-            navKey?.let { screen ->
-                if (geminiKeyProvider.isApiKeySet
-                    && when (screen) {
-                        Ideas, Info, is SearchRoute, is DetailRoute -> true
-                        else -> false
-                    }
-                ) {
-                     recipeMaestroConfig.appContext(screen)
-                } else null
-            }
-        )
-    }
+        windowInfo: WindowAdaptiveInfo
+    ): State<Boolean> =
+        remember(navKey, windowInfo) {
+            mutableStateOf(
+                when {
+                    windowInfo.isCompact() -> false
+                    !geminiKeyProvider.isApiKeySet -> false
+                    navKey == null -> false
+                    navKey is DetailRoute -> true
+                    navKey is SearchRoute -> true
+                    navKey is Ideas -> true
+                    navKey is Info -> true
+                    else -> false
+                }
+            )
+        }
 
     @OptIn(ExperimentalMaterial3AdaptiveApi::class)
     fun listPane() =

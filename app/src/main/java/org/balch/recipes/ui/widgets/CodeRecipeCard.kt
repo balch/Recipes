@@ -1,6 +1,5 @@
 package org.balch.recipes.ui.widgets
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +24,6 @@ import org.balch.recipes.core.models.color
 import org.balch.recipes.ui.utils.TransitionKeySuffix.KEY_CODE_RECIPE_TITLE
 import org.balch.recipes.ui.utils.sharedBounds
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun CodeRecipeCard(
     codeRecipe: CodeRecipe,

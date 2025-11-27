@@ -1,6 +1,5 @@
 package org.balch.recipes.features.details
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +28,6 @@ import org.balch.recipes.ui.utils.sharedBounds
 import org.balch.recipes.ui.widgets.CodeRecipeAreaBadge
 import org.balch.recipes.ui.widgets.MarkdownCodeSnippet
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun CodeDetailItem(
     modifier: Modifier = Modifier,
@@ -77,7 +75,6 @@ fun CodeDetailItem(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @ThemePreview
 @Composable
 private fun CodeRecipeDetailScreenPreview(

@@ -46,7 +46,7 @@ class MealSearchTool @Inject internal constructor(
 
     override suspend fun execute(args: Args): Result =
         Result(
-            meals = recipeRepository.searchMeals(args.searchTerm).getOrThrow(),
+            meals = recipeRepository.searchMeals(args.searchTerm).getOrDefault(emptyList()),
             searchTerm = args.searchTerm,
         )
 }

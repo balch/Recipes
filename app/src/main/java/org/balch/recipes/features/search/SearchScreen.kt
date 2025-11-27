@@ -1,7 +1,6 @@
 package org.balch.recipes.features.search
 
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,7 +59,6 @@ import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.rememberHazeState
 import org.balch.recipes.DetailRoute
 import org.balch.recipes.RecipeRoute
@@ -77,7 +75,7 @@ import org.balch.recipes.ui.widgets.CodeRecipeCard
 import org.balch.recipes.ui.widgets.FoodLoadingIndicator
 import org.balch.recipes.ui.widgets.MealImageBadge
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     modifier: Modifier = Modifier,
@@ -102,7 +100,6 @@ fun SearchScreen(
     )
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @ThemePreview
 @Composable
 private fun SearchLayoutPreview(
@@ -127,7 +124,6 @@ private fun SearchLayoutPreview(
     }
 }
 
-@OptIn(ExperimentalHazeMaterialsApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 private fun SearchLayout(
     uiState: SearchUiState,
@@ -454,7 +450,6 @@ private fun ErrorMessage(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun SearchResults(
     isFetching: Boolean,

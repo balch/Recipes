@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -202,7 +201,6 @@ fun rememberDetailScreenState(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun DetailScreen(
     modifier: Modifier = Modifier,
@@ -217,7 +215,6 @@ fun DetailScreen(
     )
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun DetailLayout(
     uiState: UiState,
@@ -340,7 +337,7 @@ fun DetailLayout(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MealDetailItem(
     modifier: Modifier = Modifier,
@@ -407,7 +404,6 @@ fun MealDetailItem(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 private fun LazyListScope.videoViewItems(
     playerState: YouTubePlayerState,
     meal: Meal,
@@ -440,7 +436,6 @@ private fun LazyListScope.stepByStepViewItems(
     item { CrossfadeIngredients(modifier, meal, true) }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 private fun LazyListScope.listViewItems(
     meal: Meal,
     playerStatus: PlayerStatus,
@@ -521,7 +516,7 @@ private fun CrossfadeIngredients(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
     modifier: Modifier,
@@ -838,7 +833,6 @@ private fun RecipeInstructionByStepCard(
 }
 
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @ThemePreview
 @Composable
 private fun DetailScreenPreview(
@@ -876,7 +870,6 @@ private fun RecipeIngredientsCardPreview(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @ThemePreview
 @Composable
 private fun ListViewItemsPreview() {
@@ -901,7 +894,6 @@ private fun ListViewItemsPreview() {
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @ThemePreview
 @Composable
 private fun VideoViewItemsPreview() {

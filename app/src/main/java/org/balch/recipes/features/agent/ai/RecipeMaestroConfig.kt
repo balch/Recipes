@@ -240,75 +240,76 @@ class RecipeMaestroConfig @Inject constructor(
     /**
      * Converts the current NavKey to a descriptive context string for the AI agent
      */
-    fun appContext(navKey: NavKey): AppContextData = with (navKey) {
+    fun appContext(navKey: NavKey): PromptIntent = with (navKey) {
         when (this) {
-            is Ideas -> AppContextData(
-                "Categories",
-                "The user is currently browsing recipe ideas and categories"
+            is Ideas -> PromptIntent(
+                displayText = "Categories",
+                prompt = "The user is currently browsing recipe ideas and categories"
             )
 
-            is Search -> AppContextData(
-                "Search ${search.searchText}",
-                "The user is currently searching for recipes with query: ${search.searchText}"
+            is Search -> PromptIntent(
+                displayText = "Search ${search.searchText}",
+                prompt = "The user is currently searching for recipes with query: ${search.searchText}"
             )
 
             is SearchRoute -> when (searchType) {
-                is SearchType.Category -> AppContextData(
-                    searchType.searchText,
-                    "The user is browsing recipes in category: ${searchType.searchText}"
+                is SearchType.Category -> PromptIntent(
+                    displayText = searchType.searchText,
+                    prompt = "The user is browsing recipes in category: ${searchType.searchText}"
                 )
 
-                is SearchType.Area -> AppContextData(
-                    searchType.searchText,
-                    "The user is browsing recipes from area: ${searchType.searchText}"
+                is SearchType.Area -> PromptIntent(
+                    displayText = searchType.searchText,
+                    prompt = "The user is browsing recipes from area: ${searchType.searchText}"
                 )
 
-                is SearchType.Ingredient -> AppContextData(
-                    searchType.searchText,
-                    "The user is browsing recipes with ingredient: ${searchType.searchText}"
+                is SearchType.Ingredient -> PromptIntent(
+                    displayText = searchType.searchText,
+                    prompt = "The user is browsing recipes with ingredient: ${searchType.searchText}"
                 )
 
-                is SearchType.Search -> AppContextData(
-                    searchType.searchText,
-                    "The user is searching for: ${searchType.searchText}"
+                is SearchType.Search -> PromptIntent(
+                    displayText = searchType.searchText,
+                    prompt = "The user is searching for: ${searchType.searchText}"
                 )
             }
 
             is DetailRoute -> when (detailType) {
-                is DetailType.MealLookup -> AppContextData(
-                    detailType.mealSummary.name,
-                    "The user is viewing a recipe: ${detailType.mealSummary.name}"
+                is DetailType.MealLookup -> PromptIntent(
+                    displayText = detailType.mealSummary.name,
+                    prompt = "The user is viewing a recipe: ${detailType.mealSummary.name}"
                 )
 
-                is DetailType.MealContent -> AppContextData(
-                    detailType.meal.name,
-                    "The user is viewing a recipe: ${detailType.meal.name}"
+                is DetailType.MealContent -> PromptIntent(
+                    displayText = detailType.meal.name,
+                    prompt = "The user is viewing a recipe: ${detailType.meal.name}"
                 )
 
-                is DetailType.RandomRecipe -> AppContextData(
-                    "Details Random",
-                    "The user is viewing a random recipe"
+                is DetailType.RandomRecipe -> PromptIntent(
+                    displayText = "Details Random",
+                    prompt = "The user is viewing a random recipe"
                 )
 
-                is DetailType.CodeRecipeContent -> AppContextData(
-                    detailType.codeRecipe.title,
-                    "The user is viewing code recipe: ${detailType.codeRecipe.title}"
+                is DetailType.CodeRecipeContent -> PromptIntent(
+                    displayText = detailType.codeRecipe.title,
+                    prompt = "The user is viewing code recipe: ${detailType.codeRecipe.title}"
                 )
             }
 
-            is Info -> AppContextData(
-                "Info", "The user is viewing the app information screen"
+            is Info -> PromptIntent(
+                displayText = "Info",
+                prompt = "The user is viewing the app information screen"
             )
 
-            is AiChatScreen -> AppContextData(
-                "Chat", "The user is in the AI assistant screen"
+            is AiChatScreen -> PromptIntent(
+                displayText = "Chat",
+                prompt = "The user is in the AI assistant screen"
             )
 
-            else -> AppContextData(
-                "Categories", "The user is browsing the Recipes app"
+            else -> PromptIntent(
+                displayText = "Categories",
+                prompt = "The user is browsing the Recipes app"
             )
         }
     }
 }
-
-

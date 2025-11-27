@@ -1,6 +1,5 @@
 package org.balch.recipes.ui.widgets
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -28,7 +27,6 @@ import org.balch.recipes.ui.utils.sharedBounds
 
 
 private const val CARD_SUFFIX = "MealImageBadge-Card"
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun MealImageBadge(
     meal: MealSummary,

@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
@@ -34,7 +35,7 @@ import kotlin.time.ExperimentalTime
 
 data class PromptIntent(
     val prompt: String,
-    val displayPrompt: String = prompt,
+    val displayText: String = prompt,
 )
 
 /**
@@ -109,7 +110,7 @@ class RecipeMaestroAgent @Inject constructor(
                     send(agentMessageToState(message))
 
                     val userPrompt = userIntent.first()
-                    send(userMessageToState(userPrompt.displayPrompt))
+                    send(userMessageToState(userPrompt.displayText))
                     userPrompt.prompt
                 }
             )
@@ -145,6 +146,13 @@ class RecipeMaestroAgent @Inject constructor(
         }.run(prompt)
     }.onEach {
         logger.info { "Agent state: $it" }
+    }.catch { throwable ->
+        logger.error(throwable) { "An unhandled exception occurred in the agent flow" }
+        emit(
+            errorMessageAsState(throwable,
+            throwable.message
+                ?: "Something went wrong. Please try again.")
+        )
     }
 
     private fun userMessageToState(message: String): AgentState {

@@ -11,7 +11,12 @@ import javax.inject.Singleton
 @Singleton
 class NavigationRouter @Inject constructor() {
 
-    private val _navigationRoute = MutableSharedFlow<RecipeRoute>(
+    data class NavInfo(
+        val recipeRoute: RecipeRoute,
+        val isFromAgent: Boolean,
+    )
+
+    private val _navigationRoute = MutableSharedFlow<NavInfo>(
         replay = 0,
         extraBufferCapacity = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
@@ -19,10 +24,18 @@ class NavigationRouter @Inject constructor() {
 
     private val logger = logging("NavigationRouter")
 
-    val navigationRoute: SharedFlow<RecipeRoute> = _navigationRoute
+    val navigationRoute: SharedFlow<NavInfo> = _navigationRoute
 
-    fun navigateTo(recipeRoute: RecipeRoute): Boolean =
-        _navigationRoute.tryEmit(recipeRoute).also {
-            logger.d { "Navigation to $recipeRoute was ${if (it) "successful" else "unsuccessful"}" }
+    fun navigateTo(
+        recipeRoute: RecipeRoute,
+        isFromAgent: Boolean = false,
+    ): Boolean =
+        NavInfo(
+            recipeRoute = recipeRoute,
+            isFromAgent = isFromAgent
+        ).let { navInfo ->
+            _navigationRoute.tryEmit(navInfo).also {
+                logger.d { "Navigation to $navInfo was ${if (it) "successful" else "unsuccessful"}" }
+            }
         }
 }

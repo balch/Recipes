@@ -48,7 +48,7 @@ class MealRecipeDetailTool @Inject internal constructor(
 
     override suspend fun execute(args: Args): Result {
         val detailRoute = DetailRoute(DetailType.MealContent(args.meal))
-        val success = navigationRouter.navigateTo(detailRoute)
+        val success = navigationRouter.navigateTo(detailRoute, true)
         return Result(
             success = success,
             message = if (success) "Success" else "Failed to navigate to $detailRoute"

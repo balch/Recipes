@@ -3,7 +3,6 @@ package org.balch.recipes.features.ideas
 import android.annotation.SuppressLint
 import android.os.Parcelable
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -99,7 +98,6 @@ sealed interface GridItem {
     data class CodeRecipeItem(val codeRecipe: CodeRecipe) : GridItem, Parcelable
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun IdeasScreen(
     modifier: Modifier = Modifier,
@@ -127,7 +125,6 @@ fun IdeasScreen(
     )
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @ThemePreview
 @Composable
 private fun IdeasLayoutPreview(
@@ -147,7 +144,7 @@ private fun IdeasLayoutPreview(
     }
 }
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalHazeMaterialsApi::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 private fun IdeasLayout(
     uiState: IdeasUiState,
@@ -469,7 +466,6 @@ private fun ErrorState(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ResultsGrid(
     items: List<GridItem>,
@@ -546,7 +542,6 @@ private fun ResultsGrid(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun CategoryCard(
     category: Category,

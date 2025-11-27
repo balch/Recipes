@@ -1,7 +1,6 @@
 package org.balch.recipes.features.agent
 
 import android.view.HapticFeedbackConstants
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -81,7 +80,6 @@ import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.utils.sharedBounds
 import org.balch.recipes.ui.widgets.RecipeMaestroWidget
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun AgentScreen(
     modifier: Modifier = Modifier,
@@ -103,7 +101,6 @@ fun AgentScreen(
     )
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalHazeMaterialsApi::class)
 @Composable
 private fun AgentLayout(
     messages: List<ChatMessage>,
@@ -178,7 +175,7 @@ private fun AgentLayout(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
     modifier: Modifier = Modifier,
@@ -330,8 +327,9 @@ private fun ChefThinkingAnimation() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalHazeMaterialsApi::class,
-    ExperimentalSharedTransitionApi::class
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalHazeMaterialsApi::class,
 )
 @Composable
 private fun ChatInputField(
@@ -451,7 +449,6 @@ private fun ChatMessage.markdownTypography() = DefaultMarkdownTypography(
 // Previews
 // ============================================
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @ThemePreview
 @Composable
 private fun AgentScreenInitialPreview(
@@ -552,7 +549,6 @@ private fun ChefThinkingAnimationPreview() {
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @ThemePreview
 @Composable
 private fun ChatInputFieldPreview() {
