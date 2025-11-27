@@ -1,8 +1,6 @@
 package org.balch.recipes.ui.widgets
 
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
@@ -32,8 +30,6 @@ fun AiFloatingActionWidget(
     onNavigateTo: (RecipeRoute) -> Unit,
     expanded: Boolean,
     moodTintColor: Color?,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     // The toolbar should receive focus before the screen content, so place it first.
     // Make sure to set its zIndex so it's above the screen content visually.
@@ -46,8 +42,6 @@ fun AiFloatingActionWidget(
                 modifier = Modifier
                     .sharedBounds(
                         key = "RecipeMaestroText",
-                        animatedVisibilityScope = animatedVisibilityScope,
-                        sharedTransitionScope = sharedTransitionScope,
                     )
                     .defaultMinSize(minWidth = 56.dp)
                     .padding(8.dp),
@@ -64,8 +58,6 @@ fun AiFloatingActionWidget(
                 RecipeMaestroWidget(
                     modifier = Modifier.align(Alignment.CenterVertically),
                     fontSize = 24.sp,
-                    sharedTransitionScope = sharedTransitionScope,
-                    animatedVisibilityScope = animatedVisibilityScope,
                 )
             }
         },
@@ -84,8 +76,6 @@ fun AiFloatingActionWidgetPreview(
             expanded = expanded,
             appContext = AppContextData("Preview Context", "Test"),
             moodTintColor = Color.Green,
-            animatedVisibilityScope = null,
-            sharedTransitionScope = null,
         )
     }
 }

@@ -1,8 +1,6 @@
 package org.balch.recipes.ui.widgets
 
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,7 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
-import org.balch.recipes.ui.utils.sharedElement
+import org.balch.recipes.ui.utils.sharedBounds
 
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -21,15 +19,11 @@ fun RecipeMaestroWidget(
     fontSize: TextUnit,
     modifier: Modifier = Modifier,
     iconTint: Color? = null,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     Box(
         modifier = modifier
-            .sharedElement(
+            .sharedBounds(
                 key = "RecipeMaestroWidget",
-                animatedVisibilityScope = animatedVisibilityScope,
-                sharedTransitionScope = sharedTransitionScope
             )
     ) {
         Text(

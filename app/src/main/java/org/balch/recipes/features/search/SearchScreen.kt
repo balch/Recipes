@@ -85,8 +85,6 @@ fun SearchScreen(
     onBack: () -> Unit,
     onNavigateTo: (RecipeRoute) -> Unit,
     onScrollChange: (Int) -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -101,8 +99,6 @@ fun SearchScreen(
         clearSearch = viewModel::clearSearch,
         onSearch = viewModel::updateSearchQuery,
         onBack = onBack,
-        sharedTransitionScope = sharedTransitionScope,
-        animatedVisibilityScope = animatedVisibilityScope,
     )
 }
 
@@ -144,8 +140,6 @@ private fun SearchLayout(
     clearSearch: () -> Unit,
     onBack: () -> Unit,
     onScrollChange: (Int) -> Unit,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     val hazeState = rememberHazeState()
     var query by rememberSaveable { mutableStateOf(searchText) }
@@ -178,9 +172,7 @@ private fun SearchLayout(
                             Modifier
                                 .sharedBounds(
                                     key = key,
-                                    sharedTransitionScope = sharedTransitionScope,
-                                    animatedVisibilityScope = animatedVisibilityScope,
-                                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
+                                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                 )
                         } else null
                     } ?: Modifier
@@ -250,8 +242,6 @@ private fun SearchLayout(
                         onCodeClick = onCodeClick,
                         onScrollChange = onScrollChange,
                         paddingValues = innerPadding,
-                        sharedTransitionScope = sharedTransitionScope,
-                        animatedVisibilityScope = animatedVisibilityScope,
                     )
                 }
             }
@@ -507,16 +497,12 @@ private fun SearchResults(
                             showBadge = true,
                             onClick = { onMealClick(item.meal) },
                             modifier = Modifier.fillMaxWidth(),
-                            sharedTransitionScope = sharedTransitionScope,
-                            animatedVisibilityScope = animatedVisibilityScope,
                         )
                         is ItemType.CodeRecipeType -> CodeRecipeCard(
                             codeRecipe = item.codeRecipe,
                             onClick = { onCodeClick(item.codeRecipe) },
                             modifier = Modifier.fillMaxWidth(),
                             center = false,
-                            sharedTransitionScope = sharedTransitionScope,
-                            animatedVisibilityScope = animatedVisibilityScope,
                         )
                     }
                 }

@@ -1,8 +1,6 @@
 package org.balch.recipes.ui.widgets
 
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -26,7 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import org.balch.recipes.core.models.MealSummary
-import org.balch.recipes.ui.utils.sharedElement
+import org.balch.recipes.ui.utils.sharedBounds
 
 
 private const val CARD_SUFFIX = "MealImageBadge-Card"
@@ -37,15 +35,11 @@ fun MealImageBadge(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     showBadge: Boolean ,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     Card(
         modifier = modifier
-            .sharedElement(
+            .sharedBounds(
                 key = "$CARD_SUFFIX-${meal.id}",
-                animatedVisibilityScope = animatedVisibilityScope,
-                sharedTransitionScope = sharedTransitionScope
             )
             .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),

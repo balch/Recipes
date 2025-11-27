@@ -1,8 +1,6 @@
 package org.balch.recipes.ui.widgets
 
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,8 +32,6 @@ fun CodeRecipeCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     center: Boolean,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     val color = codeRecipe.area.color()
     Card(
@@ -65,16 +61,12 @@ fun CodeRecipeCard(
             ) {
                 CodeRecipeAreaBadge(
                     codeRecipe = codeRecipe,
-                    sharedTransitionScope = sharedTransitionScope,
-                    animatedVisibilityScope = animatedVisibilityScope,
                 )
 
                 Text(
                     modifier = Modifier
                         .sharedBounds(
                             key = "${KEY_CODE_RECIPE_TITLE}-${codeRecipe.id}",
-                            animatedVisibilityScope = animatedVisibilityScope,
-                            sharedTransitionScope = sharedTransitionScope
                         ),
                     text = codeRecipe.title,
                     textAlign = if (center) TextAlign.Center else TextAlign.Start,

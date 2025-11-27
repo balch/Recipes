@@ -1,9 +1,7 @@
 package org.balch.recipes.features.agent
 
 import android.view.HapticFeedbackConstants
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -89,8 +87,6 @@ fun AgentScreen(
     modifier: Modifier = Modifier,
     viewModel: AgentViewModel,
     onBack: () -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val messages by viewModel.messages.collectAsState()
     val view = LocalView.current
@@ -103,8 +99,6 @@ fun AgentScreen(
             viewModel.sendPrompt(message)
         },
         onBack = onBack,
-        sharedTransitionScope = sharedTransitionScope,
-        animatedVisibilityScope = animatedVisibilityScope,
         moodTintColor = viewModel.moodTintColor,
     )
 }
@@ -115,8 +109,6 @@ private fun AgentLayout(
     messages: List<ChatMessage>,
     onSendMessage: (String) -> Unit,
     onBack: () -> Unit,
-    sharedTransitionScope: SharedTransitionScope?,
-    animatedVisibilityScope: AnimatedVisibilityScope?,
     modifier: Modifier = Modifier,
     moodTintColor: Color? = null,
 ) {
@@ -147,8 +139,6 @@ private fun AgentLayout(
                     },
                 onBack = onBack,
                 iconTint = moodTintColor,
-                sharedTransitionScope = sharedTransitionScope,
-                animatedVisibilityScope =  animatedVisibilityScope,
             )
         }
     ) { innerPadding ->
@@ -182,8 +172,6 @@ private fun AgentLayout(
                     onSendMessage = onSendMessage,
                     modifier = Modifier,
                     hazeState = hazeState,
-                    sharedTransitionScope = sharedTransitionScope,
-                    animatedVisibilityScope = animatedVisibilityScope,
                 )
             }
         }
@@ -196,8 +184,6 @@ private fun TopBar(
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
     iconTint: Color? = null,
-    sharedTransitionScope: SharedTransitionScope?,
-    animatedVisibilityScope: AnimatedVisibilityScope?,
 ) {
     Box(
         modifier = modifier.fillMaxWidth(),
@@ -213,8 +199,6 @@ private fun TopBar(
                     RecipeMaestroWidget(
                         fontSize = 32.sp,
                         iconTint = iconTint,
-                        animatedVisibilityScope = animatedVisibilityScope,
-                        sharedTransitionScope = sharedTransitionScope,
                     )
 
                     Column {
@@ -355,8 +339,6 @@ private fun ChatInputField(
     onSendMessage: (String) -> Unit,
     hazeState: HazeState,
     modifier: Modifier = Modifier,
-    sharedTransitionScope: SharedTransitionScope?,
-    animatedVisibilityScope: AnimatedVisibilityScope?,
     onMeasuredHeight: (Int) -> Unit = {},
 ) {
     var message by remember { mutableStateOf("") }
@@ -386,8 +368,6 @@ private fun ChatInputField(
                 .fillMaxWidth()
                 .sharedBounds(
                     key = "RecipeMaestroText",
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    sharedTransitionScope = sharedTransitionScope,
                 )
                 .onSizeChanged { onMeasuredHeight(it.height) }
                 .onKeyEvent { keyEvent ->
@@ -484,8 +464,6 @@ private fun AgentScreenInitialPreview(
             messages = messages,
             onSendMessage = {},
             onBack = {},
-            sharedTransitionScope = null,
-            animatedVisibilityScope = null,
         )
     }
 }
@@ -587,16 +565,12 @@ private fun ChatInputFieldPreview() {
                 modifier = Modifier.fillMaxWidth(),
                 isEnabled = true,
                 hazeState = HazeState(),
-                sharedTransitionScope = null,
-                animatedVisibilityScope = null,
             )
             ChatInputField(
                 onSendMessage = {},
                 modifier = Modifier.fillMaxWidth(),
                 isEnabled = false,
                 hazeState = HazeState(),
-                sharedTransitionScope = null,
-                animatedVisibilityScope = null,
             )
         }
     }

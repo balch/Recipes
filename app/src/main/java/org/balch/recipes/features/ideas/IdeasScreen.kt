@@ -3,7 +3,6 @@ package org.balch.recipes.features.ideas
 import android.annotation.SuppressLint
 import android.os.Parcelable
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
@@ -108,8 +107,6 @@ fun IdeasScreen(
     viewModel: IdeasViewModel = hiltViewModel(),
     onNavigateTo: (RecipeRoute) -> Unit,
     onScrollChange: (Int) -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val uiState: IdeasUiState by viewModel.uiState.collectAsState()
 
@@ -128,8 +125,6 @@ fun IdeasScreen(
         onScrollChange = onScrollChange,
         onBrowsableTypeChange = viewModel::changeBrowsableType,
         modifier = modifier,
-        sharedTransitionScope = sharedTransitionScope,
-        animatedVisibilityScope = animatedVisibilityScope
     )
 }
 
@@ -165,8 +160,6 @@ private fun IdeasLayout(
     onCodeRecipeClick: (CodeRecipe) -> Unit,
     onBrowsableTypeChange: (BrowsableType) -> Unit,
     onScrollChange: (Int) -> Unit,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     val hazeState = rememberHazeState()
 
@@ -242,8 +235,6 @@ private fun IdeasLayout(
                             onCategoryClick = onCategoryClick,
                             onCodeRecipeClick = onCodeRecipeClick,
                             centerCodeRecipes = false,
-                            sharedTransitionScope = sharedTransitionScope,
-                            animatedVisibilityScope = animatedVisibilityScope,
                         )
                     }
 
@@ -263,8 +254,6 @@ private fun IdeasLayout(
                             onAreaClick = onAreaClick,
                             onCodeRecipeClick = onCodeRecipeClick,
                             centerCodeRecipes = true,
-                            sharedTransitionScope = sharedTransitionScope,
-                            animatedVisibilityScope = animatedVisibilityScope,
                         )
                     }
 
@@ -284,8 +273,6 @@ private fun IdeasLayout(
                             onIngredientClick = onIngredientClick,
                             onCodeRecipeClick = onCodeRecipeClick,
                             centerCodeRecipes = true,
-                            sharedTransitionScope = sharedTransitionScope,
-                            animatedVisibilityScope = animatedVisibilityScope,
                         )
                     }
 
@@ -300,8 +287,6 @@ private fun IdeasLayout(
                             onIngredientClick = onIngredientClick,
                             onCodeRecipeClick = onCodeRecipeClick,
                             centerCodeRecipes = true,
-                            sharedTransitionScope = sharedTransitionScope,
-                            animatedVisibilityScope = animatedVisibilityScope,
                         )
                     }
                 }
@@ -497,8 +482,6 @@ private fun ResultsGrid(
     onAreaClick: (Area) -> Unit = {},
     onIngredientClick: (Ingredient) -> Unit = {},
     onCodeRecipeClick: (CodeRecipe) -> Unit = {},
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     val gridState = rememberLazyStaggeredGridState()
     LaunchedEffect(gridState.firstVisibleItemIndex) {
@@ -529,9 +512,7 @@ private fun ResultsGrid(
                         modifier = Modifier
                             .sharedBounds(
                                 key = "search_category_${item.category.name}",
-                                sharedTransitionScope = sharedTransitionScope,
-                                animatedVisibilityScope = animatedVisibilityScope,
-                                resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
+                                resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                             ),
                         category = item.category,
                         onClick = { onCategoryClick(item.category) }
@@ -542,10 +523,8 @@ private fun ResultsGrid(
                         modifier = Modifier
                             .alpha(0.9f)
                             .sharedBounds(
-                                key = "search_area_${item.area.name}",
-                                sharedTransitionScope = sharedTransitionScope,
-                                animatedVisibilityScope = animatedVisibilityScope,
-                                resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
+                                key = "search_area_${item.area.id}",
+                                resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                             ),
                         area = item.area,
                         onClick = { onAreaClick(item.area) }
@@ -556,10 +535,8 @@ private fun ResultsGrid(
                         modifier = Modifier
                             .alpha(0.9f)
                             .sharedBounds(
-                                key = "search_ingredient_${item.ingredient.name}",
-                                sharedTransitionScope = sharedTransitionScope,
-                                animatedVisibilityScope = animatedVisibilityScope,
-                                resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
+                                key = "search_ingredient_${item.ingredient.id}",
+                                resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                             ),
                         ingredient = item.ingredient,
                         onClick = { onIngredientClick(item.ingredient) }
@@ -572,8 +549,6 @@ private fun ResultsGrid(
                         codeRecipe = item.codeRecipe,
                         onClick = { onCodeRecipeClick(item.codeRecipe) },
                         center = centerCodeRecipes,
-                        sharedTransitionScope = sharedTransitionScope,
-                        animatedVisibilityScope = animatedVisibilityScope,
                     )
                 }
             }

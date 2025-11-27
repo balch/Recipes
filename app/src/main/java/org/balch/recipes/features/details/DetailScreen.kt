@@ -53,6 +53,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -82,7 +83,9 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import org.balch.recipes.core.models.Meal
+import org.balch.recipes.core.navigation.LocalSharedTransition
 import org.balch.recipes.ui.nav.PreviewNavigationEventDispatcherOwner
+import org.balch.recipes.ui.nav.isCompact
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.widgets.FoodLoadingIndicator
@@ -205,16 +208,12 @@ fun DetailScreen(
     modifier: Modifier = Modifier,
     viewModel: DetailsViewModel = hiltViewModel(),
     onBack: () -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     DetailLayout(
         uiState = uiState,
         modifier = modifier,
         onBack = onBack,
-        sharedTransitionScope = sharedTransitionScope,
-        animatedVisibilityScope = animatedVisibilityScope
     )
 }
 
@@ -224,12 +223,10 @@ fun DetailLayout(
     uiState: UiState,
     modifier: Modifier = Modifier,
     onBack: () -> Unit ,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     val hazeState = rememberHazeState()
     val detailState = rememberDetailScreenState(
-        animatedVisibilityScope = animatedVisibilityScope,
+        animatedVisibilityScope = LocalSharedTransition.current.animatedVisibilityScope,
         uiState = uiState,
     )
 
@@ -295,8 +292,6 @@ fun DetailLayout(
                         modifier = modifier.hazeSource(hazeState),
                         codeRecipe = uiState.codeRecipe,
                         onTittleVisible = { detailState.setShowCodeRecipeTitle(!it) },
-                        sharedTransitionScope = sharedTransitionScope,
-                        animatedVisibilityScope = animatedVisibilityScope,
                     )
                 }
 
@@ -308,8 +303,6 @@ fun DetailLayout(
                         instructionSteps = instructionSteps,
                         onDetailViewModeChange = { detailState.setDetailViewMode(it) },
                         listState = detailState.listState,
-                        sharedTransitionScope = sharedTransitionScope,
-                        animatedVisibilityScope = animatedVisibilityScope,
                     )
                 }
 
@@ -325,8 +318,6 @@ fun DetailLayout(
                                 meal = uiState.mealSummary,
                                 showBadge = false,
                                 onClick = {},
-                                sharedTransitionScope = sharedTransitionScope,
-                                animatedVisibilityScope = animatedVisibilityScope,
                             )
                         }
 
@@ -358,8 +349,6 @@ fun MealDetailItem(
     instructionSteps: List<String>,
     onDetailViewModeChange: (DetailViewMode) -> Unit,
     listState: LazyListState,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
 
     val playerState = rememberYouTubePlayer(
@@ -379,24 +368,6 @@ fun MealDetailItem(
         }
     }
 
-    /**
-     * Show Compact Ingredients when the Ingredients card scrolls
-     * to the top and we are in InstructionViewMode.List mode.
-     *
-     * Update [ingredientsCardPosition] when moving the stickyHeader element
-     */
-    val showCompactIngredients = true
-/*
-    val ingredientsCardPosition = 2
-    val showCompactIngredients by remember(listState.firstVisibleItemIndex, detailViewMode) {
-        derivedStateOf {
-            listState.firstVisibleItemIndex >= ingredientsCardPosition
-                    || detailViewMode == DetailViewMode.StepByStep
-                    || detailViewMode == DetailViewMode.Video
-        }
-    }
- */
-
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -410,14 +381,12 @@ fun MealDetailItem(
                     meal = meal,
                     playerStatus = playerStatus,
                     instructionSteps = instructionSteps,
-                    showCompactIngredients = showCompactIngredients,
+                    showCompactIngredients = true,
                     onPlayVideo = {
                         playerState.play()
                         onDetailViewModeChange(DetailViewMode.Video)
                     },
                     onDetailViewModeChange = onDetailViewModeChange,
-                    sharedTransitionScope = sharedTransitionScope,
-                    animatedVisibilityScope = animatedVisibilityScope,
                 )
             }
             DetailViewMode.StepByStep -> {
@@ -490,8 +459,6 @@ private fun LazyListScope.listViewItems(
                 showBadge = false,
                 modifier = modifier,
                 onClick = {},
-                sharedTransitionScope = sharedTransitionScope,
-                animatedVisibilityScope = animatedVisibilityScope,
             )
 
             AnimatedVisibility(
@@ -569,6 +536,8 @@ private fun TopBar(
     // Show meal title when sticky header is stuck, otherwise show default
     val shouldShowOverrideTitle = showTitleInHeader && overrideTitle != null
 
+    val showBack = currentWindowAdaptiveInfo().isCompact()
+
     TopAppBar(
         modifier = modifier,
         title = {
@@ -585,11 +554,13 @@ private fun TopBar(
             }
         },
         navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBackIosNew,
-                    contentDescription = "Back"
-                )
+            if (showBack) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBackIosNew,
+                        contentDescription = "Back"
+                    )
+                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(

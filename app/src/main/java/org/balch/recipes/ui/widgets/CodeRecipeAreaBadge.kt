@@ -1,8 +1,6 @@
 package org.balch.recipes.ui.widgets
 
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -29,15 +27,11 @@ fun CodeRecipeAreaBadge(
     @PreviewParameter(CodeRecipeProvider::class) codeRecipe: CodeRecipe,
     modifier: Modifier = Modifier,
     largeFont: Boolean = false,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     Box(
         modifier = modifier
             .sharedBounds(
                 key = "${KEY_CODE_RECIPE_BADGE}-${codeRecipe.id}",
-                animatedVisibilityScope = animatedVisibilityScope,
-                sharedTransitionScope = sharedTransitionScope,
             ),
     ) {
         Box(

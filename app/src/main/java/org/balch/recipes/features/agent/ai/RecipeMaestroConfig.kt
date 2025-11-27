@@ -56,7 +56,7 @@ class RecipeMaestroConfig @Inject constructor(
      */
     val promptAgentAtAppLaunch: Boolean = false
 
-    val model = GoogleModels.Gemini2_5Flash
+    val model = GoogleModels.Gemini2_5Pro
 
     val maxAgentIterations = 40
 

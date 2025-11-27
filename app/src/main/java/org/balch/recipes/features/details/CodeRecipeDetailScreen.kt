@@ -1,8 +1,6 @@
 package org.balch.recipes.features.details
 
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,8 +35,6 @@ fun CodeDetailItem(
     modifier: Modifier = Modifier,
     codeRecipe: CodeRecipe,
     onTittleVisible: (Boolean) -> Unit,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     Column(
         modifier = modifier
@@ -56,8 +52,6 @@ fun CodeDetailItem(
                 largeFont = true,
                 modifier = modifier
                     .padding(start = 12.dp, top = 16.dp),
-                animatedVisibilityScope = animatedVisibilityScope,
-                sharedTransitionScope = sharedTransitionScope,
             )
 
             Text(
@@ -68,8 +62,6 @@ fun CodeDetailItem(
                     .fillMaxWidth()
                     .sharedBounds(
                         key = "${KEY_CODE_RECIPE_TITLE}-${codeRecipe.id}",
-                        animatedVisibilityScope = animatedVisibilityScope,
-                        sharedTransitionScope = sharedTransitionScope,
                     )
                     .onVisibilityChanged { isVisible -> onTittleVisible(isVisible) }
             )
