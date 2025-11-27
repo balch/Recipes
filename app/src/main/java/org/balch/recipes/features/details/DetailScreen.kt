@@ -83,8 +83,8 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.navigation.LocalSharedTransition
-import org.balch.recipes.ui.nav.PreviewNavigationEventDispatcherOwner
-import org.balch.recipes.ui.nav.isCompact
+import org.balch.recipes.core.navigation.isCompact
+import org.balch.recipes.core.navigation.preview.PreviewNavigationEventDispatcherOwner
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.widgets.FoodLoadingIndicator

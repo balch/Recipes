@@ -66,7 +66,7 @@ import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.models.SearchType
-import org.balch.recipes.ui.nav.PreviewNavigationEventDispatcherOwner
+import org.balch.recipes.core.navigation.preview.PreviewNavigationEventDispatcherOwner
 import org.balch.recipes.ui.theme.DeepBrown
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview

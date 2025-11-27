@@ -1,4 +1,4 @@
-package org.balch.recipes.core.navigation
+package org.balch.recipes.core.navigation.decorators
 
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.Composable
@@ -6,6 +6,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
+import org.balch.recipes.core.navigation.LocalSharedTransition
+import org.balch.recipes.core.navigation.SharedTransitionInfo
 
 /**
  * Decorates a NavEntry with shared transition objects used by

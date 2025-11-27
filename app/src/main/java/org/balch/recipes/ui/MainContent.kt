@@ -59,7 +59,12 @@ import org.balch.recipes.SearchRoute
 import org.balch.recipes.TopLevelRoute
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.core.navigation.NavigationRouter
-import org.balch.recipes.core.navigation.rememberSharedTransitionDecorator
+import org.balch.recipes.core.navigation.decorators.rememberSharedTransitionDecorator
+import org.balch.recipes.core.navigation.isCompact
+import org.balch.recipes.core.navigation.isLastScreen
+import org.balch.recipes.core.navigation.peek
+import org.balch.recipes.core.navigation.pop
+import org.balch.recipes.core.navigation.push
 import org.balch.recipes.features.agent.AgentScreen
 import org.balch.recipes.features.agent.AgentViewModel
 import org.balch.recipes.features.details.DetailScreen
@@ -68,11 +73,6 @@ import org.balch.recipes.features.ideas.IdeasScreen
 import org.balch.recipes.features.info.InfoScreen
 import org.balch.recipes.features.search.SearchScreen
 import org.balch.recipes.features.search.SearchViewModel
-import org.balch.recipes.ui.nav.isCompact
-import org.balch.recipes.ui.nav.isLastScreen
-import org.balch.recipes.ui.nav.peek
-import org.balch.recipes.ui.nav.pop
-import org.balch.recipes.ui.nav.push
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.widgets.AiFloatingToolbar
 

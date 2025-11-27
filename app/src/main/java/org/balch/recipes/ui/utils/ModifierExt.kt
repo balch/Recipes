@@ -9,7 +9,7 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.balch.recipes.core.navigation.LocalSharedTransition
-import org.balch.recipes.ui.nav.isCompact
+import org.balch.recipes.core.navigation.isCompact
 
 @Composable
 @OptIn(ExperimentalSharedTransitionApi::class)
