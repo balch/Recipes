@@ -366,9 +366,7 @@ private fun ChatInputField(
             enabled = isEnabled,
             modifier = Modifier
                 .fillMaxWidth()
-                .sharedBounds(
-                    key = "RecipeMaestroText",
-                )
+                .sharedBounds("RecipeMaestroText")
                 .onSizeChanged { onMeasuredHeight(it.height) }
                 .onKeyEvent { keyEvent ->
                     if (keyEvent.type == KeyEventType.KeyDown &&

@@ -38,9 +38,7 @@ fun MealImageBadge(
 ) {
     Card(
         modifier = modifier
-            .sharedBounds(
-                key = "$CARD_SUFFIX-${meal.id}",
-            )
+            .sharedBounds("$CARD_SUFFIX-${meal.id}")
             .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp)

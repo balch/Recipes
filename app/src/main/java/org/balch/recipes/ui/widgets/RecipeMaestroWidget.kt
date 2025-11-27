@@ -22,9 +22,7 @@ fun RecipeMaestroWidget(
 ) {
     Box(
         modifier = modifier
-            .sharedBounds(
-                key = "RecipeMaestroWidget",
-            )
+            .sharedBounds("RecipeMaestroWidget")
     ) {
         Text(
             text = "👨‍🍳",

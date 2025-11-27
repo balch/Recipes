@@ -170,10 +170,7 @@ private fun SearchLayout(
                                 else -> "???"
                             }
                             Modifier
-                                .sharedBounds(
-                                    key = key,
-                                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-                                )
+                                .sharedBounds(key)
                         } else null
                     } ?: Modifier
 

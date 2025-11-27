@@ -40,9 +40,7 @@ fun AiFloatingActionWidget(
         leadingContent = {
             Text(
                 modifier = Modifier
-                    .sharedBounds(
-                        key = "RecipeMaestroText",
-                    )
+                    .sharedBounds("RecipeMaestroText")
                     .defaultMinSize(minWidth = 56.dp)
                     .padding(8.dp),
                 text = "Maestro"

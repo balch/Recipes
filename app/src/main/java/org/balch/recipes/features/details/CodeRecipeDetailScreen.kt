@@ -60,9 +60,7 @@ fun CodeDetailItem(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 12.dp, top = 16.dp)
                     .fillMaxWidth()
-                    .sharedBounds(
-                        key = "${KEY_CODE_RECIPE_TITLE}-${codeRecipe.id}",
-                    )
+                    .sharedBounds("${KEY_CODE_RECIPE_TITLE}-${codeRecipe.id}")
                     .onVisibilityChanged { isVisible -> onTittleVisible(isVisible) }
             )
 

@@ -65,9 +65,7 @@ fun CodeRecipeCard(
 
                 Text(
                     modifier = Modifier
-                        .sharedBounds(
-                            key = "${KEY_CODE_RECIPE_TITLE}-${codeRecipe.id}",
-                        ),
+                        .sharedBounds("${KEY_CODE_RECIPE_TITLE}-${codeRecipe.id}"),
                     text = codeRecipe.title,
                     textAlign = if (center) TextAlign.Center else TextAlign.Start,
                     style = MaterialTheme.typography.labelMedium

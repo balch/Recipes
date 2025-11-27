@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Parcelable
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -510,10 +509,7 @@ private fun ResultsGrid(
                 is GridItem.CategoryItem -> {
                     CategoryCard(
                         modifier = Modifier
-                            .sharedBounds(
-                                key = "search_category_${item.category.name}",
-                                resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-                            ),
+                            .sharedBounds("search_category_${item.category.name}"),
                         category = item.category,
                         onClick = { onCategoryClick(item.category) }
                     )
@@ -522,10 +518,7 @@ private fun ResultsGrid(
                     AreaCard(
                         modifier = Modifier
                             .alpha(0.9f)
-                            .sharedBounds(
-                                key = "search_area_${item.area.id}",
-                                resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-                            ),
+                            .sharedBounds("search_area_${item.area.id}"),
                         area = item.area,
                         onClick = { onAreaClick(item.area) }
                     )
@@ -534,10 +527,7 @@ private fun ResultsGrid(
                     IngredientCard(
                         modifier = Modifier
                             .alpha(0.9f)
-                            .sharedBounds(
-                                key = "search_ingredient_${item.ingredient.id}",
-                                resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-                            ),
+                            .sharedBounds("search_ingredient_${item.ingredient.id}"),
                         ingredient = item.ingredient,
                         onClick = { onIngredientClick(item.ingredient) }
                     )

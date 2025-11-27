@@ -30,9 +30,7 @@ fun CodeRecipeAreaBadge(
 ) {
     Box(
         modifier = modifier
-            .sharedBounds(
-                key = "${KEY_CODE_RECIPE_BADGE}-${codeRecipe.id}",
-            ),
+            .sharedBounds("${KEY_CODE_RECIPE_BADGE}-${codeRecipe.id}"),
     ) {
         Box(
             modifier = Modifier
