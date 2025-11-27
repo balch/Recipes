@@ -30,8 +30,8 @@ class MealRecipeCreateTool @Inject internal constructor(
 
         @property:LLMDescription("""            
         - Complete cooking instructions for preparing the meal. 
-        - Use `\n` to separate steps
-        - DO NOT number the steps. Number will be added when parsing and rendering
+        - Use line breaks to delineate steps.
+        - DO NOT prefix the steps with numbers.
         """
         )
         val instructions: String,

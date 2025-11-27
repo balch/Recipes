@@ -135,12 +135,6 @@ class MainActivity : ComponentActivity() {
             previousVisibleIndex = firstVisibleIndex
         }
         LaunchedEffect(Unit) {
-            navigationRouter.navigationRoute.collect {
-                backStack.push(it.recipeRoute)
-            }
-        }
-
-        LaunchedEffect(Unit) {
             navigationRouter.navigationRoute.collect { navInfo ->
                 backStack.push(navInfo.recipeRoute)
             }
@@ -319,7 +313,7 @@ class MainActivity : ComponentActivity() {
         remember(navKey, windowInfo) {
             mutableStateOf(
                 when {
-                    windowInfo.isCompact() -> false
+                    !windowInfo.isCompact() -> false
                     !geminiKeyProvider.isApiKeySet -> false
                     navKey == null -> false
                     navKey is DetailRoute -> true
