@@ -35,7 +35,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -103,7 +102,6 @@ fun IdeasScreen(
     modifier: Modifier = Modifier,
     viewModel: IdeasViewModel = hiltViewModel(),
     onNavigateTo: (RecipeRoute) -> Unit,
-    onScrollChange: (Int) -> Unit,
 ) {
     val uiState: IdeasUiState by viewModel.uiState.collectAsState()
 
@@ -119,7 +117,6 @@ fun IdeasScreen(
         onCategoryClick = { onNavigateTo(SearchRoute(SearchType.Category(it.name))) },
         onIngredientClick = { onNavigateTo(SearchRoute(SearchType.Ingredient(it.name))) },
         onCodeRecipeClick = { onNavigateTo(DetailRoute(DetailType.CodeRecipeContent(it))) },
-        onScrollChange = onScrollChange,
         onBrowsableTypeChange = viewModel::changeBrowsableType,
         modifier = modifier,
     )
@@ -139,7 +136,6 @@ private fun IdeasLayoutPreview(
             onAreaClick = { },
             onIngredientClick = { },
             onCodeRecipeClick = { },
-            onScrollChange = { }
         )
     }
 }
@@ -155,7 +151,6 @@ private fun IdeasLayout(
     onIngredientClick: (Ingredient) -> Unit,
     onCodeRecipeClick: (CodeRecipe) -> Unit,
     onBrowsableTypeChange: (BrowsableType) -> Unit,
-    onScrollChange: (Int) -> Unit,
 ) {
     val hazeState = rememberHazeState()
 
@@ -223,7 +218,6 @@ private fun IdeasLayout(
                         )
                         ResultsGrid(
                             items = items,
-                            onScrollChange = onScrollChange,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .hazeSource(state = hazeState),
@@ -242,7 +236,6 @@ private fun IdeasLayout(
                         )
                         ResultsGrid(
                             items = items,
-                            onScrollChange = onScrollChange,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .hazeSource(state = hazeState),
@@ -261,7 +254,6 @@ private fun IdeasLayout(
                         )
                         ResultsGrid(
                             items = items,
-                            onScrollChange = onScrollChange,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .hazeSource(state = hazeState),
@@ -275,7 +267,6 @@ private fun IdeasLayout(
                     is IdeasUiState.CodeRecipes -> {
                         ResultsGrid(
                             items = uiState.codeRecipes.map { GridItem.CodeRecipeItem(it) },
-                            onScrollChange = onScrollChange,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .hazeSource(state = hazeState),
@@ -470,7 +461,6 @@ private fun ErrorState(
 private fun ResultsGrid(
     items: List<GridItem>,
     centerCodeRecipes: Boolean,
-    onScrollChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     onCategoryClick: (Category) -> Unit = {},
@@ -479,9 +469,6 @@ private fun ResultsGrid(
     onCodeRecipeClick: (CodeRecipe) -> Unit = {},
 ) {
     val gridState = rememberLazyStaggeredGridState()
-    LaunchedEffect(gridState.firstVisibleItemIndex) {
-        onScrollChange(gridState.firstVisibleItemIndex)
-    }
     LazyVerticalStaggeredGrid(
         state = gridState,
         columns = Fixed(2),
@@ -500,7 +487,7 @@ private fun ResultsGrid(
                     is GridItem.CodeRecipeItem -> "code_${item.codeRecipe.id}"
                 }
             }
-        ) { index, item ->
+        ) { _, item ->
             when (item) {
                 is GridItem.CategoryItem -> {
                     CategoryCard(

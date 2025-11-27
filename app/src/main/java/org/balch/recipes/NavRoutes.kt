@@ -19,6 +19,8 @@ import org.balch.recipes.core.models.SearchType
 @LLMDescription("A route used to navigate in the Recipe App")
 sealed interface RecipeRoute: NavKey {
     val contentDescription: String
+
+    val showBottomNav: Boolean get() = true
 }
 
 /**
@@ -64,4 +66,5 @@ data class SearchRoute(val searchType: SearchType) : RecipeRoute {
 @Serializable
 data object AiChatScreen : RecipeRoute {
     override val contentDescription = "AI"
+    override val showBottomNav: Boolean = false
 }

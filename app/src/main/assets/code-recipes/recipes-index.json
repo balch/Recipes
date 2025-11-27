@@ -44,13 +44,7 @@
     },
     {
       "area": "Navigation",
-      "title": "Bottom Nav",
-      "markdownAsset": "navigation/bottom-nav.md",
-      "appExampleFileName": "MainActivity.kt"
-    },
-    {
-      "area": "Navigation",
-      "title": "Nav3 TopLevel ViewModels",
+      "title": "Nav3 TopLevel ViewModel Keys",
       "markdownAsset": "navigation/nav3-top-level-viewmodels.md",
       "appExampleFileName": "MainActivity.kt"
     },
@@ -106,12 +100,6 @@
       "area": "Theme",
       "title": "Glass Blur with Haze",
       "markdownAsset": "theme/glass-blur-haze.md",
-      "appExampleFileName": "MainActivity.kt"
-    },
-    {
-      "area": "Navigation",
-      "title": "Bottom Nav AutoHide",
-      "markdownAsset": "navigation/bottom-nav-autohide.md",
       "appExampleFileName": "MainActivity.kt"
     },
     {

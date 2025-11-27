@@ -131,6 +131,7 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.adaptive.navigation3)
+    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.0.0")
 
     implementation(libs.markdown.m3)
     implementation(libs.markdown.android)
@@ -140,6 +141,7 @@ dependencies {
 
     implementation(libs.koog.ai)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.material3.adaptive.navigation.suite)
 
     ksp(libs.hilt.compiler)
 

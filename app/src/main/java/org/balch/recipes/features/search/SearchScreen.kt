@@ -1,7 +1,5 @@
 package org.balch.recipes.features.search
 
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -80,9 +77,7 @@ import org.balch.recipes.ui.widgets.MealImageBadge
 fun SearchScreen(
     modifier: Modifier = Modifier,
     viewModel: SearchViewModel = hiltViewModel(),
-    onBack: () -> Unit,
     onNavigateTo: (RecipeRoute) -> Unit,
-    onScrollChange: (Int) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -90,13 +85,11 @@ fun SearchScreen(
         uiState = uiState,
         modifier = modifier,
         searchText = uiState.searchText,
-        onScrollChange = onScrollChange,
         onMealClick = { onNavigateTo(DetailRoute(DetailType.MealLookup(it))) },
         onCodeClick = { onNavigateTo(DetailRoute(DetailType.CodeRecipeContent(it))) },
         onRandom = { onNavigateTo(DetailRoute(DetailType.RandomRecipe)) },
         clearSearch = viewModel::clearSearch,
         onSearch = viewModel::updateSearchQuery,
-        onBack = onBack,
     )
 }
 
@@ -117,8 +110,6 @@ private fun SearchLayoutPreview(
                 onSearch = {},
                 onRandom = {},
                 clearSearch = {},
-                onBack = {},
-                onScrollChange = {},
             )
         }
     }
@@ -134,8 +125,6 @@ private fun SearchLayout(
     onSearch: (String) -> Unit,
     onRandom: () -> Unit,
     clearSearch: () -> Unit,
-    onBack: () -> Unit,
-    onScrollChange: (Int) -> Unit,
 ) {
     val hazeState = rememberHazeState()
     var query by rememberSaveable { mutableStateOf(searchText) }
@@ -189,7 +178,6 @@ private fun SearchLayout(
                     query = ""
                     clearSearch()
                 },
-                onBack = onBack,
             )
         }
     ) { innerPadding ->
@@ -233,7 +221,6 @@ private fun SearchLayout(
                         items = uiState.items,
                         onMealClick = onMealClick,
                         onCodeClick = onCodeClick,
-                        onScrollChange = onScrollChange,
                         paddingValues = innerPadding,
                     )
                 }
@@ -277,7 +264,6 @@ private fun TopBar(
     onSearch: (String) -> Unit = {},
     onRandom: () -> Unit = {},
     clearSearch: () -> Unit = {},
-    onBack: () -> Unit = {}
 ) {
     Box(
         modifier = modifier.fillMaxWidth(),
@@ -292,16 +278,6 @@ private fun TopBar(
                     onRandom = onRandom,
                     clearSearch = clearSearch,
                 )
-            },
-            navigationIcon = {
-                if (!showSearchBar) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBackIosNew,
-                            contentDescription = "Back"
-                        )
-                    }
-                }
             },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent,
@@ -456,16 +432,10 @@ private fun SearchResults(
     items: List<ItemType>,
     onMealClick: (MealSummary) -> Unit,
     onCodeClick: (CodeRecipe) -> Unit,
-    onScrollChange: (Int) -> Unit,
     paddingValues: PaddingValues,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
 
     val gridState = rememberLazyStaggeredGridState()
-    LaunchedEffect(gridState.firstVisibleItemIndex) {
-        onScrollChange(gridState.firstVisibleItemIndex)
-    }
 
     Box(
         modifier = Modifier.fillMaxSize(),

@@ -69,9 +69,6 @@ class AgentScreenTest {
                     AnimatedContent(targetState = true) {
                         AgentScreen(
                             viewModel = testViewModel,
-                            onBack =  { },
-                            sharedTransitionScope = this@SharedTransitionLayout,
-                            animatedVisibilityScope = this@AnimatedContent,
                         )
                     }
                 }

@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.scaleIn
@@ -21,7 +20,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,7 +33,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.NavigateBefore
 import androidx.compose.material.icons.automirrored.filled.NavigateNext
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,7 +49,6 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -83,7 +79,6 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.navigation.LocalSharedTransition
-import org.balch.recipes.core.navigation.isCompact
 import org.balch.recipes.core.navigation.preview.PreviewNavigationEventDispatcherOwner
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
@@ -205,13 +200,11 @@ fun rememberDetailScreenState(
 fun DetailScreen(
     modifier: Modifier = Modifier,
     viewModel: DetailsViewModel = hiltViewModel(),
-    onBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     DetailLayout(
         uiState = uiState,
         modifier = modifier,
-        onBack = onBack,
     )
 }
 
@@ -219,7 +212,6 @@ fun DetailScreen(
 fun DetailLayout(
     uiState: UiState,
     modifier: Modifier = Modifier,
-    onBack: () -> Unit ,
 ) {
     val hazeState = rememberHazeState()
     val detailState = rememberDetailScreenState(
@@ -238,8 +230,7 @@ fun DetailLayout(
 
     Scaffold(
         modifier = modifier
-            .fillMaxSize()
-            .safeDrawingPadding(),
+            .fillMaxSize(),
         topBar = {
             TopBar(
                 modifier = modifier
@@ -251,13 +242,6 @@ fun DetailLayout(
                     },
                 uiState = uiState,
                 showTitleInHeader = detailState.showTitleInHeader,
-                onBack = {
-                    if (detailState.detailViewMode != DetailViewMode.List) {
-                        detailState.setDetailViewMode(DetailViewMode.List)
-                    } else {
-                        onBack()
-                    }
-                },
             )
         },
         bottomBar = {
@@ -444,8 +428,6 @@ private fun LazyListScope.listViewItems(
     onPlayVideo: () -> Unit,
     onDetailViewModeChange: (DetailViewMode) -> Unit,
     modifier: Modifier = Modifier,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     item {
         Box {
@@ -522,7 +504,6 @@ private fun TopBar(
     modifier: Modifier,
     uiState: UiState,
     showTitleInHeader: Boolean,
-    onBack: () -> Unit,
 ) {
 
     val defaultTitle = uiState.defaultTitle()
@@ -530,8 +511,6 @@ private fun TopBar(
 
     // Show meal title when sticky header is stuck, otherwise show default
     val shouldShowOverrideTitle = showTitleInHeader && overrideTitle != null
-
-    val showBack = currentWindowAdaptiveInfo().isCompact()
 
     TopAppBar(
         modifier = modifier,
@@ -546,16 +525,6 @@ private fun TopBar(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-            }
-        },
-        navigationIcon = {
-            if (showBack) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBackIosNew,
-                        contentDescription = "Back"
-                    )
-                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -844,7 +813,6 @@ private fun DetailScreenPreview(
         RecipesTheme {
             DetailLayout(
                 uiState = uiState,
-                onBack = {}
             )
         }
     }
@@ -887,8 +855,6 @@ private fun ListViewItemsPreview() {
                 onPlayVideo = {},
                 onDetailViewModeChange = {},
                 modifier = Modifier,
-                sharedTransitionScope = null,
-                animatedVisibilityScope = null,
             )
         }
     }

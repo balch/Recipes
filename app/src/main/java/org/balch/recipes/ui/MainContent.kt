@@ -1,33 +1,33 @@
 package org.balch.recipes.ui
 
 import android.annotation.SuppressLint
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
-import androidx.compose.material3.FabPosition
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingToolbarDefaults.floatingToolbarVerticalNestedScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveComponentOverrideApi
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy.Companion.listPane
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
+import androidx.compose.material3.adaptive.navigationsuite.LocalNavigationSuiteScaffoldOverride
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,17 +36,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import dev.chrisbanes.haze.ExperimentalHazeApi
-import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.LocalHazeStyle
-import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.rememberHazeState
@@ -54,6 +49,7 @@ import org.balch.recipes.AiChatScreen
 import org.balch.recipes.DetailRoute
 import org.balch.recipes.Ideas
 import org.balch.recipes.Info
+import org.balch.recipes.RecipeRoute
 import org.balch.recipes.Search
 import org.balch.recipes.SearchRoute
 import org.balch.recipes.TopLevelRoute
@@ -61,10 +57,11 @@ import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.core.navigation.NavigationRouter
 import org.balch.recipes.core.navigation.decorators.rememberSharedTransitionDecorator
 import org.balch.recipes.core.navigation.isCompact
-import org.balch.recipes.core.navigation.isLastScreen
 import org.balch.recipes.core.navigation.peek
 import org.balch.recipes.core.navigation.pop
+import org.balch.recipes.core.navigation.popTo
 import org.balch.recipes.core.navigation.push
+import org.balch.recipes.core.navigation.rememberRecipeRouteBackStack
 import org.balch.recipes.features.agent.AgentScreen
 import org.balch.recipes.features.agent.AgentViewModel
 import org.balch.recipes.features.details.DetailScreen
@@ -88,198 +85,199 @@ private val TOP_LEVEL_ROUTES: List<TopLevelRoute> =
     ExperimentalHazeMaterialsApi::class,
     ExperimentalHazeApi::class,
     ExperimentalSharedTransitionApi::class,
-    ExperimentalMaterial3AdaptiveApi::class
+    ExperimentalMaterial3AdaptiveApi::class,
+    ExperimentalMaterial3AdaptiveComponentOverrideApi::class,
+    ExperimentalMaterial3ExpressiveApi::class
 )
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainContent(
     isAgentEnabled: Boolean,
-    activityViewModelStoreOwner: ViewModelStoreOwner,
     navigationRouter: NavigationRouter,
 ) {
+
+    val backStack = rememberRecipeRouteBackStack(TOP_LEVEL_ROUTES.first())
+
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    fun Modifier.floatingToolbarScrollIfNecessary(
+        expanded: Boolean,
+        onExpand: () -> Unit,
+        onCollapse: () -> Unit,
+    ): Modifier =
+        if (backStack.peek()?.showBottomNav ?: false) {
+            this then Modifier.floatingToolbarVerticalNestedScroll(
+                expanded = expanded,
+                onExpand = onExpand,
+                onCollapse = onCollapse,
+            )
+        } else this
+
+    val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
+    val windowInfo = currentWindowAdaptiveInfo()
     val hazeState = rememberHazeState()
 
-    val backStack = rememberNavBackStack(TOP_LEVEL_ROUTES.first())
-    val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
+    var expanded by remember(backStack.peek()) {
+        mutableStateOf(backStack.peek()?.showBottomNav ?: false)
+    }
 
     val aiToolbarVisible by rememberAiFlotatingToolbarVisible(
         navKey = backStack.peek(),
-        windowInfo = currentWindowAdaptiveInfo(),
+        windowInfo = windowInfo,
         isAgentEnabled = isAgentEnabled,
     )
 
-    var previousVisibleIndex by remember { mutableIntStateOf(0) }
-    var firstVisibleIndex by remember { mutableIntStateOf(0) }
-    var showNavigationBar by remember { mutableStateOf(true) }
-    LaunchedEffect(firstVisibleIndex) {
-        showNavigationBar = firstVisibleIndex == 0 || firstVisibleIndex < previousVisibleIndex
-        previousVisibleIndex = firstVisibleIndex
-    }
     LaunchedEffect(Unit) {
         navigationRouter.navigationRoute.collect { navInfo ->
             backStack.push(navInfo.recipeRoute)
         }
     }
 
-    val agentViewModel: AgentViewModel = hiltViewModel(
-        viewModelStoreOwner = activityViewModelStoreOwner
-    )
-
-    // override back button behavior to prevent closing the app when
-    // there is only one screen and the nav bar is down
-    BackHandler(enabled = backStack.isLastScreen() && !showNavigationBar) {
-        showNavigationBar = true
-    }
+    val agentViewModel: AgentViewModel = hiltViewModel()
 
     RecipesTheme {
-        Scaffold(
-            bottomBar = {
-                AnimatedVisibility(
-                    visible = showNavigationBar && backStack.peek() is TopLevelRoute,
-                    enter = slideInVertically { it },
-                    exit = slideOutVertically { it },
-                ) {
-                    NavigationBar(
-                        containerColor = Color.Transparent,
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier
-                            .hazeEffect(state = hazeState, style = LocalHazeStyle.current) {
-                                HazeProgressive.verticalGradient(
-                                    startIntensity = 1f,
-                                    endIntensity = 0f,
-                                )
-                            },
-                    ) {
-                        TOP_LEVEL_ROUTES.forEach { topLevelRoute ->
-                            val isSelected = topLevelRoute == backStack.peek()
-                            NavigationBarItem(
-                                selected = isSelected,
-                                onClick = {
-                                    if (backStack.peek() != topLevelRoute) {
-                                        // Navigate to root first if not there
-                                        if (backStack.peek() != TOP_LEVEL_ROUTES.first()) {
-                                            backStack.pop()
-                                        }
-                                        navigationRouter.navigateTo(topLevelRoute)
-                                    }
-                                },
-                                icon = {
-                                    Icon(
-                                        imageVector = topLevelRoute.icon,
-                                        contentDescription = topLevelRoute.contentDescription
-                                    )
+        CompositionLocalProvider(
+            LocalNavigationSuiteScaffoldOverride provides
+                    MainNavSuiteScaffoldOverride(hazeState, expanded)
+        ) {
+            val currentRoute = backStack.peek()
+            NavigationSuiteScaffold(
+                containerColor = Color.Transparent,
+                navigationSuiteColors = NavigationSuiteDefaults.colors(
+                    navigationBarContainerColor = Color.Transparent,
+                    shortNavigationBarContainerColor = Color.Transparent,
+                    navigationDrawerContainerColor = Color.Transparent,
+                ),
+                navigationSuiteItems = {
+                    TOP_LEVEL_ROUTES.forEach { topLevelRoute ->
+                        item(
+                            selected = topLevelRoute == currentRoute,
+                            onClick = {
+                                backStack.popTo(TOP_LEVEL_ROUTES.first())
+                                if (backStack.peek() != topLevelRoute) {
+                                    navigationRouter.navigateTo(topLevelRoute)
                                 }
-                            )
-                        }
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = topLevelRoute.icon,
+                                    contentDescription = topLevelRoute.contentDescription
+                                )
+                            }
+                        )
                     }
                 }
-            },
-            floatingActionButtonPosition = FabPosition.End,
-            floatingActionButton = {
-                if (aiToolbarVisible) {
-                    AiFloatingToolbar(
-                        modifier = Modifier
-                            .then(
-                                if (backStack.peek() is DetailRoute) Modifier.offset(y = -(380).dp)
-                                else Modifier
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .floatingToolbarScrollIfNecessary(
+                            expanded = expanded,
+                            onExpand = { expanded = true },
+                            onCollapse = { expanded = false },
+
+                        )
+                ) {
+                    SharedTransitionLayout {
+                        NavDisplay(
+                            modifier = Modifier
+                                .hazeSource(hazeState)
+                                .imePadding(),
+                            backStack = backStack,
+                            sceneStrategy = listDetailStrategy,
+                            onBack = { backStack.pop() },
+                            entryDecorators = listOf(
+                                rememberSaveableStateHolderNavEntryDecorator(),
+                                rememberViewModelStoreNavEntryDecorator(),
+                                rememberSharedTransitionDecorator()
                             ),
-                        expanded = showNavigationBar,
-                        onNavigateTo = { recipeRoute ->
-                            navigationRouter.navigateTo(recipeRoute)
-                        },
-                        moodTintColor = agentViewModel.moodTintColor,
-                    )
+
+                            entryProvider = entryProvider {
+                                entry<Ideas>(metadata = recipeListPane()) {
+                                    IdeasScreen(
+                                        viewModel = hiltViewModel(key = "ideasTopLevelRoute"),
+                                        onNavigateTo = { navigationRouter.navigateTo(it) },
+                                    )
+                                }
+                                entry<SearchRoute>(metadata = recipeListPane()) { searchRoute ->
+                                    // Note: We need a new ViewModel for every new SearchViewModel instance.
+                                    //
+                                    // tl;dr: Make sure you use rememberViewModelStoreNavEntryDecorator()
+                                    // if you want a new ViewModel for each new navigation key instance.
+                                    val viewModel =
+                                        hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
+                                            creationCallback = { factory ->
+                                                factory.create(searchRoute.searchType)
+                                            }
+                                        )
+                                    SearchScreen(
+                                        viewModel = viewModel,
+                                        onNavigateTo = { navigationRouter.navigateTo(it) },
+                                    )
+                                }
+                                entry<Search>(metadata = recipeListPane()) {
+                                    val viewModel =
+                                        hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
+                                            key = "SearchTopLevelRoute",
+                                            creationCallback = { factory ->
+                                                factory.create(SearchType.Search(""))
+                                            },
+                                        )
+                                    SearchScreen(
+                                        viewModel = viewModel,
+                                        onNavigateTo = { navigationRouter.navigateTo(it) },
+                                    )
+                                }
+                                entry<DetailRoute>(
+                                    metadata = ListDetailSceneStrategy.detailPane()
+                                ) { detailRoute ->
+                                    val viewModel =
+                                        hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
+                                            creationCallback = { factory ->
+                                                factory.create(detailRoute.detailType)
+                                            }
+                                        )
+
+                                    DetailScreen(
+                                        viewModel = viewModel,
+                                    )
+                                }
+                                entry<AiChatScreen>(metadata = listPane()) {
+                                    AgentScreen(
+                                        viewModel = agentViewModel,
+                                    )
+                                }
+                                entry<Info>(
+                                    metadata = ListDetailSceneStrategy.extraPane()
+                                ) {
+                                    InfoScreen(
+                                        viewModel = hiltViewModel(key = "InfoTopLevelRoute")
+                                    )
+                                }
+                            },
+                        )
+                    }
+
+                    if (aiToolbarVisible) {
+                        AiFloatingToolbar(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(16.dp)
+                                .then(
+                                    if (windowInfo.isCompact()) Modifier.padding(bottom = 80.dp)
+                                    else Modifier
+                                )
+                                .then(
+                                    if (backStack.peek() is DetailRoute) Modifier.offset(y = -(380).dp)
+                                    else Modifier
+                                ),
+                            expanded = expanded,
+                            onNavigateTo = { recipeRoute ->
+                                navigationRouter.navigateTo(recipeRoute)
+                            },
+                            moodTintColor = agentViewModel.moodTintColor,
+                        )
+                    }
                 }
-            }
-        ) { _ -> // innerPadding not applied to allow for haze effect
-            SharedTransitionLayout {
-                NavDisplay(
-                    modifier = Modifier
-                        .imePadding()
-                        .hazeSource(state = hazeState),
-                    backStack = backStack,
-                    sceneStrategy = listDetailStrategy,
-                    onBack = { backStack.pop() },
-                    entryDecorators = listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator(),
-                        rememberSharedTransitionDecorator()
-                    ),
-
-                    // Use the Activities `ViewModelStoreOwner` for ViewModels belonging to
-                    // `TopLevelRoute` NavEntry routes. This allows screens to maintain their last
-                    // states when navigating back to a top level screen
-                    entryProvider = entryProvider {
-                        entry<Ideas>(metadata = listPane()) {
-                            IdeasScreen(
-                                viewModel = hiltViewModel(viewModelStoreOwner = activityViewModelStoreOwner),
-                                onNavigateTo = { navigationRouter.navigateTo(it) },
-                                onScrollChange = { firstVisibleIndex = it },
-                            )
-                        }
-                        entry<SearchRoute>(metadata = listPane()) { searchRoute ->
-                            // Note: We need a new ViewModel for every new SearchViewModel instance.
-                            //
-                            // tl;dr: Make sure you use rememberViewModelStoreNavEntryDecorator()
-                            // if you want a new ViewModel for each new navigation key instance.
-                            val viewModel =
-                                hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
-                                    creationCallback = { factory ->
-                                        factory.create(searchRoute.searchType)
-                                    }
-                                )
-                            SearchScreen(
-                                viewModel = viewModel,
-                                onBack = { backStack.pop() },
-                                onNavigateTo = { navigationRouter.navigateTo(it) },
-                                onScrollChange = { firstVisibleIndex = it },
-                            )
-                        }
-                        entry<Search>(metadata = listPane()) {
-                            val viewModel =
-                                hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
-                                    creationCallback = { factory ->
-                                        factory.create(SearchType.Search(""))
-                                    },
-                                    viewModelStoreOwner = activityViewModelStoreOwner
-                                )
-                            SearchScreen(
-                                viewModel = viewModel,
-                                onBack = { backStack.pop() },
-                                onNavigateTo = { navigationRouter.navigateTo(it) },
-                                onScrollChange = { firstVisibleIndex = it },
-                            )
-                        }
-                        entry<DetailRoute>(
-                            metadata = ListDetailSceneStrategy.detailPane()
-                        ) { detailRoute ->
-                            val viewModel =
-                                hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
-                                    creationCallback = { factory ->
-                                        factory.create(detailRoute.detailType)
-                                    }
-                                )
-
-                            DetailScreen(
-                                viewModel = viewModel,
-                                onBack = { backStack.pop() },
-                            )
-                        }
-                        entry<AiChatScreen>(metadata = listPane()) {
-                            AgentScreen(
-                                viewModel = agentViewModel,
-                                onBack = { backStack.pop() },
-                            )
-                        }
-                        entry<Info>(
-                            metadata = ListDetailSceneStrategy.extraPane()
-                        ) {
-                            InfoScreen(
-                                viewModel = hiltViewModel(viewModelStoreOwner = activityViewModelStoreOwner)
-                            )
-                        }
-                    },
-                )
             }
         }
     }
@@ -287,11 +285,12 @@ fun MainContent(
 
 @Composable
 fun rememberAiFlotatingToolbarVisible(
-    navKey: NavKey?,
+    navKey: RecipeRoute?,
     isAgentEnabled: Boolean,
     windowInfo: WindowAdaptiveInfo
 ): State<Boolean> =
-    derivedStateOf {
+    remember(navKey, windowInfo) {
+        derivedStateOf {
             when {
                 !windowInfo.isCompact() -> false
                 !isAgentEnabled -> false
@@ -302,11 +301,12 @@ fun rememberAiFlotatingToolbarVisible(
                 navKey is Info -> true
                 else -> false
             }
+        }
     }
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
-private fun listPane() =
-    ListDetailSceneStrategy.listPane(
+private fun recipeListPane() =
+    listPane(
         detailPlaceholder = {
             Box {
                 Text(

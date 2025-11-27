@@ -27,7 +27,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             MainContent(
                 isAgentEnabled = geminiKeyProvider.isApiKeySet,
-                activityViewModelStoreOwner = this@MainActivity,
                 navigationRouter = navigationRouter
             )
         }

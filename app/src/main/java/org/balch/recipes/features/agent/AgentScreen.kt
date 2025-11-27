@@ -28,7 +28,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -84,7 +83,6 @@ import org.balch.recipes.ui.widgets.RecipeMaestroWidget
 fun AgentScreen(
     modifier: Modifier = Modifier,
     viewModel: AgentViewModel,
-    onBack: () -> Unit,
 ) {
     val messages by viewModel.messages.collectAsState()
     val view = LocalView.current
@@ -96,7 +94,6 @@ fun AgentScreen(
             view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
             viewModel.sendPrompt(message)
         },
-        onBack = onBack,
         moodTintColor = viewModel.moodTintColor,
     )
 }
@@ -105,7 +102,6 @@ fun AgentScreen(
 private fun AgentLayout(
     messages: List<ChatMessage>,
     onSendMessage: (String) -> Unit,
-    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     moodTintColor: Color? = null,
 ) {
@@ -134,7 +130,6 @@ private fun AgentLayout(
                             endIntensity = 1f,
                         )
                     },
-                onBack = onBack,
                 iconTint = moodTintColor,
             )
         }
@@ -179,7 +174,6 @@ private fun AgentLayout(
 @Composable
 private fun TopBar(
     modifier: Modifier = Modifier,
-    onBack: () -> Unit = {},
     iconTint: Color? = null,
 ) {
     Box(
@@ -210,14 +204,6 @@ private fun TopBar(
                             color = colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                     }
-                }
-            },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBackIosNew,
-                        contentDescription = "Back"
-                    )
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
@@ -458,7 +444,6 @@ private fun AgentScreenInitialPreview(
         AgentLayout(
             messages = messages,
             onSendMessage = {},
-            onBack = {},
         )
     }
 }
