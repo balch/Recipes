@@ -34,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -54,6 +53,7 @@ import org.balch.recipes.TopLevelRoute
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.core.navigation.NavigationRouter
 import org.balch.recipes.core.navigation.decorators.rememberSharedTransitionDecorator
+import org.balch.recipes.core.navigation.decorators.rememberViewModelStoreRecipeRouteDecorator
 import org.balch.recipes.core.navigation.isCompact
 import org.balch.recipes.core.navigation.isLastScreen
 import org.balch.recipes.core.navigation.peek
@@ -66,9 +66,7 @@ import org.balch.recipes.features.agent.AgentViewModel
 import org.balch.recipes.features.details.DetailScreen
 import org.balch.recipes.features.details.DetailsViewModel
 import org.balch.recipes.features.ideas.IdeasScreen
-import org.balch.recipes.features.ideas.IdeasViewModel
 import org.balch.recipes.features.info.InfoScreen
-import org.balch.recipes.features.info.InfoViewModel
 import org.balch.recipes.features.search.SearchScreen
 import org.balch.recipes.features.search.SearchViewModel
 import org.balch.recipes.ui.theme.RecipesTheme
@@ -80,6 +78,11 @@ private val TOP_LEVEL_ROUTES: List<TopLevelRoute> =
         Search(SearchType.Search("")),
         Info
     )
+
+private const val TOP_LEVEL_ROUTE_KEY_PREFIX = "TOP_LEVEL_ROUTE_KEY_"
+
+private fun Any.isTopLevelRouteKey() = toString().startsWith(TOP_LEVEL_ROUTE_KEY_PREFIX)
+private fun String.toTopLevelRoutKey() = TOP_LEVEL_ROUTE_KEY_PREFIX + this
 
 @OptIn(
     ExperimentalHazeMaterialsApi::class,
@@ -140,21 +143,7 @@ fun MainContent(
         }
     }
 
-    /**
-     * All Top Level ViewModels that need to retain state should be declared here.
-     * ViewModels that are create in EntryProviders will get a unique view model per
-     * the `entry.contentKey` via the `rememberViewModelStoreNavEntryDecorator`
-     * being used in `NavDisplay`
-     */
     val agentViewModel: AgentViewModel = hiltViewModel()
-    val infoViewModel: InfoViewModel = hiltViewModel()
-    val searchViewModel =
-        hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
-            creationCallback = { factory ->
-                factory.create(SearchType.Search(""))
-            },
-        )
-    val ideasViewModel: IdeasViewModel = hiltViewModel()
 
     RecipesTheme {
         CompositionLocalProvider(
@@ -204,7 +193,6 @@ fun MainContent(
                             visible = bottomNavVisible,
                             onShow = { bottomNavVisible = true },
                             onHide = { bottomNavVisible = false },
-
                         )
                 ) {
                     SharedTransitionLayout {
@@ -217,14 +205,19 @@ fun MainContent(
                             onBack = { backStack.pop() },
                             entryDecorators = listOf(
                                 rememberSaveableStateHolderNavEntryDecorator(),
-                                rememberViewModelStoreNavEntryDecorator(),
+                                rememberViewModelStoreRecipeRouteDecorator(
+                                    createChildViewModel = { key -> !key.isTopLevelRouteKey() }
+                                ),
                                 rememberSharedTransitionDecorator()
                             ),
 
                             entryProvider = entryProvider {
-                                entry<Ideas>(metadata = recipeListPane()) {
+                                entry<Ideas>(
+                                    { "IdeasRoute".toTopLevelRoutKey() },
+                                    metadata = recipeListPane()
+                                ) {
                                     IdeasScreen(
-                                        viewModel = ideasViewModel,
+                                        viewModel = hiltViewModel(),
                                         onNavigateTo = { navigationRouter.navigateTo(it) },
                                     )
                                 }
@@ -240,9 +233,18 @@ fun MainContent(
                                         onNavigateTo = { navigationRouter.navigateTo(it) },
                                     )
                                 }
-                                entry<Search>(metadata = recipeListPane()) {
+                                entry<Search>(
+                                    { "SearchRoute".toTopLevelRoutKey() },
+                                    metadata = recipeListPane()
+                                ) {
+                                    val viewModel =
+                                        hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
+                                            creationCallback = { factory ->
+                                                factory.create(SearchType.Search(""))
+                                            },
+                                        )
                                     SearchScreen(
-                                        viewModel = searchViewModel,
+                                        viewModel = viewModel,
                                         onNavigateTo = { navigationRouter.navigateTo(it) },
                                     )
                                 }
@@ -258,13 +260,17 @@ fun MainContent(
 
                                     DetailScreen(viewModel = viewModel)
                                 }
-                                entry<AiChatScreen>(metadata = listPane()) {
+                                entry<AiChatScreen>(
+                                    { "AiChatScreen".toTopLevelRoutKey() },
+                                    metadata = listPane()
+                                ) {
                                     AgentScreen(viewModel = agentViewModel)
                                 }
                                 entry<Info>(
+                                    { "InfoRoute".toTopLevelRoutKey() },
                                     metadata = ListDetailSceneStrategy.extraPane()
                                 ) {
-                                    InfoScreen(viewModel = infoViewModel)
+                                    InfoScreen(viewModel = hiltViewModel())
                                 }
                             },
                         )

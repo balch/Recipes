@@ -44,12 +44,6 @@
     },
     {
       "area": "Navigation",
-      "title": "Nav3 TopLevel ViewModel Keys",
-      "markdownAsset": "navigation/nav3-top-level-viewmodels.md",
-      "appExampleFileName": "MainActivity.kt"
-    },
-    {
-      "area": "Navigation",
       "title": "Nav3 EntryProvider DSL Syntax",
       "markdownAsset": "navigation/nav3-entry-provider.md",
       "appExampleFileName": "MainActivity.kt"
