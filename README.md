@@ -82,18 +82,21 @@ To use the AI features, you need a Google Gemini API key:
 **Note:** The `local.properties` file is gitignored and should never be committed to version control.
 
 ### Dependencies
-| Dependency                                                                                     | Description                                           | 
-|------------------------------------------------------------------------------------------------|-------------------------------------------------------|
-| [android-youtube-player](https://github.com/PierfrancescoSoffritti/android-youtube-player)     | YouTube Player library for Android                    |
-| [Coil](https://coil-kt.github.io/coil/)                                                        | Image Loader for Jetpack Compose                      |  
-| [Compose Material3](https://developer.android.com/jetpack/androidx/releases/compose-material3) | Material Design Components for Jetpack Compose        | 
-| [Compose Navigation3](https://github.com/android/nav3-recipes)                                 | Navigation Component for Jetpack Compose              | 
-| [Haze](https://chrisbanes.github.io/haze/latest/)                                              | Chris Banes 'glassmorphism' blur library for Compose. |
-| [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)               | Dependency Injection for Android                      | 
-| [KmLogging](https://github.com/LighthouseGames/KmLogging)                                      | Kotlin Multiplatform logging library.                 |
-| [Koog AI Agents](https://github.com/koog-ai/koog-agents)                                       | AI Agent framework with Gemini integration            |
-| [Ktor](https://ktor.io/)                                                                       | HTTP Client for Android                               |
-| [Markdown Renderer](https://github.com/mikepenz/multiplatform-markdown-renderer)               | Mike Penz Multiplatform Markdown Renderer             |
-| [TheMealDB](https://www.themealdb.com/api.php)                                                 | Free, easy to use, API for Food Recipes               |
-| [Truth](https://truth.dev/)                                                                    | Google Assertion Library used for Testing             |
-| [Turbine](https://github.com/cashapp/turbine)                                                  | Coroutine Flow Testing Library from CashApp           |
+| Dependency                                                                                                              | Description                                                                            | 
+|-------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|
+| [android-youtube-player](https://github.com/PierfrancescoSoffritti/android-youtube-player)                              | YouTube Player library for Android                                                     |
+| [Coil](https://coil-kt.github.io/coil/)                                                                                 | Image Loader for Jetpack Compose                                                       |
+| [Compose Adaptive](https://developer.android.com/jetpack/androidx/releases/compose-material3-adaptive)                  | Adaptive Layouts for Jetpack Compose for mutliple screensize and form factor detection |
+| [Compose Adaptive Navigation Suite](https://developer.android.com/jetpack/androidx/releases/compose-material3-adaptive) | Adaptive Navigation Suite for Material 3 for Navigation widget screensize support      |
+| [Compose Material3](https://developer.android.com/jetpack/androidx/releases/compose-material3)                          | Material Design Components for Jetpack Compose                                         |
+| [Compose Material3 Expressive](https://developer.android.com/jetpack/androidx/releases/compose-material3)               | Expressive APIs for Material 3 for new widets and dynamic motions                      |
+| [Compose Navigation3](https://github.com/android/nav3-recipes)                                                          | Navigation Component for Jetpack Compose                                               | 
+| [Haze](https://chrisbanes.github.io/haze/latest/)                                                                       | Chris Banes 'glassmorphism' blur library for Compose.                                  |
+| [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)                                        | Dependency Injection for Android                                                       | 
+| [KmLogging](https://github.com/LighthouseGames/KmLogging)                                                               | Kotlin Multiplatform logging library.                                                  |
+| [Koog AI Agents](https://github.com/koog-ai/koog-agents)                                                                | AI Agent framework with Gemini integration                                             |
+| [Ktor](https://ktor.io/)                                                                                                | HTTP Client for Android                                                                |
+| [Markdown Renderer](https://github.com/mikepenz/multiplatform-markdown-renderer)                                        | Mike Penz Multiplatform Markdown Renderer                                              |
+| [TheMealDB](https://www.themealdb.com/api.php)                                                                          | Free, easy to use, API for Food Recipes                                                |
+| [Truth](https://truth.dev/)                                                                                             | Google Assertion Library used for Testing                                              |
+| [Turbine](https://github.com/cashapp/turbine)                                                                           | Coroutine Flow Testing Library from CashApp                                            |

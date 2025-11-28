@@ -1,13 +1,12 @@
 package org.balch.recipes.ui
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults.floatingToolbarVerticalNestedScroll
 import androidx.compose.material3.Icon
@@ -34,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
@@ -57,6 +55,7 @@ import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.core.navigation.NavigationRouter
 import org.balch.recipes.core.navigation.decorators.rememberSharedTransitionDecorator
 import org.balch.recipes.core.navigation.isCompact
+import org.balch.recipes.core.navigation.isLastScreen
 import org.balch.recipes.core.navigation.peek
 import org.balch.recipes.core.navigation.pop
 import org.balch.recipes.core.navigation.popTo
@@ -71,7 +70,6 @@ import org.balch.recipes.features.info.InfoScreen
 import org.balch.recipes.features.search.SearchScreen
 import org.balch.recipes.features.search.SearchViewModel
 import org.balch.recipes.ui.theme.RecipesTheme
-import org.balch.recipes.ui.widgets.AiFloatingToolbar
 
 
 private val TOP_LEVEL_ROUTES: List<TopLevelRoute> =
@@ -98,17 +96,20 @@ fun MainContent(
 
     val backStack = rememberRecipeRouteBackStack(TOP_LEVEL_ROUTES.first())
 
+    /**
+     * Conditionally adds nested scroll handling for showing/hiding bottom nav bar.
+     */
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-    fun Modifier.floatingToolbarScrollIfNecessary(
-        expanded: Boolean,
-        onExpand: () -> Unit,
-        onCollapse: () -> Unit,
+    fun Modifier.bottomNavNestedScroll(
+        visible: Boolean,
+        onShow: () -> Unit,
+        onHide: () -> Unit,
     ): Modifier =
         if (backStack.peek()?.showBottomNav ?: false) {
             this then Modifier.floatingToolbarVerticalNestedScroll(
-                expanded = expanded,
-                onExpand = onExpand,
-                onCollapse = onCollapse,
+                expanded = visible,
+                onExpand = onShow,
+                onCollapse = onHide,
             )
         } else this
 
@@ -116,8 +117,13 @@ fun MainContent(
     val windowInfo = currentWindowAdaptiveInfo()
     val hazeState = rememberHazeState()
 
-    var expanded by remember(backStack.peek()) {
+    var bottomNavVisible by remember(backStack.peek()) {
         mutableStateOf(backStack.peek()?.showBottomNav ?: false)
+    }
+    // override back button behavior to prevent closing the app when
+    // there is only one screen and the nav bar is down
+    BackHandler(enabled = backStack.isLastScreen() && !bottomNavVisible) {
+        bottomNavVisible = true
     }
 
     val aiToolbarVisible by rememberAiFlotatingToolbarVisible(
@@ -137,7 +143,15 @@ fun MainContent(
     RecipesTheme {
         CompositionLocalProvider(
             LocalNavigationSuiteScaffoldOverride provides
-                    MainNavSuiteScaffoldOverride(hazeState, expanded)
+                    MainNavSuiteScaffoldOverride(
+                        hazeState = hazeState,
+                        bottomNavVisible = bottomNavVisible,
+                        aiToolbarVisible = aiToolbarVisible,
+                        moodTintColor = agentViewModel.moodTintColor ?: Color.Transparent,
+                        onNavigateTo = { route, isFromAgent ->
+                            navigationRouter.navigateTo(route, isFromAgent)
+                        }
+                    )
         ) {
             val currentRoute = backStack.peek()
             NavigationSuiteScaffold(
@@ -170,10 +184,10 @@ fun MainContent(
                 Box(
                     Modifier
                         .fillMaxSize()
-                        .floatingToolbarScrollIfNecessary(
-                            expanded = expanded,
-                            onExpand = { expanded = true },
-                            onCollapse = { expanded = false },
+                        .bottomNavNestedScroll(
+                            visible = bottomNavVisible,
+                            onShow = { bottomNavVisible = true },
+                            onHide = { bottomNavVisible = false },
 
                         )
                 ) {
@@ -194,7 +208,7 @@ fun MainContent(
                             entryProvider = entryProvider {
                                 entry<Ideas>(metadata = recipeListPane()) {
                                     IdeasScreen(
-                                        viewModel = hiltViewModel(key = "ideasTopLevelRoute"),
+                                        viewModel = hiltViewModel(key = "IdeasTopLevelRoute"),
                                         onNavigateTo = { navigationRouter.navigateTo(it) },
                                     )
                                 }
@@ -254,27 +268,6 @@ fun MainContent(
                                     )
                                 }
                             },
-                        )
-                    }
-
-                    if (aiToolbarVisible) {
-                        AiFloatingToolbar(
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(16.dp)
-                                .then(
-                                    if (windowInfo.isCompact()) Modifier.padding(bottom = 80.dp)
-                                    else Modifier
-                                )
-                                .then(
-                                    if (backStack.peek() is DetailRoute) Modifier.offset(y = -(380).dp)
-                                    else Modifier
-                                ),
-                            expanded = expanded,
-                            onNavigateTo = { recipeRoute ->
-                                navigationRouter.navigateTo(recipeRoute)
-                            },
-                            moodTintColor = agentViewModel.moodTintColor,
                         )
                     }
                 }

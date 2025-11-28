@@ -3,12 +3,15 @@ package org.balch.recipes.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerDefaults
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationRailDefaults
@@ -22,10 +25,14 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
+import org.balch.recipes.RecipeRoute
+import org.balch.recipes.ui.widgets.AiFloatingToolbar
 
 private val NoWindowInsets = WindowInsets(0, 0, 0, 0)
 
@@ -36,31 +43,48 @@ private val NoWindowInsets = WindowInsets(0, 0, 0, 0)
 @OptIn(ExperimentalMaterial3AdaptiveComponentOverrideApi::class)
 class MainNavSuiteScaffoldOverride(
     private val hazeState: HazeState,
-    private val isContentExpanded: Boolean,
+    private val bottomNavVisible: Boolean,
+    private val aiToolbarVisible: Boolean = true,
+    private val moodTintColor: Color,
+    private val onNavigateTo: (RecipeRoute, Boolean) -> Unit,
 ) : NavigationSuiteScaffoldOverride {
     @Composable
     override fun NavigationSuiteScaffoldOverrideScope.NavigationSuiteScaffold() {
         if (layoutType == NavigationSuiteType.NavigationBar) {
             Box(Modifier.fillMaxSize()) {
                 content()
-                AnimatedVisibility(
-                    visible = isContentExpanded && state.currentValue == NavigationSuiteScaffoldValue.Visible,
-                    enter = slideInVertically { it },
-                    exit = slideOutVertically { it },
-                    modifier = Modifier.align(Alignment.BottomCenter)
+                Column(
+                    modifier = Modifier.fillMaxSize().align(Alignment.BottomCenter),
+                    verticalArrangement = Arrangement.Bottom,
                 ) {
-                    NavigationSuite(
-                        modifier = Modifier
-                            .hazeEffect(state = hazeState, style = LocalHazeStyle.current) {
-                                HazeProgressive.verticalGradient(
-                                    startIntensity = 1f,
-                                    endIntensity = 0f,
-                                )
-                            },
-                        layoutType = layoutType,
-                        colors = navigationSuiteColors,
-                        content = navigationSuiteItems,
-                    )
+                    if (aiToolbarVisible) {
+                        AiFloatingToolbar(
+                            modifier = Modifier
+                                .align(Alignment.End)
+                                .padding(16.dp),
+                            expanded = bottomNavVisible,
+                            onNavigateTo = { recipeRoute -> onNavigateTo(recipeRoute, true) },
+                            moodTintColor = moodTintColor,
+                        )
+                    }
+                    AnimatedVisibility(
+                        visible = bottomNavVisible && state.currentValue == NavigationSuiteScaffoldValue.Visible,
+                        enter = slideInVertically { it },
+                        exit = slideOutVertically { it },
+                    ) {
+                        NavigationSuite(
+                            modifier = Modifier
+                                .hazeEffect(state = hazeState, style = LocalHazeStyle.current) {
+                                    HazeProgressive.verticalGradient(
+                                        startIntensity = 1f,
+                                        endIntensity = 0f,
+                                    )
+                                },
+                            layoutType = layoutType,
+                            colors = navigationSuiteColors,
+                            content = navigationSuiteItems,
+                        )
+                    }
                 }
             }
         } else {
