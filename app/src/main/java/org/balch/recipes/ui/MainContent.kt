@@ -66,7 +66,9 @@ import org.balch.recipes.features.agent.AgentViewModel
 import org.balch.recipes.features.details.DetailScreen
 import org.balch.recipes.features.details.DetailsViewModel
 import org.balch.recipes.features.ideas.IdeasScreen
+import org.balch.recipes.features.ideas.IdeasViewModel
 import org.balch.recipes.features.info.InfoScreen
+import org.balch.recipes.features.info.InfoViewModel
 import org.balch.recipes.features.search.SearchScreen
 import org.balch.recipes.features.search.SearchViewModel
 import org.balch.recipes.ui.theme.RecipesTheme
@@ -138,7 +140,21 @@ fun MainContent(
         }
     }
 
+    /**
+     * All Top Level ViewModels that need to retain state should be declared here.
+     * ViewModels that are create in EntryProviders will get a unique view model per
+     * the `entry.contentKey` via the `rememberViewModelStoreNavEntryDecorator`
+     * being used in `NavDisplay`
+     */
     val agentViewModel: AgentViewModel = hiltViewModel()
+    val infoViewModel: InfoViewModel = hiltViewModel()
+    val searchViewModel =
+        hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
+            creationCallback = { factory ->
+                factory.create(SearchType.Search(""))
+            },
+        )
+    val ideasViewModel: IdeasViewModel = hiltViewModel()
 
     RecipesTheme {
         CompositionLocalProvider(
@@ -208,15 +224,11 @@ fun MainContent(
                             entryProvider = entryProvider {
                                 entry<Ideas>(metadata = recipeListPane()) {
                                     IdeasScreen(
-                                        viewModel = hiltViewModel(key = "IdeasTopLevelRoute"),
+                                        viewModel = ideasViewModel,
                                         onNavigateTo = { navigationRouter.navigateTo(it) },
                                     )
                                 }
                                 entry<SearchRoute>(metadata = recipeListPane()) { searchRoute ->
-                                    // Note: We need a new ViewModel for every new SearchViewModel instance.
-                                    //
-                                    // tl;dr: Make sure you use rememberViewModelStoreNavEntryDecorator()
-                                    // if you want a new ViewModel for each new navigation key instance.
                                     val viewModel =
                                         hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
                                             creationCallback = { factory ->
@@ -229,15 +241,8 @@ fun MainContent(
                                     )
                                 }
                                 entry<Search>(metadata = recipeListPane()) {
-                                    val viewModel =
-                                        hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
-                                            key = "SearchTopLevelRoute",
-                                            creationCallback = { factory ->
-                                                factory.create(SearchType.Search(""))
-                                            },
-                                        )
                                     SearchScreen(
-                                        viewModel = viewModel,
+                                        viewModel = searchViewModel,
                                         onNavigateTo = { navigationRouter.navigateTo(it) },
                                     )
                                 }
@@ -251,21 +256,15 @@ fun MainContent(
                                             }
                                         )
 
-                                    DetailScreen(
-                                        viewModel = viewModel,
-                                    )
+                                    DetailScreen(viewModel = viewModel)
                                 }
                                 entry<AiChatScreen>(metadata = listPane()) {
-                                    AgentScreen(
-                                        viewModel = agentViewModel,
-                                    )
+                                    AgentScreen(viewModel = agentViewModel)
                                 }
                                 entry<Info>(
                                     metadata = ListDetailSceneStrategy.extraPane()
                                 ) {
-                                    InfoScreen(
-                                        viewModel = hiltViewModel(key = "InfoTopLevelRoute")
-                                    )
+                                    InfoScreen(viewModel = infoViewModel)
                                 }
                             },
                         )

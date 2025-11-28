@@ -2,14 +2,28 @@
 
 - Top Level Screens should maintain their last state when navigating back to them
 - `rememberViewModelStoreNavEntryDecorator()` causes the ***ViewModel*** to be cleared when the screen is popped off the ***backstack***
-- Explicitly set `key` when creating top level ***ViewModels***
-   - Example: `hiltViewModel(key = "IdeasTopLevelRoute")`
+- retrieve ViewModels that should retain state outside of the `entryProvider` block:
    - Use `started = SharingStarted.Lazily` when creating the ***StateFlow*** to ensure state is not reset when ***Screen*** is not on the top of the ***backstack***
 
 ## Code Snippet
 
 ```
 val backStack = rememberNavBackStack(TOP_LEVEL_ROUTES.first())
+
+/**
+ * All Top Level ViewModels that need to retain state should be declared here.
+ * ViewModels that are create in EntryProviders will get a unique view model per 
+ * the `entry.contentKey` via the `rememberViewModelStoreNavEntryDecorator`
+ * being used in `NavDisplay`
+ */
+val ideasViewModel: IdeasViewModel = hiltViewModel()
+val searchViewModel =
+    hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
+        creationCallback = { factory ->
+            factory.create(SearchType.Search(""))
+        },
+    )
+val infoViewModel: InfoViewModel = hiltViewModel()
 
 NavDisplay(
     backStack = backStack,
@@ -22,12 +36,9 @@ NavDisplay(
     entryProvider = entryProvider {
         entry<Ideas> {
             // Note: Use the same ViewModel instance for all Ideas navigation
-            IdeasScreen(
-                viewModel = hiltViewModel(key = "ideasTopLevelRoute"),
-            )
+            IdeasScreen(viewModel = ideasViewModel)
         }
         entry<SearchRoute> { searchRoute ->
-        
             // Note: Creates a new ViewModel instance for each SearchRoute navigation
             // (not scoped to Activity, so will be cleared when popped)
             val viewModel =
@@ -36,25 +47,11 @@ NavDisplay(
                         factory.create(searchRoute.searchType)
                     }
                 )
-            SearchScreen(
-                viewModel = viewModel,
-                // ...
-
-            )
+            SearchScreen(viewModel = viewModel)
         }
         entry<Search> {
             // Note: SearchViewModel uses `SearchTopLevelRoute` instance 
-            val viewModel =
-                hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
-                    key = "SearchTopLevelRoute",
-                    creationCallback = { factory ->
-                        factory.create(SearchType.Search(""))
-                    },
-                )
-            SearchScreen(
-                viewModel = viewModel,
-                // ...
-            )
+            SearchScreen(viewModel = searchViewModel)
         }
         entry<DetailRoute> { detailRoute ->
             val viewModel =
@@ -69,11 +66,9 @@ NavDisplay(
                 onBack = { backstack.pop() }
             )
         }
-        entry<Info> { InfoScreen(
-            viewModel = hiltViewModel(
-                viewModel = hiltViewModel(key = "InfoTopLevelRoute")
-            ),
-        ) }
+        entry<Info> { 
+            InfoScreen(viewModel = infoViewModel) 
+        }
     },
 )
 ```
