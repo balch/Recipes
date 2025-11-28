@@ -39,7 +39,13 @@ fun WebViewWidget(
                 .graphicsLayer { alpha = animatedAlpha },
             factory = { context ->
                 WebView(context).apply {
+                    // Fix for crash on tablets (RenderThread SIGSEGV / Cache directory access)
+                    setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null)
+
                     settings.javaScriptEnabled = true
+                    settings.domStorageEnabled = true
+                    settings.databaseEnabled = true
+
                     webViewClient = object : WebViewClient() {
                         override fun onPageFinished(view: WebView?, url: String?) {
                             isLoading = false
