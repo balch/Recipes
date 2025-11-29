@@ -29,7 +29,12 @@ sealed interface RecipeRoute: NavKey {
  */
 @Serializable
 @LLMDescription("A route used for items in the bottom navigation bar")
-sealed interface TopLevelRoute: RecipeRoute {
+sealed interface TopLevelRoute: NavItemRoute {
+}
+
+@Serializable
+@LLMDescription("A route used for items in the bottom navigation bar")
+sealed interface NavItemRoute: RecipeRoute {
     val icon: ImageVector
 }
 
@@ -65,7 +70,7 @@ data class SearchRoute(val searchType: SearchType) : RecipeRoute {
     override val contentDescription = "Search"
 }
 @Serializable
-data object AiChatScreen : TopLevelRoute {
+data object AiChatScreen : NavItemRoute {
     override val contentDescription = "AI"
     override val showBottomNav: Boolean = false
     override val icon: ImageVector = Icons.Filled.ChatBubble

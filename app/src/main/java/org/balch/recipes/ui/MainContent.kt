@@ -14,6 +14,8 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveComponentOverrideApi
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy.Companion.detailPane
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy.Companion.listPane
 import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy.Companion.extraPane
 import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy.Companion.mainPane
 import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy.Companion.supportingPane
@@ -50,6 +52,7 @@ import org.balch.recipes.AiChatScreen
 import org.balch.recipes.DetailRoute
 import org.balch.recipes.Ideas
 import org.balch.recipes.Info
+import org.balch.recipes.NavItemRoute
 import org.balch.recipes.RecipeRoute
 import org.balch.recipes.Search
 import org.balch.recipes.SearchRoute
@@ -98,7 +101,7 @@ fun MainContent(
     val windowInfo = currentWindowAdaptiveInfo()
     val aiChatAvailableAsTopLevelRoute = isAgentEnabled && !windowInfo.isCompact()
 
-    val topLevelRoutes: List<TopLevelRoute> =
+    val topLevelRoutes: List<NavItemRoute> =
         listOfNotNull(
             Ideas,
             Search(SearchType.Search("")),
@@ -156,6 +159,7 @@ fun MainContent(
 
     LaunchedEffect(Unit) {
         navigationRouter.navigationRoute.collect { navInfo ->
+            // TODO - fix this for non compact screens
             backStack.push(navInfo.recipeRoute)
         }
     }
@@ -192,7 +196,9 @@ fun MainContent(
                                     backStack.popTo(topLevelRoutes.first())
                                     backStack.peek() != route
                                 } else {
-                                    // TODO - fix this
+                                    if (backStack.peek() !is TopLevelRoute) {
+                                        backStack.pop()
+                                    }
                                     true
                                 }
                                 if (navigateTo) {
@@ -236,14 +242,16 @@ fun MainContent(
                             entryProvider = entryProvider {
                                 entry<Ideas>(
                                     { "IdeasRoute".toTopLevelRoutKey() },
-                                    metadata = mainPane()
+                                    metadata = mainPane() + listPane()
                                 ) {
                                     IdeasScreen(
                                         viewModel = hiltViewModel(),
                                         onNavigateTo = { navigationRouter.navigateTo(it) },
                                     )
                                 }
-                                entry<SearchRoute>(metadata = mainPane()) { searchRoute ->
+                                entry<SearchRoute>(
+                                    metadata = mainPane() + listPane()
+                                ) { searchRoute ->
                                     val viewModel =
                                         hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
                                             creationCallback = { factory ->
@@ -257,7 +265,7 @@ fun MainContent(
                                 }
                                 entry<Search>(
                                     { "SearchRoute".toTopLevelRoutKey() },
-                                    metadata = supportingPane()
+                                    metadata = mainPane() + listPane()
                                 ) {
                                     val viewModel =
                                         hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
@@ -271,7 +279,7 @@ fun MainContent(
                                     )
                                 }
                                 entry<DetailRoute>(
-                                    metadata = supportingPane()
+                                    metadata = detailPane() + extraPane()
                                 ) { detailRoute ->
                                     val viewModel =
                                         hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
@@ -290,7 +298,7 @@ fun MainContent(
                                 }
                                 entry<Info>(
                                     { "InfoRoute".toTopLevelRoutKey() },
-                                    metadata = extraPane()
+                                    metadata = mainPane() + extraPane()
                                 ) {
                                     InfoScreen(viewModel = hiltViewModel())
                                 }

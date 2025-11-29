@@ -23,7 +23,7 @@ class MealRecipeDetailTool @Inject internal constructor(
         @property:LLMDescription("Optional contextual information from the calling agent.")
         val callingAgentContext: String?,
 
-        @property:LLMDescription("The Meal meal_recipe_create tools.\n")
+        @property:LLMDescription("The Meal created from the meal_recipe_create tool.\n")
         val meal: Meal,
     )
 
