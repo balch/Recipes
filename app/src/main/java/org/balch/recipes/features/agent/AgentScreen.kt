@@ -139,7 +139,7 @@ private fun AgentLayout(
         ) {
             // Messages
             LazyColumn(
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxSize()
                     .hazeSource(hazeState),
                 state = listState,

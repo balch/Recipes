@@ -14,6 +14,11 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveComponentOverrideApi
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.layout.AdaptStrategy
+import androidx.compose.material3.adaptive.layout.DockedEdge
+import androidx.compose.material3.adaptive.layout.SupportingPaneScaffoldDefaults
+import androidx.compose.material3.adaptive.layout.rememberDragToResizeState
+import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy.Companion.detailPane
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy.Companion.listPane
 import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy.Companion.extraPane
@@ -34,8 +39,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -113,12 +120,7 @@ fun MainContent(
         windowInfo.isCompact(),
         serializer = NavBackStackSerializer(elementSerializer = NavKeySerializer())
     ) {
-        val startRoutes = mutableStateListOf<RecipeRoute>(topLevelRoutes.first()).apply {
-            // show the agent on wide screens
-            if (aiChatAvailableAsTopLevelRoute) {
-                add(AiChatScreen)
-            }
-        }
+        val startRoutes = mutableStateListOf<RecipeRoute>(topLevelRoutes.first())
         NavBackStack(startRoutes)
     }
 
@@ -139,7 +141,20 @@ fun MainContent(
             )
         } else this
 
-    val sceneStrategy = rememberSupportingPaneSceneStrategy<NavKey>()
+    val dragToResizeState = rememberDragToResizeState(
+        dockedEdge = DockedEdge.Bottom,
+        minSize = 120.dp,
+    )
+
+    val sceneStrategy = rememberSupportingPaneSceneStrategy<NavKey>(
+        backNavigationBehavior = BackNavigationBehavior.PopUntilCurrentDestinationChange,
+        adaptStrategies = SupportingPaneScaffoldDefaults.adaptStrategies(
+            supportingPaneAdaptStrategy = AdaptStrategy.Levitate(
+                alignment = Alignment.BottomEnd,
+                dragToResizeState = dragToResizeState,
+            ),
+        ),
+    )
     val hazeState = rememberHazeState()
 
     var bottomNavVisible by remember(backStack.peek()) {
@@ -198,8 +213,10 @@ fun MainContent(
                                 } else {
                                     if (backStack.peek() !is TopLevelRoute) {
                                         backStack.pop()
+                                        true
+                                    } else {
+                                        backStack.peek() != route
                                     }
-                                    true
                                 }
                                 if (navigateTo) {
                                     navigationRouter.navigateTo(route)
