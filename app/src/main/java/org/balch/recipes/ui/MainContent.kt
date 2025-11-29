@@ -10,14 +10,14 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults.floatingToolbarVerticalNestedScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveComponentOverrideApi
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
-import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy.Companion.listPane
-import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
+import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy.Companion.extraPane
+import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy.Companion.mainPane
+import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy.Companion.supportingPane
+import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSceneStrategy
 import androidx.compose.material3.adaptive.navigationsuite.LocalNavigationSuiteScaffoldOverride
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -27,16 +27,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.runtime.serialization.NavBackStackSerializer
+import androidx.navigation3.runtime.serialization.NavKeySerializer
 import androidx.navigation3.ui.NavDisplay
 import dev.chrisbanes.haze.ExperimentalHazeApi
 import dev.chrisbanes.haze.hazeSource
@@ -60,7 +64,6 @@ import org.balch.recipes.core.navigation.peek
 import org.balch.recipes.core.navigation.pop
 import org.balch.recipes.core.navigation.popTo
 import org.balch.recipes.core.navigation.push
-import org.balch.recipes.core.navigation.rememberRecipeRouteBackStack
 import org.balch.recipes.features.agent.AgentScreen
 import org.balch.recipes.features.agent.AgentViewModel
 import org.balch.recipes.features.details.DetailScreen
@@ -71,13 +74,6 @@ import org.balch.recipes.features.search.SearchScreen
 import org.balch.recipes.features.search.SearchViewModel
 import org.balch.recipes.ui.theme.RecipesTheme
 
-
-private val TOP_LEVEL_ROUTES: List<TopLevelRoute> =
-    listOf(
-        Ideas,
-        Search(SearchType.Search("")),
-        Info
-    )
 
 private const val TOP_LEVEL_ROUTE_KEY_PREFIX = "TOP_LEVEL_ROUTE_KEY_"
 
@@ -99,7 +95,29 @@ fun MainContent(
     navigationRouter: NavigationRouter,
 ) {
 
-    val backStack = rememberRecipeRouteBackStack(TOP_LEVEL_ROUTES.first())
+    val windowInfo = currentWindowAdaptiveInfo()
+    val aiChatAvailableAsTopLevelRoute = isAgentEnabled && !windowInfo.isCompact()
+
+    val topLevelRoutes: List<TopLevelRoute> =
+        listOfNotNull(
+            Ideas,
+            Search(SearchType.Search("")),
+            Info,
+            AiChatScreen.takeIf { aiChatAvailableAsTopLevelRoute }
+        )
+
+    val backStack = rememberSerializable(
+        windowInfo.isCompact(),
+        serializer = NavBackStackSerializer(elementSerializer = NavKeySerializer())
+    ) {
+        val startRoutes = mutableStateListOf<RecipeRoute>(topLevelRoutes.first()).apply {
+            // show the agent on wide screens
+            if (aiChatAvailableAsTopLevelRoute) {
+                add(AiChatScreen)
+            }
+        }
+        NavBackStack(startRoutes)
+    }
 
     /**
      * Conditionally adds nested scroll handling for showing/hiding bottom nav bar.
@@ -118,8 +136,7 @@ fun MainContent(
             )
         } else this
 
-    val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
-    val windowInfo = currentWindowAdaptiveInfo()
+    val sceneStrategy = rememberSupportingPaneSceneStrategy<NavKey>()
     val hazeState = rememberHazeState()
 
     var bottomNavVisible by remember(backStack.peek()) {
@@ -167,19 +184,25 @@ fun MainContent(
                     navigationDrawerContainerColor = Color.Transparent,
                 ),
                 navigationSuiteItems = {
-                    TOP_LEVEL_ROUTES.forEach { topLevelRoute ->
+                    topLevelRoutes.forEach { route ->
                         item(
-                            selected = topLevelRoute == currentRoute,
+                            selected = route == currentRoute,
                             onClick = {
-                                backStack.popTo(TOP_LEVEL_ROUTES.first())
-                                if (backStack.peek() != topLevelRoute) {
-                                    navigationRouter.navigateTo(topLevelRoute)
+                                val navigateTo = if (windowInfo.isCompact()) {
+                                    backStack.popTo(topLevelRoutes.first())
+                                    backStack.peek() != route
+                                } else {
+                                    // TODO - fix this
+                                    true
+                                }
+                                if (navigateTo) {
+                                    navigationRouter.navigateTo(route)
                                 }
                             },
                             icon = {
                                 Icon(
-                                    imageVector = topLevelRoute.icon,
-                                    contentDescription = topLevelRoute.contentDescription
+                                    imageVector = route.icon,
+                                    contentDescription = route.contentDescription
                                 )
                             }
                         )
@@ -201,7 +224,7 @@ fun MainContent(
                                 .hazeSource(hazeState)
                                 .imePadding(),
                             backStack = backStack,
-                            sceneStrategy = listDetailStrategy,
+                            sceneStrategy = sceneStrategy,
                             onBack = { backStack.pop() },
                             entryDecorators = listOf(
                                 rememberSaveableStateHolderNavEntryDecorator(),
@@ -210,18 +233,17 @@ fun MainContent(
                                 ),
                                 rememberSharedTransitionDecorator()
                             ),
-
                             entryProvider = entryProvider {
                                 entry<Ideas>(
                                     { "IdeasRoute".toTopLevelRoutKey() },
-                                    metadata = recipeListPane()
+                                    metadata = mainPane()
                                 ) {
                                     IdeasScreen(
                                         viewModel = hiltViewModel(),
                                         onNavigateTo = { navigationRouter.navigateTo(it) },
                                     )
                                 }
-                                entry<SearchRoute>(metadata = recipeListPane()) { searchRoute ->
+                                entry<SearchRoute>(metadata = mainPane()) { searchRoute ->
                                     val viewModel =
                                         hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
                                             creationCallback = { factory ->
@@ -235,7 +257,7 @@ fun MainContent(
                                 }
                                 entry<Search>(
                                     { "SearchRoute".toTopLevelRoutKey() },
-                                    metadata = recipeListPane()
+                                    metadata = supportingPane()
                                 ) {
                                     val viewModel =
                                         hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
@@ -249,7 +271,7 @@ fun MainContent(
                                     )
                                 }
                                 entry<DetailRoute>(
-                                    metadata = ListDetailSceneStrategy.detailPane()
+                                    metadata = supportingPane()
                                 ) { detailRoute ->
                                     val viewModel =
                                         hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
@@ -262,13 +284,13 @@ fun MainContent(
                                 }
                                 entry<AiChatScreen>(
                                     { "AiChatScreen".toTopLevelRoutKey() },
-                                    metadata = listPane()
+                                    metadata = supportingPane()
                                 ) {
                                     AgentScreen(viewModel = agentViewModel)
                                 }
                                 entry<Info>(
                                     { "InfoRoute".toTopLevelRoutKey() },
-                                    metadata = ListDetailSceneStrategy.extraPane()
+                                    metadata = extraPane()
                                 ) {
                                     InfoScreen(viewModel = hiltViewModel())
                                 }
@@ -301,17 +323,4 @@ fun rememberAiFlotatingToolbarVisible(
             }
         }
     }
-
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
-private fun recipeListPane() =
-    listPane(
-        detailPlaceholder = {
-            Box {
-                Text(
-                    modifier = Modifier.align(Alignment.Center),
-                    text = "Choose an item from the list"
-                )
-            }
-        }
-    )
 

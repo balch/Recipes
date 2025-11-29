@@ -2,6 +2,7 @@ package org.balch.recipes
 
 import ai.koog.agents.core.tools.annotations.LLMDescription
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Search
@@ -64,7 +65,9 @@ data class SearchRoute(val searchType: SearchType) : RecipeRoute {
     override val contentDescription = "Search"
 }
 @Serializable
-data object AiChatScreen : RecipeRoute {
+data object AiChatScreen : TopLevelRoute {
     override val contentDescription = "AI"
     override val showBottomNav: Boolean = false
+    override val icon: ImageVector = Icons.Filled.ChatBubble
+
 }
