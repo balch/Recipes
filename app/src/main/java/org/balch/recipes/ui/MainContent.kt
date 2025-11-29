@@ -28,6 +28,7 @@ import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSce
 import androidx.compose.material3.adaptive.navigationsuite.LocalNavigationSuiteScaffoldOverride
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -45,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -108,6 +110,9 @@ fun MainContent(
     val windowInfo = currentWindowAdaptiveInfo()
     val aiChatAvailableAsTopLevelRoute = isAgentEnabled && !windowInfo.isCompact()
 
+    /**
+     * The list of routes that are displayed in the navigation drawer.
+     */
     val topLevelRoutes: List<NavItemRoute> =
         listOfNotNull(
             Ideas,
@@ -203,33 +208,13 @@ fun MainContent(
                     navigationDrawerContainerColor = Color.Transparent,
                 ),
                 navigationSuiteItems = {
-                    topLevelRoutes.forEach { route ->
-                        item(
-                            selected = route == currentRoute,
-                            onClick = {
-                                val navigateTo = if (windowInfo.isCompact()) {
-                                    backStack.popTo(topLevelRoutes.first())
-                                    backStack.peek() != route
-                                } else {
-                                    if (backStack.peek() !is TopLevelRoute) {
-                                        backStack.pop()
-                                        true
-                                    } else {
-                                        backStack.peek() != route
-                                    }
-                                }
-                                if (navigateTo) {
-                                    navigationRouter.navigateTo(route)
-                                }
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = route.icon,
-                                    contentDescription = route.contentDescription
-                                )
-                            }
-                        )
-                    }
+                    navigationSuiteItems(
+                        topLevelRoutes = topLevelRoutes,
+                        currentRoute = currentRoute,
+                        navigationRouter = navigationRouter,
+                        backStack = backStack,
+                        isCompact = windowInfo.isCompact()
+                    )
                 }
             ) {
                 Box(
@@ -256,70 +241,8 @@ fun MainContent(
                                 ),
                                 rememberSharedTransitionDecorator()
                             ),
-                            entryProvider = entryProvider {
-                                entry<Ideas>(
-                                    { "IdeasRoute".toTopLevelRoutKey() },
-                                    metadata = mainPane() + listPane()
-                                ) {
-                                    IdeasScreen(
-                                        viewModel = hiltViewModel(),
-                                        onNavigateTo = { navigationRouter.navigateTo(it) },
-                                    )
-                                }
-                                entry<SearchRoute>(
-                                    metadata = mainPane() + listPane()
-                                ) { searchRoute ->
-                                    val viewModel =
-                                        hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
-                                            creationCallback = { factory ->
-                                                factory.create(searchRoute.searchType)
-                                            }
-                                        )
-                                    SearchScreen(
-                                        viewModel = viewModel,
-                                        onNavigateTo = { navigationRouter.navigateTo(it) },
-                                    )
-                                }
-                                entry<Search>(
-                                    { "SearchRoute".toTopLevelRoutKey() },
-                                    metadata = mainPane() + listPane()
-                                ) {
-                                    val viewModel =
-                                        hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
-                                            creationCallback = { factory ->
-                                                factory.create(SearchType.Search(""))
-                                            },
-                                        )
-                                    SearchScreen(
-                                        viewModel = viewModel,
-                                        onNavigateTo = { navigationRouter.navigateTo(it) },
-                                    )
-                                }
-                                entry<DetailRoute>(
-                                    metadata = detailPane() + extraPane()
-                                ) { detailRoute ->
-                                    val viewModel =
-                                        hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
-                                            creationCallback = { factory ->
-                                                factory.create(detailRoute.detailType)
-                                            }
-                                        )
-
-                                    DetailScreen(viewModel = viewModel)
-                                }
-                                entry<AiChatScreen>(
-                                    { "AiChatScreen".toTopLevelRoutKey() },
-                                    metadata = supportingPane()
-                                ) {
-                                    AgentScreen(viewModel = agentViewModel)
-                                }
-                                entry<Info>(
-                                    { "InfoRoute".toTopLevelRoutKey() },
-                                    metadata = mainPane() + extraPane()
-                                ) {
-                                    InfoScreen(viewModel = hiltViewModel())
-                                }
-                            },
+                            entryProvider =
+                                entryProviderRouter(agentViewModel, navigationRouter)
                         )
                     }
                 }
@@ -328,6 +251,133 @@ fun MainContent(
     }
 }
 
+/**
+ * Creates an entry provider function to route [NaveKey]s to corresponding
+ * composable screens. The layer manages any metadata and biz logic necessary
+ * to handle ViewModels and screen orchestration
+ *
+ * @param agentViewModel The ViewModel used for managing state and interactions of the Agent screen.
+ * @param navigationRouter The router responsible for handling navigation between routes.
+ * @return A function that takes a navigation key and returns a corresponding navigation entry.
+ */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+private fun entryProviderRouter(
+    agentViewModel: AgentViewModel,
+    navigationRouter: NavigationRouter,
+): (key: NavKey) -> NavEntry<NavKey> =
+    entryProvider {
+        entry<Ideas>(
+            { "IdeasRoute".toTopLevelRoutKey() },
+            metadata = mainPane() + listPane()
+        ) {
+            IdeasScreen(
+                viewModel = hiltViewModel(),
+                onNavigateTo = { navigationRouter.navigateTo(it) },
+            )
+        }
+        entry<SearchRoute>(
+            metadata = mainPane() + listPane()
+        ) { searchRoute ->
+            val viewModel =
+                hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
+                    creationCallback = { factory ->
+                        factory.create(searchRoute.searchType)
+                    }
+                )
+            SearchScreen(
+                viewModel = viewModel,
+                onNavigateTo = { navigationRouter.navigateTo(it) },
+            )
+        }
+        entry<Search>(
+            { "SearchRoute".toTopLevelRoutKey() },
+            metadata = mainPane() + listPane()
+        ) {
+            val viewModel =
+                hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
+                    creationCallback = { factory ->
+                        factory.create(SearchType.Search(""))
+                    },
+                )
+            SearchScreen(
+                viewModel = viewModel,
+                onNavigateTo = { navigationRouter.navigateTo(it) },
+            )
+        }
+        entry<DetailRoute>(
+            metadata = detailPane() + extraPane()
+        ) { detailRoute ->
+            val viewModel =
+                hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
+                    creationCallback = { factory ->
+                        factory.create(detailRoute.detailType)
+                    }
+                )
+
+            DetailScreen(viewModel = viewModel)
+        }
+        entry<AiChatScreen>(
+            { "AiChatScreen".toTopLevelRoutKey() },
+            metadata = supportingPane()
+        ) {
+            AgentScreen(viewModel = agentViewModel)
+        }
+        entry<Info>(
+            { "InfoRoute".toTopLevelRoutKey() },
+            metadata = mainPane() + extraPane()
+        ) {
+            InfoScreen(viewModel = hiltViewModel())
+        }
+    }
+
+/**
+ * Configures the nav items displayed used for app navigation. How and where the
+ * items are displayed are determined by the [NavigationSuiteScaffold] based on
+ * Scene, NavigationSuite, and WindowAdaptiveInfo. For example, the items can
+ * be displayed either in a BottomNav, Rail or Drawer depending on the window size.
+ *
+ * This method is responsible for backstack management logic when an item in the
+ * navigation suite is selected.
+ **/
+private fun NavigationSuiteScope.navigationSuiteItems(
+    topLevelRoutes: List<NavItemRoute>,
+    currentRoute: RecipeRoute?,
+    navigationRouter: NavigationRouter,
+    backStack: NavBackStack<RecipeRoute>,
+    isCompact: Boolean,
+) {
+    topLevelRoutes.forEach { route ->
+        item(
+            selected = route == currentRoute,
+            onClick = {
+                val navigateTo = if (isCompact) {
+                    backStack.popTo(topLevelRoutes.first())
+                    backStack.peek() != route
+                } else {
+                    if (backStack.peek() !is TopLevelRoute) {
+                        backStack.pop()
+                        true
+                    } else {
+                        backStack.peek() != route
+                    }
+                }
+                if (navigateTo) {
+                    navigationRouter.navigateTo(route)
+                }
+            },
+            icon = {
+                Icon(
+                    imageVector = route.icon,
+                    contentDescription = route.contentDescription
+                )
+            }
+        )
+    }
+}
+
+/**
+ * Biz logic to determine when the floating toolbar should be visible.
+ */
 @Composable
 fun rememberAiFlotatingToolbarVisible(
     navKey: RecipeRoute?,
@@ -348,4 +398,3 @@ fun rememberAiFlotatingToolbarVisible(
             }
         }
     }
-
