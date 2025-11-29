@@ -129,6 +129,10 @@ fun MainContent(
         NavBackStack(startRoutes)
     }
 
+    val currentRoute by remember(backStack) {
+        derivedStateOf { backStack.peek() }
+    }
+
     /**
      * Conditionally adds nested scroll handling for showing/hiding bottom nav bar.
      */
@@ -138,7 +142,7 @@ fun MainContent(
         onShow: () -> Unit,
         onHide: () -> Unit,
     ): Modifier =
-        if (backStack.peek()?.showBottomNav ?: false) {
+        if (currentRoute?.showBottomNav ?: false) {
             this then Modifier.floatingToolbarVerticalNestedScroll(
                 expanded = visible,
                 onExpand = onShow,
@@ -162,8 +166,8 @@ fun MainContent(
     )
     val hazeState = rememberHazeState()
 
-    var bottomNavVisible by remember(backStack.peek()) {
-        mutableStateOf(backStack.peek()?.showBottomNav ?: false)
+    var bottomNavVisible by remember(currentRoute) {
+        mutableStateOf(currentRoute?.showBottomNav ?: false)
     }
     // override back button behavior to prevent closing the app when
     // there is only one screen and the nav bar is down
@@ -172,7 +176,7 @@ fun MainContent(
     }
 
     val aiToolbarVisible by rememberAiFlotatingToolbarVisible(
-        navKey = backStack.peek(),
+        navKey = currentRoute,
         windowInfo = windowInfo,
         isAgentEnabled = isAgentEnabled,
     )
@@ -199,7 +203,6 @@ fun MainContent(
                         }
                     )
         ) {
-            val currentRoute = backStack.peek()
             NavigationSuiteScaffold(
                 containerColor = Color.Transparent,
                 navigationSuiteColors = NavigationSuiteDefaults.colors(
@@ -241,8 +244,9 @@ fun MainContent(
                                 ),
                                 rememberSharedTransitionDecorator()
                             ),
-                            entryProvider =
+                            entryProvider = remember(agentViewModel, navigationRouter) {
                                 entryProviderRouter(agentViewModel, navigationRouter)
+                            }
                         )
                     }
                 }
