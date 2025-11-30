@@ -1,7 +1,6 @@
 package org.balch.recipes.features.agent
 
 import android.view.HapticFeedbackConstants
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -20,17 +19,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material3.BottomSheetDefaults.DragHandle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,6 +40,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,13 +60,11 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mikepenz.markdown.compose.Markdown
@@ -80,9 +77,9 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.rememberHazeState
+import org.balch.recipes.core.navigation.isCompact
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
-import org.balch.recipes.ui.utils.sharedBounds
 import org.balch.recipes.ui.widgets.RecipeMaestroWidget
 
 @Composable
@@ -104,6 +101,7 @@ fun AgentScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AgentLayout(
     messages: List<ChatMessage>,
@@ -113,46 +111,60 @@ private fun AgentLayout(
 ) {
     val listState = rememberLazyListState()
     val hazeState = rememberHazeState()
+    val windowInfo = currentWindowAdaptiveInfo()
 
-    var containerSize by remember { mutableStateOf(IntSize.Zero) }
-    val density = LocalDensity.current
-    val isCompactHeight by remember(containerSize, density) {
+    val isLoading by remember(messages) {
         derivedStateOf {
-            with(density) { containerSize.height.toDp() < 400.dp }
+            messages.lastOrNull()?.type == ChatMessageType.Loading
         }
     }
-
-    val isLoading = messages.lastOrNull()?.type == ChatMessageType.Loading
 
     LaunchedEffect(isLoading) {
         if (messages.isNotEmpty()) {
             // Always bring the latest message into view
             listState.animateScrollToItem(
-                index = messages.lastIndex,
-                scrollOffset = -1
+                index = (messages.lastIndex - 1).coerceAtLeast(0),
             )
         }
     }
 
-    Scaffold(
-        modifier = Modifier.onSizeChanged { containerSize = it },
-        topBar = {
-            TopBar(
-                isCompactHeight = isCompactHeight,
-                modifier = Modifier
-                    .hazeEffect(state = hazeState, style = LocalHazeStyle.current) {
-                        HazeProgressive.verticalGradient(
-                            startIntensity = 0f,
-                            endIntensity = 1f,
-                        )
-                    },
-                iconTint = moodTintColor,
-            )
+    Column(
+        modifier = modifier,
+    ) {
+        if (!windowInfo.isCompact()) {
+            Box(
+                modifier = Modifier.fillMaxWidth()
+                    .background(colorScheme.surface),
+            ) {
+                DragHandle(
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
+            }
         }
-    ) { innerPadding ->
-        Box(
-            modifier = modifier.fillMaxSize()
-        ) {
+
+        Scaffold(
+            bottomBar = {
+                ChatInputField(
+                    isEnabled = !isLoading,
+                    onSendMessage = onSendMessage,
+                    modifier = Modifier,
+                    hazeState = hazeState,
+                )
+            },
+            topBar = {
+                TopBar(
+                    isCompact = windowInfo.isCompact(),
+                    modifier = Modifier
+                        .hazeEffect(state = hazeState, style = LocalHazeStyle.current) {
+                            HazeProgressive.verticalGradient(
+                                startIntensity = 0f,
+                                endIntensity = 1f,
+                            )
+                        },
+                    moodTintColor = moodTintColor,
+                )
+            }
+        ) { innerPadding ->
             // Messages
             LazyColumn(
                 modifier = Modifier
@@ -165,22 +177,9 @@ private fun AgentLayout(
                 items(messages, key = { it.id }) { message ->
                     ChatMessageBubble(message = message)
                 }
-                item {
+                item("bottomSpacer") {
                     Spacer(modifier = Modifier.height(55.dp))
                 }
-            }
-
-            // Input area
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-            ) {
-                ChatInputField(
-                    isEnabled = !isLoading,
-                    onSendMessage = onSendMessage,
-                    modifier = Modifier,
-                    hazeState = hazeState,
-                )
             }
         }
     }
@@ -189,62 +188,44 @@ private fun AgentLayout(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
-    isCompactHeight: Boolean,
+    isCompact: Boolean,
     modifier: Modifier = Modifier,
-    iconTint: Color? = null,
+    moodTintColor: Color?,
 ) {
-    Box(
+    TopAppBar(
         modifier = modifier.fillMaxWidth(),
-    ) {
-        // Pill drag handle
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 8.dp)
-                .width(32.dp)
-                .height(4.dp)
-                .background(
-                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                    shape = CircleShape
+        title = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                RecipeMaestroWidget(
+                    fontSize = if (isCompact) 24.sp else 32.sp,
+                    iconTint = moodTintColor,
                 )
-        )
 
-        TopAppBar(
-            title = {
-                Crossfade(isCompactHeight) { isCompact ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        RecipeMaestroWidget(
-                            fontSize = if (isCompact) 24.sp else 32.sp,
-                            iconTint = iconTint,
+                Column {
+                    Text(
+                        text = "Recipe Maestro",
+                        style = if (isCompact) typography.titleMedium else typography.titleLarge,
+                        fontWeight = if (isCompact) FontWeight.SemiBold else FontWeight.Bold
+                    )
+                    if (!isCompact) {
+                        Text(
+                            text = "Your culinary—coding companion",
+                            style = typography.bodyMedium,
+                            color = colorScheme.onSurface.copy(alpha = 0.7f)
                         )
-
-                        Column {
-                            Text(
-                                text = "Recipe Maestro",
-                                style = if (isCompact) typography.titleMedium else typography.titleLarge,
-                                fontWeight = if (isCompact) FontWeight.SemiBold else FontWeight.Bold
-                            )
-                            if (!isCompact) {
-                                Text(
-                                    text = "Your culinary—coding companion",
-                                    style = typography.bodyMedium,
-                                    color = colorScheme.onSurface.copy(alpha = 0.7f)
-                                )
-                            }
-                        }
                     }
                 }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-                titleContentColor = colorScheme.onSurface,
-            )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+            titleContentColor = colorScheme.onSurface,
         )
-    }
+    )
 }
 
 @Composable
@@ -372,7 +353,6 @@ private fun ChatInputField(
             .hazeEffect(state = hazeState, style = LocalHazeStyle.current)
             .fillMaxWidth()
             .padding(16.dp)
-            // Respect the IME (keyboard) and system navigation bars
             .imePadding(),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -383,7 +363,6 @@ private fun ChatInputField(
             enabled = isEnabled,
             modifier = Modifier
                 .fillMaxWidth()
-                .sharedBounds("RecipeMaestroText")
                 .onSizeChanged { onMeasuredHeight(it.height) }
                 .onKeyEvent { keyEvent ->
                     if (keyEvent.type == KeyEventType.KeyDown &&

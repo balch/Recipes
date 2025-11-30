@@ -244,9 +244,12 @@ fun MainContent(
                                 ),
                                 rememberSharedTransitionDecorator()
                             ),
-                            entryProvider = remember(agentViewModel, navigationRouter) {
-                                entryProviderRouter(agentViewModel, navigationRouter)
-                            }
+                            entryProvider =
+                                entryProviderRouter(
+                                    agentViewModel = agentViewModel,
+                                    navigationRouter = navigationRouter,
+                                    isCompact = windowInfo.isCompact()
+                                )
                         )
                     }
                 }
@@ -268,6 +271,7 @@ fun MainContent(
 private fun entryProviderRouter(
     agentViewModel: AgentViewModel,
     navigationRouter: NavigationRouter,
+    isCompact: Boolean,
 ): (key: NavKey) -> NavEntry<NavKey> =
     entryProvider {
         entry<Ideas>(
@@ -322,7 +326,7 @@ private fun entryProviderRouter(
         }
         entry<AiChatScreen>(
             { "AiChatScreen".toTopLevelRoutKey() },
-            metadata = supportingPane()
+            metadata = if (isCompact) mainPane() else supportingPane()
         ) {
             AgentScreen(viewModel = agentViewModel)
         }
