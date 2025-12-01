@@ -1,6 +1,7 @@
 package org.balch.recipes.features.agent
 
 import android.view.HapticFeedbackConstants
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -60,11 +61,13 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mikepenz.markdown.compose.Markdown
@@ -111,7 +114,15 @@ private fun AgentLayout(
 ) {
     val listState = rememberLazyListState()
     val hazeState = rememberHazeState()
-    val windowInfo = currentWindowAdaptiveInfo()
+
+    var containerSize by remember { mutableStateOf(IntSize.Zero) }
+    val density = LocalDensity.current
+    val isCompactHeight by remember(containerSize, density) {
+        derivedStateOf {
+            with(density) { containerSize.height.toDp() < 400.dp }
+        }
+    }
+    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
 
     val isLoading by remember(messages) {
         derivedStateOf {
@@ -131,7 +142,7 @@ private fun AgentLayout(
     Column(
         modifier = modifier,
     ) {
-        if (!windowInfo.isCompact()) {
+        if (!windowAdaptiveInfo.isCompact()) {
             Box(
                 modifier = Modifier.fillMaxWidth()
                     .background(colorScheme.surface),
@@ -141,30 +152,25 @@ private fun AgentLayout(
                 )
             }
         }
-
-        Scaffold(
-            bottomBar = {
-                ChatInputField(
-                    isEnabled = !isLoading,
-                    onSendMessage = onSendMessage,
-                    modifier = Modifier,
-                    hazeState = hazeState,
-                )
-            },
-            topBar = {
-                TopBar(
-                    isCompact = windowInfo.isCompact(),
-                    modifier = Modifier
-                        .hazeEffect(state = hazeState, style = LocalHazeStyle.current) {
-                            HazeProgressive.verticalGradient(
-                                startIntensity = 0f,
-                                endIntensity = 1f,
-                            )
-                        },
-                    moodTintColor = moodTintColor,
-                )
-            }
-        ) { innerPadding ->
+    Scaffold(
+        modifier = Modifier.onSizeChanged { containerSize = it },
+        topBar = {
+            TopBar(
+                isCompactHeight = isCompactHeight,
+                modifier = Modifier
+                    .hazeEffect(state = hazeState, style = LocalHazeStyle.current) {
+                        HazeProgressive.verticalGradient(
+                            startIntensity = 0f,
+                            endIntensity = 1f,
+                        )
+                    },
+                moodTintColor = moodTintColor,
+            )
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = modifier.fillMaxSize()
+        ) {
             // Messages
             LazyColumn(
                 modifier = Modifier
@@ -181,42 +187,58 @@ private fun AgentLayout(
                     Spacer(modifier = Modifier.height(55.dp))
                 }
             }
+
+            // Input area
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+            ) {
+                ChatInputField(
+                    isEnabled = !isLoading,
+                    onSendMessage = onSendMessage,
+                    modifier = Modifier,
+                    hazeState = hazeState,
+                )
+            }
         }
+    }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
-    isCompact: Boolean,
+    isCompactHeight: Boolean,
     modifier: Modifier = Modifier,
     moodTintColor: Color?,
 ) {
     TopAppBar(
         modifier = modifier.fillMaxWidth(),
         title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                RecipeMaestroWidget(
-                    fontSize = if (isCompact) 24.sp else 32.sp,
-                    iconTint = moodTintColor,
-                )
-
-                Column {
-                    Text(
-                        text = "Recipe Maestro",
-                        style = if (isCompact) typography.titleMedium else typography.titleLarge,
-                        fontWeight = if (isCompact) FontWeight.SemiBold else FontWeight.Bold
+            Crossfade(isCompactHeight) { isCompact ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    RecipeMaestroWidget(
+                        fontSize = if (isCompact) 24.sp else 32.sp,
+                        iconTint = moodTintColor,
                     )
-                    if (!isCompact) {
+
+                    Column {
                         Text(
-                            text = "Your culinary—coding companion",
-                            style = typography.bodyMedium,
-                            color = colorScheme.onSurface.copy(alpha = 0.7f)
+                            text = "Recipe Maestro",
+                            style = if (isCompact) typography.titleMedium else typography.titleLarge,
+                            fontWeight = if (isCompact) FontWeight.SemiBold else FontWeight.Bold
                         )
+                        if (!isCompact) {
+                            Text(
+                                text = "Your culinary—coding companion",
+                                style = typography.bodyMedium,
+                                color = colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                        }
                     }
                 }
             }
