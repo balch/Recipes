@@ -1,0 +1,48 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "buildDebug",
+            "type": "shell",
+            "command": "./gradlew assembleDebug -Dorg.gradle.java.home=/opt/homebrew/Cellar/openjdk@21/21.0.7/libexec/openjdk.jdk/Contents/Home",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": [
+                "$android-lint"
+            ]
+        },
+        {
+            "label": "installDebug",
+            "type": "shell",
+            "command": "./gradlew installDebug -Dorg.gradle.java.home=/opt/homebrew/Cellar/openjdk@21/21.0.7/libexec/openjdk.jdk/Contents/Home",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "testDebug",
+            "type": "shell",
+            "command": "./gradlew testDebugUnitTest -Dorg.gradle.java.home=/opt/homebrew/Cellar/openjdk@21/21.0.7/libexec/openjdk.jdk/Contents/Home",
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "./gradlew clean",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        }
+    ]
+}

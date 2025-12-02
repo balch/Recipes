@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "android",
+            "request": "launch",
+            "name": "Launch Recipe App",
+            "mainActivity": "org.balch.recipes.MainActivity",
+            "appSrc": "${workspaceFolder}/app/src/main",
+            "apkFile": "${workspaceFolder}/app/build/outputs/apk/debug/app-debug.apk"
+        },
+        {
+            "type": "android",
+            "request": "attach",
+            "name": "Attach to Recipe App",
+            "appSrc": "${workspaceFolder}/app/src/main",
+            "processId": "${command:PickAndroidProcess}"
+        }
+    ]
+}
