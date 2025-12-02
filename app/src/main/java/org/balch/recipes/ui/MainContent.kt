@@ -38,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -113,13 +114,14 @@ fun MainContent(
     /**
      * The list of routes that are displayed in the navigation drawer.
      */
-    val topLevelRoutes: List<NavItemRoute> =
+    val topLevelRoutes: List<NavItemRoute> = remember(aiChatAvailableAsTopLevelRoute) {
         listOfNotNull(
             Ideas,
             Search(SearchType.Search("")),
             Info,
             AiChatScreen.takeIf { aiChatAvailableAsTopLevelRoute }
         )
+    }
 
     val backStack = rememberSerializable(
         windowInfo.isCompact(),
@@ -391,18 +393,16 @@ fun rememberAiFlotatingToolbarVisible(
     navKey: RecipeRoute?,
     isAgentEnabled: Boolean,
     windowInfo: WindowAdaptiveInfo
-): State<Boolean> =
-    remember(navKey, windowInfo) {
-        derivedStateOf {
-            when {
-                !windowInfo.isCompact() -> false
-                !isAgentEnabled -> false
-                navKey == null -> false
-                navKey is DetailRoute -> true
-                navKey is SearchRoute -> true
-                navKey is Ideas -> true
-                navKey is Info -> true
-                else -> false
-            }
-        }
+): State<Boolean> {
+    val visible = when {
+        !windowInfo.isCompact() -> false
+        !isAgentEnabled -> false
+        navKey == null -> false
+        navKey is DetailRoute -> true
+        navKey is SearchRoute -> true
+        navKey is Ideas -> true
+        navKey is Info -> true
+        else -> false
     }
+    return rememberUpdatedState(visible)
+}
