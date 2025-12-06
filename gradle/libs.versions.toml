@@ -37,6 +37,7 @@ youtubePlayer = "13.0.0"
 koog = "0.5.4"
 kotlinxDatetime = "0.7.1-0.6.x-compat"
 material3AdaptiveNavigationSuite = "1.5.0-alpha10"
+uiGeometry = "1.10.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -99,6 +100,7 @@ koog-ai = { module = "ai.koog:koog-agents", version.ref = "koog" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version.ref = "material3AdaptiveNavigationSuite" }
+androidx-compose-ui-geometry = { group = "androidx.compose.ui", name = "ui-geometry", version.ref = "uiGeometry" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

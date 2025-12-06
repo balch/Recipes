@@ -142,6 +142,7 @@ dependencies {
     implementation(libs.koog.ai)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material3.adaptive.navigation.suite)
+    implementation(libs.androidx.compose.ui.geometry)
 
     ksp(libs.hilt.compiler)
 
