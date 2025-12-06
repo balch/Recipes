@@ -54,6 +54,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -485,6 +486,26 @@ private fun AgentScreenInitialPreview(
             sessionUsage = SessionUsage(inputTokens = 150, outputTokens = 450),
             onSendMessage = {},
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RevealedTelemetryWidgetPreview() {
+    RecipesTheme {
+        Box(modifier = Modifier.height(200.dp)) {
+            RevealedTelemetryWidget(
+                overscrollOffset = 50f,
+                maxRevealPx = 130f,
+                sessionUsage = SessionUsage(
+                    inputTokens = 1250,
+                    outputTokens = 3750,
+                    toolCalls = 5
+                ),
+                isLoading = false,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
     }
 }
 
