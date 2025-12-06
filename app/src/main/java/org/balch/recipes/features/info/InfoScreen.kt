@@ -19,13 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.balch.recipes.ui.theme.WarmOrangeDark
 import org.balch.recipes.ui.widgets.WebViewWidget
 
 @Composable
 fun InfoScreen(
-    viewModel: InfoViewModel = hiltViewModel(),
+    modifier: Modifier = Modifier,
+    viewModel: InfoViewModel,
 ) {
     val urls: List<String> by viewModel.uiState.collectAsState()
     InfoLayout(urls = urls)

@@ -3,10 +3,12 @@ package org.balch.recipes.features.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diamondedge.logging.logging
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.AssistedInject
+import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
+import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactoryKey
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
@@ -33,6 +35,7 @@ import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.core.repository.RecipeRepository
+import org.balch.recipes.di.AppScope
 import org.balch.recipes.features.CodeRecipeRepository
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.milliseconds
@@ -54,7 +57,6 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param dispatcherProvider Supplies coroutine dispatchers for running concurrent tasks.
  */
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-@HiltViewModel(assistedFactory = SearchViewModel.Factory::class)
 class SearchViewModel @AssistedInject constructor(
     @Assisted val searchType: SearchType,
     private val repository: RecipeRepository,
@@ -224,8 +226,10 @@ class SearchViewModel @AssistedInject constructor(
     }
 
     @AssistedFactory
-    interface Factory {
-        fun create(searchType: SearchType): SearchViewModel
+    @ManualViewModelAssistedFactoryKey(Factory::class)
+    @ContributesIntoMap(AppScope::class)
+    fun interface Factory : ManualViewModelAssistedFactory {
+        fun create(@Assisted searchType: SearchType): SearchViewModel
     }
 }
 

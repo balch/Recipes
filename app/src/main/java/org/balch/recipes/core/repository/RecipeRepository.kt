@@ -1,13 +1,15 @@
 package org.balch.recipes.core.repository
 
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.SingleIn
 import org.balch.recipes.core.models.Area
 import org.balch.recipes.core.models.Category
 import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.network.TheMealDbApi
+import org.balch.recipes.di.AppScope
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Repository interface for accessing recipes data.
@@ -24,7 +26,8 @@ interface RecipeRepository {
     suspend fun getMealsByIngredient(ingredient: String): Result<List<MealSummary>>
 }
 
-@Singleton
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 class RecipeRepositoryImpl @Inject constructor(
     private val api: TheMealDbApi
 ) : RecipeRepository {

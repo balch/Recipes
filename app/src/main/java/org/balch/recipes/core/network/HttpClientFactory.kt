@@ -1,5 +1,6 @@
 package org.balch.recipes.core.network
 
+import dev.zacsweers.metro.SingleIn
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -9,13 +10,13 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import org.balch.recipes.di.AppScope
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Factory class for creating Ktor [HttpClient] instances.
  */
-@Singleton
+@SingleIn(AppScope::class)
 class HttpClientFactory @Inject constructor() {
     
     fun create(): HttpClient {

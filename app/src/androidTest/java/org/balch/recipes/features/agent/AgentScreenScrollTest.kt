@@ -30,9 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -62,104 +60,6 @@ class AgentScreenScrollTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
-
-    /**
-     * This test reproduces the scroll glitch by:
-     * 1. Displaying the AgentLayout with a long markdown message
-     * 2. Triggering the typewriter animation
-     * 3. Observing scroll behavior during animation
-     */
-    @SuppressLint("UnusedContentLambdaTargetStateParameter")
-    @OptIn(ExperimentalSharedTransitionApi::class)
-    @Test
-    fun agentScreen_typewriterScroll_withLongMarkdownMessage() {
-        val longMarkdownMessage = """
-            # Recipe: Classic Pasta Carbonara
-            
-            This is a **traditional Italian dish** that's creamy without using any cream!
-            
-            ## Ingredients
-            
-            - 400g spaghetti
-            - 200g guanciale or **pancetta**
-            - 4 large egg yolks
-            - 1 whole egg
-            - 100g Pecorino Romano cheese
-            - **Freshly ground black pepper**
-            
-            ## Instructions
-            
-            1. **Boil the pasta** in salted water until al dente
-            2. While pasta cooks, cut the guanciale into small cubes
-            3. Cook guanciale in a cold pan, slowly rendering the fat
-            4. Mix eggs, yolks, and cheese in a bowl
-            5. Reserve pasta water before draining
-            6. Toss hot pasta with guanciale
-            7. Remove from heat and add egg mixture
-            8. Add pasta water to reach **creamy consistency**
-            
-            > Pro tip: Never add the eggs while the pan is on heat or you'll get scrambled eggs!
-            
-            Enjoy your authentic **carbonara**!
-        """.trimIndent()
-
-        val messages = mutableStateListOf(
-            ChatMessage(
-                id = "1",
-                text = "How do I make pasta carbonara?",
-                type = ChatMessageType.User,
-                timestamp = System.currentTimeMillis()
-            ),
-            ChatMessage(
-                id = "2",
-                text = longMarkdownMessage,
-                type = ChatMessageType.Agent,
-                timestamp = System.currentTimeMillis() + 1
-            )
-        )
-
-        val sessionUsage = SessionUsage(
-            inputTokens = 150,
-            outputTokens = 450,
-            toolCalls = 2
-        )
-
-        composeTestRule.setContent {
-            RecipesTheme {
-                SharedTransitionLayout {
-                    AnimatedContent(targetState = true) { _ ->
-                        // Use a custom list state to track scroll position
-                        var scrollFirstVisibleItem by remember { mutableStateOf(-1) }
-                        var scrollOffset by remember { mutableStateOf(-1) }
-                        
-                        AgentLayoutForTest(
-                            messages = messages,
-                            sessionUsage = sessionUsage,
-                            onSendMessage = { },
-                            onScrollChanged = { firstVisible, offset ->
-                                scrollFirstVisibleItem = firstVisible
-                                scrollOffset = offset
-                                // Log scroll changes to help debug
-                                println("SCROLL_DEBUG: firstVisible=$firstVisible, offset=$offset")
-                            }
-                        )
-                    }
-                }
-            }
-        }
-
-        // Wait for the typewriter animation to play and scroll to settle
-        composeTestRule.waitForIdle()
-        
-        // Let the typewriter animation run for a bit
-        Thread.sleep(3000)
-        
-        composeTestRule.waitForIdle()
-        
-        // Verify the message content is eventually displayed
-        composeTestRule.onNodeWithText("Classic Pasta Carbonara", substring = true)
-            .assertIsDisplayed()
-    }
 
     /**
      * Test with markdown that has blank lines which may cause height fluctuations

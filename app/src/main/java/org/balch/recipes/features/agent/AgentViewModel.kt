@@ -3,7 +3,9 @@ package org.balch.recipes.features.agent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diamondedge.logging.logging
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -11,12 +13,14 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.balch.recipes.core.coroutines.DispatcherProvider
+import org.balch.recipes.di.AppScope
 import org.balch.recipes.features.agent.chat.ChatMessage
 import org.balch.recipes.features.agent.session.SessionUsage
-import javax.inject.Inject
 
-@HiltViewModel
-class AgentViewModel @Inject constructor(
+@Inject
+@ViewModelKey(AgentViewModel::class)
+@ContributesIntoMap(AppScope::class)
+class AgentViewModel(
     private val agent: RecipeMaestroAgent,
     dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {

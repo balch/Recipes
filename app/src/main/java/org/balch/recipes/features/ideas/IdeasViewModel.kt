@@ -2,9 +2,16 @@ package org.balch.recipes.features.ideas
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.diamondedge.logging.logging
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.AssistedInject
+import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
+import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -25,8 +32,8 @@ import org.balch.recipes.core.models.Category
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.repository.RecipeRepository
+import org.balch.recipes.di.AppScope
 import org.balch.recipes.features.CodeRecipeRepository
-import javax.inject.Inject
 
 /**
  * ViewModel responsible for managing and providing UI state for the "Ideas" screen,
@@ -38,11 +45,11 @@ import javax.inject.Inject
  * @constructor Injects the required dependencies: `repository` for data access,
  * `codeRecipes` for code recipe examples, and `dispatcherProvider` for coroutine context management.
  */
-@HiltViewModel
-class IdeasViewModel @Inject constructor(
+@OptIn(ExperimentalCoroutinesApi::class)
+class IdeasViewModel @AssistedInject constructor(
     private val mealRepository: RecipeRepository,
     private val codeRecipeRepository: CodeRecipeRepository,
-    private val savedStateHandle: SavedStateHandle,
+    @Assisted private val savedStateHandle: SavedStateHandle,
     dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
 
@@ -136,6 +143,17 @@ class IdeasViewModel @Inject constructor(
 
     fun changeBrowsableType(browsableType: BrowsableType) {
         browsableTypeFlow.value = browsableType
+    }
+
+    @AssistedFactory
+    @ViewModelAssistedFactoryKey(IdeasViewModel::class)
+    @ContributesIntoMap(AppScope::class)
+    abstract class Factory : ViewModelAssistedFactory {
+        abstract fun create(@Assisted savedStateHandle: SavedStateHandle): IdeasViewModel
+        
+        override fun create(extras: CreationExtras): IdeasViewModel {
+            return create(extras.createSavedStateHandle())
+        }
     }
 
     companion object {

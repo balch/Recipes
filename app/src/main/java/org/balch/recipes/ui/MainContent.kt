@@ -45,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
@@ -58,6 +57,9 @@ import dev.chrisbanes.haze.ExperimentalHazeApi
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.rememberHazeState
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
+import dev.zacsweers.metrox.viewmodel.metroViewModel
 import org.balch.recipes.AiChatScreen
 import org.balch.recipes.DetailRoute
 import org.balch.recipes.Ideas
@@ -77,6 +79,7 @@ import org.balch.recipes.core.navigation.peek
 import org.balch.recipes.core.navigation.pop
 import org.balch.recipes.core.navigation.popTo
 import org.balch.recipes.core.navigation.push
+import org.balch.recipes.di.rememberAppGraph
 import org.balch.recipes.features.agent.AgentScreen
 import org.balch.recipes.features.agent.AgentViewModel
 import org.balch.recipes.features.details.DetailScreen
@@ -190,69 +193,76 @@ fun MainContent(
         }
     }
 
-    val agentViewModel: AgentViewModel = hiltViewModel()
+    val appGraph = rememberAppGraph()
 
-    RecipesTheme {
-        CompositionLocalProvider(
-            LocalNavigationSuiteScaffoldOverride provides
-                    MainNavSuiteScaffoldOverride(
-                        hazeState = hazeState,
-                        bottomNavVisible = bottomNavVisible,
-                        aiToolbarVisible = aiToolbarVisible,
-                        moodTintColor = agentViewModel.moodTintColor ?: Color.Transparent,
-                        onNavigateTo = { route, isFromAgent ->
-                            navigationRouter.navigateTo(route, isFromAgent)
-                        }
-                    )
-        ) {
-            NavigationSuiteScaffold(
-                containerColor = Color.Transparent,
-                navigationSuiteColors = NavigationSuiteDefaults.colors(
-                    navigationBarContainerColor = Color.Transparent,
-                    shortNavigationBarContainerColor = Color.Transparent,
-                    navigationDrawerContainerColor = Color.Transparent,
-                ),
-                navigationSuiteItems = {
-                    navigationSuiteItems(
-                        topLevelRoutes = topLevelRoutes,
-                        currentRoute = currentRoute,
-                        navigationRouter = navigationRouter,
-                        backStack = backStack,
-                        isCompact = windowInfo.isCompact()
-                    )
-                }
+    CompositionLocalProvider(
+        LocalMetroViewModelFactory provides appGraph.metroViewModelFactory,
+    ) {
+        // Now metroViewModel() can access the factory
+        val agentViewModel: AgentViewModel = metroViewModel()
+
+        RecipesTheme {
+            CompositionLocalProvider(
+                LocalNavigationSuiteScaffoldOverride provides
+                        MainNavSuiteScaffoldOverride(
+                            hazeState = hazeState,
+                            bottomNavVisible = bottomNavVisible,
+                            aiToolbarVisible = aiToolbarVisible,
+                            moodTintColor = agentViewModel.moodTintColor ?: Color.Transparent,
+                            onNavigateTo = { route, isFromAgent ->
+                                navigationRouter.navigateTo(route, isFromAgent)
+                            }
+                        )
             ) {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .bottomNavNestedScroll(
-                            visible = bottomNavVisible,
-                            onShow = { bottomNavVisible = true },
-                            onHide = { bottomNavVisible = false },
-                        )
-                ) {
-                    SharedTransitionLayout {
-                        NavDisplay(
-                            modifier = Modifier
-                                .hazeSource(hazeState)
-                                .imePadding(),
+                NavigationSuiteScaffold(
+                    containerColor = Color.Transparent,
+                    navigationSuiteColors = NavigationSuiteDefaults.colors(
+                        navigationBarContainerColor = Color.Transparent,
+                        shortNavigationBarContainerColor = Color.Transparent,
+                        navigationDrawerContainerColor = Color.Transparent,
+                    ),
+                    navigationSuiteItems = {
+                        navigationSuiteItems(
+                            topLevelRoutes = topLevelRoutes,
+                            currentRoute = currentRoute,
+                            navigationRouter = navigationRouter,
                             backStack = backStack,
-                            sceneStrategy = sceneStrategy,
-                            onBack = { backStack.pop() },
-                            entryDecorators = listOf(
-                                rememberSaveableStateHolderNavEntryDecorator(),
-                                rememberViewModelStoreRecipeRouteDecorator(
-                                    createChildViewModel = { key -> !key.isTopLevelRouteKey() }
-                                ),
-                                rememberSharedTransitionDecorator()
-                            ),
-                            entryProvider =
-                                entryProviderRouter(
-                                    agentViewModel = agentViewModel,
-                                    navigationRouter = navigationRouter,
-                                    isCompact = windowInfo.isCompact()
-                                )
+                            isCompact = windowInfo.isCompact()
                         )
+                    }
+                ) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .bottomNavNestedScroll(
+                                visible = bottomNavVisible,
+                                onShow = { bottomNavVisible = true },
+                                onHide = { bottomNavVisible = false },
+                            )
+                    ) {
+                        SharedTransitionLayout {
+                            NavDisplay(
+                                modifier = Modifier
+                                    .hazeSource(hazeState)
+                                    .imePadding(),
+                                backStack = backStack,
+                                sceneStrategy = sceneStrategy,
+                                onBack = { backStack.pop() },
+                                entryDecorators = listOf(
+                                    rememberSaveableStateHolderNavEntryDecorator(),
+                                    rememberViewModelStoreRecipeRouteDecorator(
+                                        createChildViewModel = { key -> !key.isTopLevelRouteKey() }
+                                    ),
+                                    rememberSharedTransitionDecorator()
+                                ),
+                                entryProvider =
+                                    entryProviderRouter(
+                                        agentViewModel = agentViewModel,
+                                        navigationRouter = navigationRouter,
+                                        isCompact = windowInfo.isCompact()
+                                    )
+                            )
+                        }
                     }
                 }
             }
@@ -281,7 +291,7 @@ private fun entryProviderRouter(
             metadata = mainPane() + listPane()
         ) {
             IdeasScreen(
-                viewModel = hiltViewModel(),
+                viewModel = assistedMetroViewModel(),
                 onNavigateTo = { navigationRouter.navigateTo(it) },
             )
         }
@@ -289,11 +299,9 @@ private fun entryProviderRouter(
             metadata = mainPane() + listPane()
         ) { searchRoute ->
             val viewModel =
-                hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
-                    creationCallback = { factory ->
-                        factory.create(searchRoute.searchType)
-                    }
-                )
+                assistedMetroViewModel<SearchViewModel, SearchViewModel.Factory> {
+                    create(searchRoute.searchType)
+                }
             SearchScreen(
                 viewModel = viewModel,
                 onNavigateTo = { navigationRouter.navigateTo(it) },
@@ -304,11 +312,9 @@ private fun entryProviderRouter(
             metadata = mainPane() + listPane()
         ) {
             val viewModel =
-                hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
-                    creationCallback = { factory ->
-                        factory.create(SearchType.Search(""))
-                    },
-                )
+                assistedMetroViewModel<SearchViewModel, SearchViewModel.Factory> {
+                    create(SearchType.Search(""))
+                }
             SearchScreen(
                 viewModel = viewModel,
                 onNavigateTo = { navigationRouter.navigateTo(it) },
@@ -318,11 +324,9 @@ private fun entryProviderRouter(
             metadata = detailPane() + extraPane()
         ) { detailRoute ->
             val viewModel =
-                hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
-                    creationCallback = { factory ->
-                        factory.create(detailRoute.detailType)
-                    }
-                )
+                assistedMetroViewModel<DetailsViewModel, DetailsViewModel.Factory> {
+                    create(detailRoute.detailType)
+                }
 
             DetailScreen(viewModel = viewModel)
         }
@@ -336,7 +340,7 @@ private fun entryProviderRouter(
             { "InfoRoute".toTopLevelRoutKey() },
             metadata = mainPane() + extraPane()
         ) {
-            InfoScreen(viewModel = hiltViewModel())
+            InfoScreen(viewModel = metroViewModel())
         }
     }
 

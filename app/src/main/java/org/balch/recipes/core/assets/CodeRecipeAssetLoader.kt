@@ -2,7 +2,7 @@ package org.balch.recipes.core.assets
 
 import android.content.Context
 import com.diamondedge.logging.logging
-import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -11,12 +11,12 @@ import org.balch.recipes.core.coroutines.DispatcherProvider
 import org.balch.recipes.core.models.CodeArea
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.CodeRecipeSummary
+import org.balch.recipes.di.AppScope
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SingleIn(AppScope::class)
 class CodeRecipeAssetLoader @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+    private val context: Context,
     private val json: Json,
     private val dispatcherProvider: DispatcherProvider,
 ) {

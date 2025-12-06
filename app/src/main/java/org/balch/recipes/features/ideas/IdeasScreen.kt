@@ -54,7 +54,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -100,7 +99,7 @@ sealed interface GridItem {
 @Composable
 fun IdeasScreen(
     modifier: Modifier = Modifier,
-    viewModel: IdeasViewModel = hiltViewModel(),
+    viewModel: IdeasViewModel,
     onNavigateTo: (RecipeRoute) -> Unit,
 ) {
     val uiState: IdeasUiState by viewModel.uiState.collectAsState()

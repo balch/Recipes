@@ -3,10 +3,12 @@ package org.balch.recipes.features.details
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diamondedge.logging.logging
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.AssistedInject
+import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
+import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactoryKey
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -21,6 +23,7 @@ import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.random.RandomProvider
 import org.balch.recipes.core.repository.RecipeRepository
+import org.balch.recipes.di.AppScope
 import org.balch.recipes.features.CodeRecipeRepository
 import kotlin.time.Duration.Companion.seconds
 
@@ -41,7 +44,6 @@ import kotlin.time.Duration.Companion.seconds
  * @property mealRepository Provides access to data sources for fetching meals and related details.
  * @property uiState Represents the current UI state as a `StateFlow` that can emit loading, success, or error states.
  */
-@HiltViewModel(assistedFactory = DetailsViewModel.Factory::class)
 class DetailsViewModel @AssistedInject constructor(
     @Assisted val detailType: DetailType,
     private val mealRepository: RecipeRepository,
@@ -112,8 +114,10 @@ class DetailsViewModel @AssistedInject constructor(
         )
 
     @AssistedFactory
-    interface Factory {
-        fun create(detailType: DetailType): DetailsViewModel
+    @ManualViewModelAssistedFactoryKey(Factory::class)
+    @ContributesIntoMap(AppScope::class)
+    fun interface Factory : ManualViewModelAssistedFactory {
+        fun create(@Assisted detailType: DetailType): DetailsViewModel
     }
 
     companion object {

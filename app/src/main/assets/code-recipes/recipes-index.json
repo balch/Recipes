@@ -8,8 +8,14 @@
     },
     {
       "area": "Architecture",
-      "title": "Hilt ViewModel Factory",
-      "markdownAsset": "architecture/hilt-viewmodel-factory.md",
+      "title": "Metro Dependency Injection",
+      "markdownAsset": "architecture/metro-di.md",
+      "appExampleFileName": "AppGraph.kt"
+    },
+    {
+      "area": "Architecture",
+      "title": "Hilt to Metro Migration",
+      "markdownAsset": "architecture/hilt-to-metro-migration.md",
       "appExampleFileName": "DetailsViewModel.kt"
     },
     {

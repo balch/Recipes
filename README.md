@@ -92,7 +92,7 @@ To use the AI features, you need a Google Gemini API key:
 | [Compose Material3 Expressive](https://developer.android.com/jetpack/androidx/releases/compose-material3)               | Expressive APIs for Material 3 for new widets and dynamic motions                      |
 | [Compose Navigation3](https://github.com/android/nav3-recipes)                                                          | Navigation Component for Jetpack Compose                                               | 
 | [Haze](https://chrisbanes.github.io/haze/latest/)                                                                       | Chris Banes 'glassmorphism' blur library for Compose.                                  |
-| [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)                                        | Dependency Injection for Android                                                       | 
+| [Metro](https://github.com/ZacSweers/metro)                                                                             | Compile-time Dependency Injection for Kotlin by Zac Sweers                             | 
 | [KmLogging](https://github.com/LighthouseGames/KmLogging)                                                               | Kotlin Multiplatform logging library.                                                  |
 | [Koog AI Agents](https://github.com/koog-ai/koog-agents)                                                                | AI Agent framework with Gemini integration                                             |
 | [Ktor](https://ktor.io/)                                                                                                | HTTP Client for Android                                                                |

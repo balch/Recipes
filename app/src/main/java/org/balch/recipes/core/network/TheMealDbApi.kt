@@ -1,17 +1,18 @@
 package org.balch.recipes.core.network
 
+import dev.zacsweers.metro.SingleIn
 import org.balch.recipes.core.models.AreasResponse
 import org.balch.recipes.core.models.CategoriesResponse
 import org.balch.recipes.core.models.IngredientsResponse
 import org.balch.recipes.core.models.MealResponse
 import org.balch.recipes.core.models.MealSummaryResponse
+import org.balch.recipes.di.AppScope
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * API service interface for TheMealDb API.
  */
-@Singleton
+@SingleIn(AppScope::class)
 class TheMealDbApi @Inject constructor(
     private val apiService: ApiService
 ) {

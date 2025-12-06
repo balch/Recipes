@@ -4,14 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import dagger.hilt.android.AndroidEntryPoint
 import org.balch.recipes.core.ai.GeminiKeyProvider
 import org.balch.recipes.core.navigation.NavigationRouter
 import org.balch.recipes.ui.MainContent
 import org.balch.recipes.ui.utils.setEdgeToEdgeConfig
 import javax.inject.Inject
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     @Inject
@@ -22,6 +20,9 @@ class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3AdaptiveApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Inject dependencies via Metro graph
+        (application as RecipesApplication).graph.inject(this)
+        
         setEdgeToEdgeConfig()
         super.onCreate(savedInstanceState)
         setContent {

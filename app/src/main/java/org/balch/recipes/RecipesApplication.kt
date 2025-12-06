@@ -10,13 +10,20 @@ import coil3.util.DebugLogger
 import coil3.util.Logger
 import com.diamondedge.logging.KmLogging
 import com.diamondedge.logging.LogLevel
-import dagger.hilt.android.HiltAndroidApp
+import dev.zacsweers.metro.createGraphFactory
+import org.balch.recipes.di.AppGraph
 
-@HiltAndroidApp
 class RecipesApplication : Application(), SingletonImageLoader.Factory {
+
+    lateinit var graph: AppGraph
+        private set
 
     override fun onCreate() {
         super.onCreate()
+        
+        // Create the Metro dependency graph
+        graph = createGraphFactory<AppGraph.Factory>().create(this)
+        
         KmLogging.setLogLevel(if (BuildConfig.DEBUG) LogLevel.Debug else LogLevel.Off)
     }
 

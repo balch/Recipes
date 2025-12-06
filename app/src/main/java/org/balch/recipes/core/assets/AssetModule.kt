@@ -1,22 +1,22 @@
 package org.balch.recipes.core.assets
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.Provides
+import dev.zacsweers.metro.SingleIn
 import kotlinx.serialization.json.Json
-import javax.inject.Singleton
+import org.balch.recipes.di.AppScope
 
-@Module
-@InstallIn(SingletonComponent::class)
-object AssetModule {
+@ContributesTo(AppScope::class)
+interface AssetModule {
 
-    @Provides
-    @Singleton
-    fun provideJson(): Json {
-        return Json {
-            ignoreUnknownKeys = true
-            isLenient = true
+    companion object {
+        @Provides
+        @SingleIn(AppScope::class)
+        fun provideJson(): Json {
+            return Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            }
         }
     }
 }

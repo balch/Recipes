@@ -8,8 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("kotlin-parcelize")
     alias(libs.plugins.jetbrains.kotlin.serialization)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
+    alias(libs.plugins.metro)
 }
 
 // Load local.properties
@@ -31,7 +30,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "org.balch.recipes.HiltTestRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
         // Add API key from local.properties to BuildConfig
         val geminiApiKey = localProperties.getProperty("GEMINI_API_KEY") ?: ""
@@ -90,6 +89,12 @@ android {
     }
 }
 
+metro {
+    interop {
+        includeDagger() // Allows reusing Dagger's @Inject, @Provides, etc.
+    }
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -122,12 +127,11 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.navigation3.adaptive.layout)
 
-    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.metro.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.kotlinx.datetime)
 
-    implementation(libs.hilt.android)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.adaptive.navigation3)
@@ -144,8 +148,6 @@ dependencies {
     implementation(libs.androidx.material3.adaptive.navigation.suite)
     implementation(libs.androidx.compose.ui.geometry)
 
-    ksp(libs.hilt.compiler)
-
     testRuntimeOnly(libs.junit5.loader)
     testImplementation(libs.junit5.jupiter)
     testImplementation(libs.junit5.vintage)
@@ -159,8 +161,6 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.hilt.android.testing)
-    kspAndroidTest(libs.hilt.compiler)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

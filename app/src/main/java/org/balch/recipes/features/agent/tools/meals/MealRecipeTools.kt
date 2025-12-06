@@ -1,14 +1,15 @@
 package org.balch.recipes.features.agent.tools.meals
 
 import ai.koog.agents.core.tools.Tool
+import dev.zacsweers.metro.SingleIn
+import org.balch.recipes.di.AppScope
 import javax.inject.Inject
-import javax.inject.Singleton
 
 
 /**
  * Provides access to the CodeRecipe tools.
  */
-@Singleton
+@SingleIn(AppScope::class)
 class MealRecipeTools @Inject internal constructor(
     mealRecipeCreateTool: MealRecipeCreateTool,
     mealRecipeDetailTool: MealRecipeDetailTool,

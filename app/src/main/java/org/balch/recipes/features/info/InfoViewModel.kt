@@ -2,7 +2,9 @@ package org.balch.recipes.features.info
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -11,13 +13,15 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.balch.recipes.core.coroutines.DispatcherProvider
-import javax.inject.Inject
+import org.balch.recipes.di.AppScope
 
 /**
  * ViewModel that provides a list of URLs to be displayed and supports user-triggered reloading of data.
  **/
-@HiltViewModel
-class InfoViewModel @Inject constructor(
+@Inject
+@ViewModelKey(InfoViewModel::class)
+@ContributesIntoMap(AppScope::class)
+class InfoViewModel(
     dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 

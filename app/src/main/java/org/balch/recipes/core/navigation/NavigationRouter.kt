@@ -1,14 +1,15 @@
 package org.balch.recipes.core.navigation
 
 import com.diamondedge.logging.logging
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import org.balch.recipes.RecipeRoute
+import org.balch.recipes.di.AppScope
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SingleIn(AppScope::class)
 class NavigationRouter @Inject constructor() {
 
     data class NavInfo(

@@ -1,7 +1,9 @@
 package org.balch.recipes.core.random
 
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.SingleIn
+import org.balch.recipes.di.AppScope
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.random.Random
 
 /**
@@ -12,7 +14,8 @@ interface RandomProvider {
     fun nextFloat(): Float
 }
 
-@Singleton
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 class RandomProviderImpl @Inject constructor() : RandomProvider {
     override fun nextFloat(): Float = Random.nextFloat()
 }
