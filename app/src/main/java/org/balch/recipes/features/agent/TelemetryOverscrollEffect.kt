@@ -7,7 +7,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -20,8 +19,6 @@ import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Velocity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.sign
 
@@ -34,7 +31,6 @@ import kotlin.math.sign
  */
 @OptIn(ExperimentalFoundationApi::class)
 class TelemetryOverscrollEffect(
-    private val scope: CoroutineScope,
     private val maxOverscroll: Float, // Max magnitude (absolute value) of allowed overscroll
     private val enabled: Boolean = true,
     private val getOnNewOverscroll: () -> (Float) -> Unit
@@ -159,11 +155,10 @@ fun rememberTelemetryOverscrollEffect(
     enabled: Boolean = true,
     onNewOverscroll: (Float) -> Unit
 ): TelemetryOverscrollEffect {
-    val scope = rememberCoroutineScope()
     val currentOnNewOverscroll by rememberUpdatedState(onNewOverscroll)
 
     // Key on enabled as well, so if it changes we recreate/update the effect state
-    return remember(scope, maxOverscroll, enabled) {
-        TelemetryOverscrollEffect(scope, maxOverscroll, enabled) { currentOnNewOverscroll }
+    return remember(maxOverscroll, enabled) {
+        TelemetryOverscrollEffect(maxOverscroll, enabled) { currentOnNewOverscroll }
     }
 }

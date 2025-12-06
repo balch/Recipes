@@ -351,52 +351,68 @@ private fun AgentLayout(
                 // Bottom TelemetryWidget - slides up based on overscroll amount
                 // Widget is pinned to the bottom and slides in from below
                 if (showCondensedTokenUsage) {
-                    val revealFraction = (overscrollOffset / maxRevealPx).coerceIn(0f, 1f)
-                    val slideDistance = maxRevealPx + 20f // Extra slide distance for more dramatic effect
-
-                    Card(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
-                            .offset {
-                                // Pin to bottom, slide up from off-screen
-                                // offset = slideDistance when hidden, 0 when fully revealed
-                                IntOffset(
-                                    x = 0,
-                                    y = ((1f - revealFraction) * slideDistance).toInt()
-                                )
-                            }
-                            .graphicsLayer {
-                                // Subtle fade - only fade to 70% at start, not fully transparent
-                                alpha = 0.7f + (0.3f * revealFraction)
-                            },
-                        shape = RoundedCornerShape(
-                            topStart = 16.dp,
-                            topEnd = 16.dp,
-                            bottomStart = 0.dp,
-                            bottomEnd = 0.dp
-                        ),
-                        colors = cardColors(
-                            containerColor = colorScheme.surfaceVariant.copy(alpha = 0.95f)
-                        ),
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            TelemetryWidget(
-                                sessionUsage = sessionUsage,
-                                isLoading = isLoading,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp)
-                                    .padding(vertical = 8.dp)
-                            )
-                        }
-                    }
+                    RevealedTelemetryWidget(
+                        overscrollOffset = overscrollOffset,
+                        maxRevealPx = maxRevealPx,
+                        sessionUsage = sessionUsage,
+                        isLoading = isLoading,
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                    )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun RevealedTelemetryWidget(
+    overscrollOffset: Float,
+    maxRevealPx: Float,
+    sessionUsage: SessionUsage,
+    isLoading: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val revealFraction = (overscrollOffset / maxRevealPx).coerceIn(0f, 1f)
+    val slideDistance = maxRevealPx + 20f // Extra slide distance for more dramatic effect
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+            .offset {
+                // Pin to bottom, slide up from off-screen
+                // offset = slideDistance when hidden, 0 when fully revealed
+                IntOffset(
+                    x = 0,
+                    y = ((1f - revealFraction) * slideDistance).toInt()
+                )
+            }
+            .graphicsLayer {
+                // Subtle fade - only fade to 70% at start, not fully transparent
+                alpha = 0.7f + (0.3f * revealFraction)
+            },
+        shape = RoundedCornerShape(
+            topStart = 16.dp,
+            topEnd = 16.dp,
+            bottomStart = 0.dp,
+            bottomEnd = 0.dp
+        ),
+        colors = cardColors(
+            containerColor = colorScheme.surfaceVariant.copy(alpha = 0.95f)
+        ),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            TelemetryWidget(
+                sessionUsage = sessionUsage,
+                isLoading = isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+                    .padding(vertical = 8.dp)
+            )
         }
     }
 }
