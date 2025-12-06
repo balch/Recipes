@@ -47,11 +47,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.foundation.overscroll
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
@@ -210,57 +208,29 @@ private fun AgentLayout(
             var overscrollOffset by remember { mutableFloatStateOf(0f) }
             val maxRevealHeight = 130f // Max height of TelemetryWidget card in dp
             val maxRevealPx = with(density) { maxRevealHeight.dp.toPx() }
-            
-            // Animate back to 0 when not dragging
-            LaunchedEffect(isDragged) {
-                if (!isDragged && overscrollOffset > 0f) {
-                    // Delay before auto-collapse
-                    delay(1500L)
-                    overscrollOffset = 0f
-                }
+
+            // Overscroll effect
+            // We pass maxRevealPx to limit the accumulation of overscroll
+            val overscrollEffect = rememberTelemetryOverscrollEffect(
+                maxOverscroll = maxRevealPx,
+                enabled = showCondensedTokenUsage
+            ) { offset ->
+                // The effect returns negative offset for pull-up.
+                // We convert it to positive for the reveal logic.
+                overscrollOffset = (-offset).coerceIn(0f, maxRevealPx)
             }
-            
-            // Animated offset for smooth transitions - bouncy spring for tactile feel
-            val animatedOffset by animateFloatAsState(
-                targetValue = overscrollOffset,
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioLowBouncy, // More bounce!
-                    stiffness = Spring.StiffnessMedium // Faster response
-                ),
-                label = "bottomWidgetOffset"
-            )
-            
-            // NestedScrollConnection to capture overscroll
-            val nestedScrollConnection = remember {
-                object : NestedScrollConnection {
-                    override fun onPostScroll(
-                        consumed: Offset,
-                        available: Offset,
-                        source: NestedScrollSource
-                    ): Offset {
-                        // In reversed layout, available.y < 0 means overscroll at bottom (swipe up past end)
-                        if (available.y < 0 && source == NestedScrollSource.UserInput && showCondensedTokenUsage) {
-                            // Accumulate overscroll with resistance
-                            val delta = -available.y * 0.5f // Resistance factor
-                            overscrollOffset = (overscrollOffset + delta).coerceIn(0f, maxRevealPx)
-                            return available // Consume the overscroll
-                        }
-                        return Offset.Zero
-                    }
-                }
-            }
-            
+
             Box(
                 modifier = modifier
                     .fillMaxSize()
                     .imePadding()
-                    .nestedScroll(nestedScrollConnection)
             ) {
                 // Messages
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .hazeSource(hazeState),
+                        .hazeSource(hazeState)
+                        .overscroll(overscrollEffect),
                     state = listState,
                     reverseLayout = true,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -381,15 +351,15 @@ private fun AgentLayout(
                 // Bottom TelemetryWidget - slides up based on overscroll amount
                 // Widget is pinned to the bottom and slides in from below
                 if (showCondensedTokenUsage) {
-                    val revealFraction = (animatedOffset / maxRevealPx).coerceIn(0f, 1f)
+                    val revealFraction = (overscrollOffset / maxRevealPx).coerceIn(0f, 1f)
                     val slideDistance = maxRevealPx + 20f // Extra slide distance for more dramatic effect
-                    
+
                     Card(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .fillMaxWidth()
                             .padding(horizontal = 8.dp)
-                            .offset { 
+                            .offset {
                                 // Pin to bottom, slide up from off-screen
                                 // offset = slideDistance when hidden, 0 when fully revealed
                                 IntOffset(
