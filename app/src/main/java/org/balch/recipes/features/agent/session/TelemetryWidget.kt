@@ -62,6 +62,7 @@ fun TelemetryWidget(
     sessionUsage: SessionUsage,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f)
 ) {
     val animatedInputTokens by animateIntAsState(
         targetValue = sessionUsage.inputTokens.toInt(),
@@ -95,7 +96,7 @@ fun TelemetryWidget(
             .clip(RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+            containerColor = containerColor,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {

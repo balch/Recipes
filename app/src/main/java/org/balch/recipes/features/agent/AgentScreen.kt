@@ -10,21 +10,19 @@ import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults.DragHandle
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults.cardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
@@ -38,7 +36,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,18 +43,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,7 +58,6 @@ import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.balch.recipes.core.navigation.isCompact
 import org.balch.recipes.features.agent.chat.ChatInputField
@@ -77,6 +68,7 @@ import org.balch.recipes.features.agent.session.SessionUsage
 import org.balch.recipes.features.agent.session.TelemetryWidget
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
+import org.balch.recipes.ui.widgets.OverscrollRevealBox
 import org.balch.recipes.ui.widgets.RecipeMaestroWidget
 
 @Composable
@@ -143,9 +135,6 @@ private fun AgentLayout(
     // Cancel typewriter when user scrolls up (away from bottom)
     var cancelTypewriter by remember { mutableStateOf(false) }
 
-    // State for push-up-to-reveal TelemetryWidget
-
-
     // Helper to scroll to bottom (index 0 in reverse layout)
     val coroutineScope = rememberCoroutineScope()
     val scrollToBottom: () -> Unit = remember {
@@ -180,7 +169,8 @@ private fun AgentLayout(
     ) {
         if (!windowAdaptiveInfo.isCompact()) {
             Box(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .background(colorScheme.surface),
             ) {
                 DragHandle(
@@ -206,230 +196,169 @@ private fun AgentLayout(
                 )
             }
         ) { innerPadding ->
-            // Track overscroll for bottom widget reveal
-            var overscrollOffset by remember { mutableFloatStateOf(0f) }
-            val maxRevealHeight = 130f // Max height of TelemetryWidget card in dp
-            val maxRevealPx = with(density) { maxRevealHeight.dp.toPx() }
-            
-            // Animate back to 0 when not dragging
-            LaunchedEffect(isDragged) {
-                if (!isDragged && overscrollOffset > 0f) {
-                    // Delay before auto-collapse
-                    delay(1500L)
-                    overscrollOffset = 0f
-                }
-            }
-            
-            // Animated offset for smooth transitions - bouncy spring for tactile feel
-            val animatedOffset by animateFloatAsState(
-                targetValue = overscrollOffset,
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioLowBouncy, // More bounce!
-                    stiffness = Spring.StiffnessMedium // Faster response
-                ),
-                label = "bottomWidgetOffset"
-            )
-            
-            // NestedScrollConnection to capture overscroll
-            val nestedScrollConnection = remember {
-                object : NestedScrollConnection {
-                    override fun onPostScroll(
-                        consumed: Offset,
-                        available: Offset,
-                        source: NestedScrollSource
-                    ): Offset {
-                        // In reversed layout, available.y < 0 means overscroll at bottom (swipe up past end)
-                        if (available.y < 0 && source == NestedScrollSource.UserInput && showCondensedTokenUsage) {
-                            // Accumulate overscroll with resistance
-                            val delta = -available.y * 0.5f // Resistance factor
-                            overscrollOffset = (overscrollOffset + delta).coerceIn(0f, maxRevealPx)
-                            return available // Consume the overscroll
-                        }
-                        return Offset.Zero
-                    }
-                }
-            }
-            
-            Box(
+            // OverscrollRevealBox wraps everything to intercept scroll events
+            OverscrollRevealBox(
                 modifier = modifier
                     .fillMaxSize()
-                    .imePadding()
-                    .nestedScroll(nestedScrollConnection)
-            ) {
-                // Messages
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .hazeSource(hazeState),
-                    state = listState,
-                    reverseLayout = true,
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = innerPadding,
-                ) {
-                    item("bottomSpacer") {
-                        Spacer(modifier = Modifier.height(55.dp))
-                    }
-                    items(reversedMessages, key = { it.id }) { message ->
-                        val shouldAnimate = message.id == messages.lastOrNull()?.id &&
-                                message.type == ChatMessageType.Agent &&
-                                !initialMessageIds.contains(message.id)
-                        ChatMessageBubble(
-                            message = message,
-                            animateTypewriter = shouldAnimate,
-                            cancelTypewriter = cancelTypewriter,
-                            onAnimationComplete = {
-                                if (shouldAnimate && !cancelTypewriter) {
-                                    scrollToBottom()
-                                }
-                            }
-                        )
-                    }
-                    item(key = "tokenUsage") {
-                        // For reverseLayout=true, this item is at the visual TOP
-                        val itemInfo = listState.layoutInfo.visibleItemsInfo
-                            .find { it.key == "tokenUsage" }
-                        
-                        // Calculate parallax based on position relative to viewport
-                        // The item should:
-                        // - Be fully visible when it's comfortably in the viewport
-                        // - Start fading/shrinking as it approaches any edge
-                        // - Disappear quickly once mostly off-screen
-                        
-                        val visibilityFraction = if (itemInfo != null) {
-                            val offset = itemInfo.offset
-                            val size = itemInfo.size
-                            val contentPaddingTop = innerPadding.calculateTopPadding().value * density.density
-                            
-                            // Distance from top edge (content area starts after top padding)
-                            val distanceFromTop = offset - contentPaddingTop
-                            
-                            // Transition zones for parallax effect
-                            val enterTransitionZone = size * 0.8f  // 80% of item height for entering
-                            val exitTransitionZone = size * 0.5f   // Start fading out when 50% of height from top
-                            
-                            when {
-                                // Item is scrolled above viewport
-                                offset + size <= contentPaddingTop -> 0f
-                                
-                                // Item is partially above top edge (parallax out - final phase)
-                                distanceFromTop < 0 -> {
-                                    val visiblePart = size + distanceFromTop
-                                    (visiblePart / size).coerceIn(0f, 1f) * 0.5f // Max 50% at this point
-                                }
-                                
-                                // Item is approaching top edge - early exit zone (start fading)
-                                distanceFromTop < exitTransitionZone -> {
-                                    // Fade from 1.0 to 0.5 as it approaches the edge
-                                    val progress = distanceFromTop / exitTransitionZone // 1.0 at zone start, 0 at edge
-                                    0.5f + (progress * 0.5f) // 0.5 to 1.0
-                                }
-                                
-                                // Item is in enter transition zone near top (parallax in)
-                                distanceFromTop < enterTransitionZone -> {
-                                    (distanceFromTop / enterTransitionZone).coerceIn(0f, 1f)
-                                }
-                                
-                                // Item is comfortably in viewport
-                                else -> 1f
-                            }
-                        } else {
-                            // Not visible at all
-                            0f
-                        }
-                        
-                        // Animate visibility for smoother transitions
-                        val animatedVisibility by animateFloatAsState(
-                            targetValue = visibilityFraction,
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioNoBouncy,
-                                stiffness = Spring.StiffnessLow
-                            ),
-                            label = "topParallax"
-                        )
-                        
-                        TelemetryWidget(
-                            sessionUsage = sessionUsage,
-                            isLoading = isLoading,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .graphicsLayer {
-                                    alpha = animatedVisibility
-                                    // Scale effect: shrink from 100% to 85%
-                                    scaleX = 0.85f + (0.15f * animatedVisibility)
-                                    scaleY = 0.85f + (0.15f * animatedVisibility)
-                                    // Move upward as it fades
-                                    translationY = (1f - animatedVisibility) * -30f
-                                }
-                        )
-                    }
-                }
-
-                // Input area
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                ) {
-                    ChatInputField(
-                        isEnabled = !isLoading,
-                        onSendMessage = onSendMessage,
-                        modifier = Modifier,
-                        hazeState = hazeState,
-                    )
-                }
-                
-                // Bottom TelemetryWidget - slides up based on overscroll amount
-                // Widget is pinned to the bottom and slides in from below
-                if (showCondensedTokenUsage) {
-                    val revealFraction = (animatedOffset / maxRevealPx).coerceIn(0f, 1f)
-                    val slideDistance = maxRevealPx + 20f // Extra slide distance for more dramatic effect
-                    
-                    Card(
+                    .imePadding(),
+                reverseLayout = true,
+                enabled = showCondensedTokenUsage,
+                revealContent = {
+                    TelemetryWidget(
+                        sessionUsage = sessionUsage,
+                        isLoading = isLoading,
                         modifier = Modifier
-                            .align(Alignment.BottomCenter)
                             .fillMaxWidth()
                             .padding(horizontal = 8.dp)
-                            .offset { 
-                                // Pin to bottom, slide up from off-screen
-                                // offset = slideDistance when hidden, 0 when fully revealed
-                                IntOffset(
-                                    x = 0,
-                                    y = ((1f - revealFraction) * slideDistance).toInt()
-                                )
-                            }
-                            .graphicsLayer {
-                                // Subtle fade - only fade to 70% at start, not fully transparent
-                                alpha = 0.7f + (0.3f * revealFraction)
-                            },
-                        shape = RoundedCornerShape(
-                            topStart = 16.dp,
-                            topEnd = 16.dp,
-                            bottomStart = 0.dp,
-                            bottomEnd = 0.dp
-                        ),
-                        colors = cardColors(
-                            containerColor = colorScheme.surfaceVariant.copy(alpha = 0.95f)
-                        ),
+                            .padding(vertical = 8.dp)
+                    )
+                }
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // Messages
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .hazeSource(hazeState),
+                        state = listState,
+                        reverseLayout = true,
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = innerPadding,
                     ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            TelemetryWidget(
+                        item("bottomSpacer") {
+                            Spacer(modifier = Modifier.height(55.dp))
+                        }
+                        items(reversedMessages, key = { it.id }) { message ->
+                            val shouldAnimate = message.id == messages.lastOrNull()?.id &&
+                                    message.type == ChatMessageType.Agent &&
+                                    !initialMessageIds.contains(message.id)
+                            ChatMessageBubble(
+                                message = message,
+                                animateTypewriter = shouldAnimate,
+                                cancelTypewriter = cancelTypewriter,
+                                onAnimationComplete = {
+                                    if (shouldAnimate && !cancelTypewriter) {
+                                        scrollToBottom()
+                                    }
+                                }
+                            )
+                        }
+                        item(key = "tokenUsage") {
+                            TelemetryParallaxEffect(
+                                listState = listState,
+                                innerPadding = innerPadding,
                                 sessionUsage = sessionUsage,
                                 isLoading = isLoading,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp)
-                                    .padding(vertical = 8.dp)
                             )
                         }
                     }
+
+                    // Input area
+                    ChatInputField(
+                        isEnabled = !isLoading,
+                        onSendMessage = onSendMessage,
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        hazeState = hazeState,
+                    )
                 }
             }
         }
     }
 }
+
+@Composable
+private fun TelemetryParallaxEffect(
+    listState: LazyListState,
+    innerPadding: PaddingValues,
+    sessionUsage: SessionUsage,
+    isLoading: Boolean,
+) {
+    // For reverseLayout=true, this item is at the visual TOP
+    val itemInfo = listState.layoutInfo.visibleItemsInfo
+        .find { it.key == "tokenUsage" }
+
+    // Calculate parallax based on position relative to viewport
+    // The item should:
+    // - Be fully visible when it's comfortably in the viewport
+    // - Start fading/shrinking as it approaches any edge
+    // - Disappear quickly once mostly off-screen
+
+    val visibilityFraction = if (itemInfo != null) {
+        val offset = itemInfo.offset
+        val size = itemInfo.size
+        val contentPaddingTop =
+            innerPadding.calculateTopPadding().value * LocalDensity.current.density
+
+        // Distance from top edge (content area starts after top padding)
+        val distanceFromTop = offset - contentPaddingTop
+
+        // Transition zones for parallax effect
+        val enterTransitionZone =
+            size * 0.8f  // 80% of item height for entering
+        val exitTransitionZone =
+            size * 0.5f   // Start fading out when 50% of height from top
+
+        when {
+            // Item is scrolled above viewport
+            offset + size <= contentPaddingTop -> 0f
+
+            // Item is partially above top edge (parallax out - final phase)
+            distanceFromTop < 0 -> {
+                val visiblePart = size + distanceFromTop
+                (visiblePart / size).coerceIn(
+                    0f,
+                    1f
+                ) * 0.5f // Max 50% at this point
+            }
+
+            // Item is approaching top edge - early exit zone (start fading)
+            distanceFromTop < exitTransitionZone -> {
+                // Fade from 1.0 to 0.5 as it approaches the edge
+                val progress =
+                    distanceFromTop / exitTransitionZone // 1.0 at zone start, 0 at edge
+                0.5f + (progress * 0.5f) // 0.5 to 1.0
+            }
+
+            // Item is in enter transition zone near top (parallax in)
+            distanceFromTop < enterTransitionZone -> {
+                (distanceFromTop / enterTransitionZone).coerceIn(0f, 1f)
+            }
+
+            // Item is comfortably in viewport
+            else -> 1f
+        }
+    } else {
+        // Not visible at all
+        0f
+    }
+
+    // Animate visibility for smoother transitions
+    val animatedVisibility by animateFloatAsState(
+        targetValue = visibilityFraction,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "topParallax"
+    )
+
+    TelemetryWidget(
+        sessionUsage = sessionUsage,
+        isLoading = isLoading,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .graphicsLayer {
+                alpha = animatedVisibility
+                // Scale effect: shrink from 100% to 85%
+                scaleX = 0.85f + (0.15f * animatedVisibility)
+                scaleY = 0.85f + (0.15f * animatedVisibility)
+                // Move upward as it fades
+                translationY = (1f - animatedVisibility) * -30f
+            }
+    )
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
