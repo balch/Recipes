@@ -11,8 +11,6 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import org.balch.recipes.core.ai.GeminiKeyProvider
 import org.balch.recipes.core.coroutines.DefaultDispatcherProvider
 import org.balch.recipes.core.coroutines.DispatcherProvider
-import org.balch.recipes.features.agent.ai.RecipeMaestroAgent
-import org.balch.recipes.features.agent.ai.RecipeMaestroConfig
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.junit.Before
 import org.junit.Rule
