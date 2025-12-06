@@ -1,6 +1,7 @@
 package org.balch.recipes.ui.widgets
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollFactory
@@ -39,6 +40,9 @@ private val logger = logging("OverscrollRevealBox")
  * @param modifier Modifier to apply to the container
  * @param reverseLayout Whether the child scrollable uses reverseLayout=true.
  * @param enabled Whether the reveal gesture is enabled
+ * @param revealThresholdFraction The fraction of the reveal content height that needs to be
+ *        dragged to fully reveal the content. Lower values = more sensitive. Default is 0.22f,
+ *        meaning dragging 22% of the reveal content height will fully reveal it.
  * @param revealContent The content to reveal (slides up from bottom)
  * @param content The main child content (should contain a scrollable)
  */
@@ -48,6 +52,7 @@ fun OverscrollRevealBox(
     modifier: Modifier = Modifier,
     reverseLayout: Boolean = false,
     enabled: Boolean = true,
+    revealThresholdFraction: Float = 0.32f,
     revealContent: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -59,7 +64,10 @@ fun OverscrollRevealBox(
     // Reveal amount: 0 = hidden, revealHeightPx = fully revealed
     val revealAmount = remember { Animatable(0f) }
     
-    val nestedScrollConnection = remember(reverseLayout, enabled) {
+    // Sensitivity multiplier: lower threshold = higher sensitivity
+    val sensitivityMultiplier = 1f / revealThresholdFraction.coerceIn(0.1f, 1f)
+    
+    val nestedScrollConnection = remember(reverseLayout, enabled, sensitivityMultiplier) {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 // If we're revealed and user scrolls in the opposite direction, consume to hide
@@ -100,7 +108,12 @@ fun OverscrollRevealBox(
                     val shouldReveal = if (reverseLayout) overscroll < 0f else overscroll > 0f
                     
                     if (shouldReveal) {
-                        val delta = abs(overscroll) * 0.4f // Dampening for rubber-band feel
+                        // Apply cubic ease-in using standard Compose easing
+                        val currentProgress = revealAmount.value / revealHeightPx
+                        val easedProgress = EaseIn.transform(currentProgress)
+                        // Base sensitivity at 0 is 30%, ramps up to 100% at full reveal
+                        val easedMultiplier = sensitivityMultiplier * (0.3f + 0.7f * easedProgress)
+                        val delta = abs(overscroll) * easedMultiplier
                         val newReveal = (revealAmount.value + delta).coerceAtMost(revealHeightPx.toFloat())
                         
                         scope.launch { revealAmount.snapTo(newReveal) }
