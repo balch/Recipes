@@ -32,16 +32,18 @@ class DetailsViewModel @AssistedInject constructor(
 }
 
 // AFTER: Metro ViewModel with Assisted Injection
-class DetailsViewModel @AssistedInject constructor(
+@AssistedInject
+class DetailsViewModel(
     @Assisted val detailType: DetailType,
-    private val repository: RecipeRepository
+    private val mealRepository: RecipeRepository,
+    // ...
 ) : ViewModel() {
 
     @AssistedFactory
     @ManualViewModelAssistedFactoryKey(Factory::class)
     @ContributesIntoMap(AppScope::class)
     fun interface Factory : ManualViewModelAssistedFactory {
-        fun create(detailType: DetailType): DetailsViewModel
+        fun create(@Assisted detailType: DetailType): DetailsViewModel
     }
 }
 
@@ -52,6 +54,6 @@ val viewModel = hiltViewModel<DetailsViewModel, DetailsViewModel.Factory>(
 
 // AFTER: Compose with Metro
 val viewModel = assistedMetroViewModel<DetailsViewModel, DetailsViewModel.Factory> { 
-    create(detailType)
+    create(detailRoute.detailType)
 }
 ```
