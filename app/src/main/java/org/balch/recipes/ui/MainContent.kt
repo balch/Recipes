@@ -19,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults.floatingToolbarVerticalNestedScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveComponentOverrideApi
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
@@ -212,35 +213,39 @@ fun MainContent(
         val agentViewModel: AgentViewModel = metroViewModel()
 
         RecipesTheme {
-            CompositionLocalProvider(
-                LocalNavigationSuiteScaffoldOverride provides
-                        MainNavSuiteScaffoldOverride(
-                            hazeState = hazeState,
-                            bottomNavVisible = bottomNavVisible,
-                            aiToolbarVisible = aiToolbarVisible,
-                            moodTintColor = agentViewModel.moodTintColor ?: Color.Transparent,
-                            onNavigateTo = { route, isFromAgent ->
-                                navigationRouter.navigateTo(route, isFromAgent)
-                            }
-                        )
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
             ) {
-                NavigationSuiteScaffold(
-                    containerColor = Color.Transparent,
-                    navigationSuiteColors = NavigationSuiteDefaults.colors(
-                        navigationBarContainerColor = Color.Transparent,
-                        shortNavigationBarContainerColor = Color.Transparent,
-                        navigationDrawerContainerColor = Color.Transparent,
-                    ),
-                    navigationSuiteItems = {
-                        navigationSuiteItems(
-                            topLevelRoutes = topLevelRoutes,
-                            currentRoute = currentRoute,
-                            navigationRouter = navigationRouter,
-                            backStack = backStack,
-                            isCompact = windowInfo.isCompact()
-                        )
-                    }
+                CompositionLocalProvider(
+                    LocalNavigationSuiteScaffoldOverride provides
+                            MainNavSuiteScaffoldOverride(
+                                hazeState = hazeState,
+                                bottomNavVisible = bottomNavVisible,
+                                aiToolbarVisible = aiToolbarVisible,
+                                moodTintColor = agentViewModel.moodTintColor ?: Color.Transparent,
+                                onNavigateTo = { route, isFromAgent ->
+                                    navigationRouter.navigateTo(route, isFromAgent)
+                                }
+                            )
                 ) {
+                    NavigationSuiteScaffold(
+                        containerColor = Color.Transparent,
+                        navigationSuiteColors = NavigationSuiteDefaults.colors(
+                            navigationBarContainerColor = Color.Transparent,
+                            shortNavigationBarContainerColor = Color.Transparent,
+                            navigationDrawerContainerColor = Color.Transparent,
+                        ),
+                        navigationSuiteItems = {
+                            navigationSuiteItems(
+                                topLevelRoutes = topLevelRoutes,
+                                currentRoute = currentRoute,
+                                navigationRouter = navigationRouter,
+                                backStack = backStack,
+                                isCompact = windowInfo.isCompact()
+                            )
+                        }
+                    ) {
                     Box(
                         Modifier
                             .fillMaxSize()
@@ -302,6 +307,7 @@ fun MainContent(
                         }
                     }
                 }
+            }
             }
         }
     }
