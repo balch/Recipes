@@ -54,7 +54,6 @@ fun Modifier.sharedBounds(
                 placeholderSize = placeholderSize,
                 sharedContentState = rememberSharedContentState(key = key),
                 animatedVisibilityScope = animatedVisibilityScope,
-                renderInOverlayDuringTransition = false,
             )
         }
     } else this

@@ -350,8 +350,7 @@ fun MealDetailItem(
 
     LazyColumn(
         modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         state = listState,
     ) {
@@ -449,7 +448,7 @@ private fun LazyListScope.listViewItems(
                     modifier = Modifier
                         .width(120.dp)
                         .height(85.dp),
-                    containerColor = Color(0xBBCD201F),
+                    containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
                 ) {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
@@ -465,7 +464,7 @@ private fun LazyListScope.listViewItems(
     stickyHeader {
         Column(
             modifier = modifier
-                .background(MaterialTheme.colorScheme.surfaceContainer),
+                .background(Color.Transparent),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             CrossfadeIngredients(modifier, meal, showCompactIngredients)

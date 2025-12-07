@@ -18,10 +18,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.ui.utils.sharedBounds
 
@@ -44,7 +47,10 @@ fun MealImageBadge(
         Box {
             if (meal.thumbnail != null) {
                 AsyncImage(
-                    model = meal.thumbnail,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(meal.thumbnail)
+                        .crossfade(true)
+                        .build(),
                     contentDescription = meal.name,
                     modifier = Modifier
                         .fillMaxWidth()

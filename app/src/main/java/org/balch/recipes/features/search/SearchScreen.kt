@@ -63,7 +63,6 @@ import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.core.navigation.preview.PreviewNavigationEventDispatcherOwner
-import org.balch.recipes.ui.theme.DeepBrown
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
 import org.balch.recipes.ui.utils.sharedBounds
@@ -369,7 +368,7 @@ private fun SearchBarRow(
                         .weight(.24f),
                     shape = RoundedCornerShape(23.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = DeepBrown,
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
                     )
 
                 ) {
