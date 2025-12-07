@@ -2,16 +2,9 @@ package org.balch.recipes.ui
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.unveilIn
-import androidx.compose.animation.veilOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
@@ -33,7 +26,6 @@ import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy.C
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy.Companion.listPane
 import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy.Companion.extraPane
 import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy.Companion.mainPane
-import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy.Companion.supportingPane
 import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSceneStrategy
 import androidx.compose.material3.adaptive.navigationsuite.LocalNavigationSuiteScaffoldOverride
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
@@ -251,47 +243,11 @@ fun MainContent(
                                 )
                         ) {
                             SharedTransitionLayout {
-                                val veilColor = MaterialTheme.colorScheme.surface
-                                val matchSize = true
                                 NavDisplay(
                                     modifier = Modifier
                                         .hazeSource(hazeState)
                                         .imePadding(),
                                     backStack = backStack,
-                                    transitionSpec = {
-                                        ContentTransform(
-                                            fadeIn(),
-                                            fadeOut()
-                                                    + veilOut(
-                                                targetColor = veilColor,
-                                                matchParentSize = matchSize
-                                            ),
-                                        )
-                                    },
-                                    popTransitionSpec = {
-                                        ContentTransform(
-                                            fadeIn()
-                                                    + unveilIn(
-                                                initialColor = veilColor,
-                                                matchParentSize = matchSize
-                                            ),
-                                            fadeOut()
-                                        )
-                                    },
-                                    predictivePopTransitionSpec = {
-                                        ContentTransform(
-                                            fadeIn(
-                                                spring(
-                                                    dampingRatio = 1.0f,
-                                                    stiffness = 1600.0f,
-                                                )
-                                            ) + unveilIn(
-                                                initialColor = veilColor,
-                                                matchParentSize = matchSize
-                                            ),
-                                            scaleOut(targetScale = 0.7f),
-                                        )
-                                    },
                                     sceneStrategy = sceneStrategy,
                                     onBack = { backStack.pop() },
                                     entryDecorators = listOf(
@@ -379,7 +335,7 @@ private fun entryProviderRouter(
         }
         entry<AiChatScreen>(
             { "AiChatScreen".toTopLevelRoutKey() },
-            metadata = if (isCompact) mainPane() else supportingPane()
+            metadata = if (isCompact) mainPane() else extraPane()
         ) {
             AgentScreen(viewModel = agentViewModel)
         }

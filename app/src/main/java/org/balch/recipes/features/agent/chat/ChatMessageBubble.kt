@@ -28,7 +28,6 @@ import org.balch.recipes.ui.widgets.TypewriterText
 internal fun ChatMessageBubble(
     message: ChatMessage,
     animateTypewriter: Boolean = false,
-    cancelTypewriter: Boolean = false,
     onAnimationComplete: () -> Unit = {},
 ) {
     val alignment = if (message.type == ChatMessageType.User) {
@@ -77,7 +76,6 @@ internal fun ChatMessageBubble(
                                 text = message.text,
                                 textId = message.id,
                                 animate = animateTypewriter,
-                                cancelAnimation = cancelTypewriter,
                                 onAnimationComplete = onAnimationComplete,
                             ) { renderedText ->
                                 Markdown(

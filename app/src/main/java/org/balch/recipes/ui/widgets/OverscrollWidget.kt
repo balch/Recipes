@@ -36,13 +36,15 @@ private val logger = logging("OverscrollRevealBox")
  * 
  * Uses NestedScrollConnection to intercept overscroll events from child scrollables.
  * The widget tracks drag proportionally (rubber band effect) and snaps back on release.
+ * 
+ * The reveal is triggered by swiping up at the bottom of a scrollable list (overscroll).
+ * The widget appears from the bottom and slides up. Scrolling back down hides it.
  *
  * @param modifier Modifier to apply to the container
- * @param reverseLayout Whether the child scrollable uses reverseLayout=true.
  * @param enabled Whether the reveal gesture is enabled
  * @param revealThresholdFraction The fraction of the reveal content height that needs to be
- *        dragged to fully reveal the content. Lower values = more sensitive. Default is 0.22f,
- *        meaning dragging 22% of the reveal content height will fully reveal it.
+ *        dragged to fully reveal the content. Lower values = more sensitive. Default is 0.32f,
+ *        meaning dragging 32% of the reveal content height will fully reveal it.
  * @param revealContent The content to reveal (slides up from bottom)
  * @param content The main child content (should contain a scrollable)
  */
@@ -50,7 +52,6 @@ private val logger = logging("OverscrollRevealBox")
 @Composable
 fun OverscrollRevealBox(
     modifier: Modifier = Modifier,
-    reverseLayout: Boolean = false,
     enabled: Boolean = true,
     revealThresholdFraction: Float = 0.32f,
     revealContent: @Composable () -> Unit,
@@ -67,7 +68,7 @@ fun OverscrollRevealBox(
     // Sensitivity multiplier: lower threshold = higher sensitivity
     val sensitivityMultiplier = 1f / revealThresholdFraction.coerceIn(0.1f, 1f)
     
-    val nestedScrollConnection = remember(reverseLayout, enabled, sensitivityMultiplier) {
+    val nestedScrollConnection = remember(enabled, sensitivityMultiplier) {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 // If we're revealed and user scrolls in the opposite direction, consume to hide
@@ -75,10 +76,10 @@ fun OverscrollRevealBox(
                 
                 val scrollY = available.y
                 
-                // When revealed (revealAmount > 0), scrolling down should hide the widget first
+                // When revealed (revealAmount > 0), scrolling down (away from the reveal) should hide the widget first
                 if (revealAmount.value > 0f && source == NestedScrollSource.UserInput) {
-                    // For reverseLayout=true: scrolling down (positive delta) should hide
-                    val shouldHide = if (reverseLayout) scrollY > 0f else scrollY < 0f
+                    // Scrolling down (positive delta) means user is moving away from the revealed content
+                    val shouldHide = scrollY > 0f
                     
                     if (shouldHide) {
                         val consumeAmount = abs(scrollY).coerceAtMost(revealAmount.value)
@@ -87,7 +88,7 @@ fun OverscrollRevealBox(
                         scope.launch { revealAmount.snapTo(newReveal) }
                         
                         // Consume the amount we used to hide
-                        return if (reverseLayout) Offset(0f, consumeAmount) else Offset(0f, -consumeAmount)
+                        return Offset(0f, consumeAmount)
                     }
                 }
                 return Offset.Zero
@@ -104,8 +105,9 @@ fun OverscrollRevealBox(
                 val overscroll = available.y
                 
                 if (source == NestedScrollSource.UserInput && abs(overscroll) > 0.5f) {
-                    // For reverseLayout=true: overscroll < 0 means swiping up at bottom (reveal)
-                    val shouldReveal = if (reverseLayout) overscroll < 0f else overscroll > 0f
+                    // For reverseLayout=false: overscroll < 0 means at bottom, swiping up to reveal (finger moves up, content tries to move down)
+                    // For reverseLayout=true: overscroll < 0 also means swiping up at the "bottom" (which is visual top in reversed layout)
+                    val shouldReveal = overscroll < 0f
                     
                     if (shouldReveal) {
                         // Apply cubic ease-in using standard Compose easing

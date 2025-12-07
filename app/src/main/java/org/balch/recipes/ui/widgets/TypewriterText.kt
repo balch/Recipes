@@ -18,7 +18,6 @@ fun TypewriterText(
     text: String,
     textId: Any,
     animate: Boolean,
-    cancelAnimation: Boolean = false,
     onAnimationComplete: () -> Unit = {},
     content: @Composable (String) -> Unit,
 ) {
@@ -29,16 +28,7 @@ fun TypewriterText(
     
     // Track if animation has completed for this text
     var animationCompleted by remember(textId) { mutableStateOf(!animate) }
-    
-    // Cancel animation immediately when requested
-    LaunchedEffect(cancelAnimation) {
-        if (cancelAnimation && !animationCompleted) {
-            currentCharIndex = text.length
-            animationCompleted = true
-            onAnimationComplete()
-        }
-    }
-    
+
     // The text we actually render - only complete lines during animation
     val renderedText by remember(text) {
         derivedStateOf {
@@ -53,7 +43,7 @@ fun TypewriterText(
     val breakIterator = remember { BreakIterator.getCharacterInstance() }
 
     LaunchedEffect(text, animate) {
-        if (animate && !cancelAnimation && !animationCompleted) {
+        if (animate && !animationCompleted) {
             val targetText = text
             breakIterator.text = StringCharacterIterator(targetText)
 
