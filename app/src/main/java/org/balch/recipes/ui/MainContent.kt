@@ -2,14 +2,23 @@ package org.balch.recipes.ui
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.unveilIn
+import androidx.compose.animation.veilOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults.floatingToolbarVerticalNestedScroll
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveComponentOverrideApi
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
@@ -102,7 +111,8 @@ private fun String.toTopLevelRoutKey() = TOP_LEVEL_ROUTE_KEY_PREFIX + this
     ExperimentalSharedTransitionApi::class,
     ExperimentalMaterial3AdaptiveApi::class,
     ExperimentalMaterial3AdaptiveComponentOverrideApi::class,
-    ExperimentalMaterial3ExpressiveApi::class
+    ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalAnimationApi::class
 )
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -241,11 +251,38 @@ fun MainContent(
                             )
                     ) {
                         SharedTransitionLayout {
+                            val veilColor = MaterialTheme.colorScheme.surface
+                            val matchSize = true
                             NavDisplay(
                                 modifier = Modifier
                                     .hazeSource(hazeState)
                                     .imePadding(),
                                 backStack = backStack,
+                                transitionSpec = {
+                                    ContentTransform(
+                                        fadeIn(),
+                                        fadeOut()
+                                                + veilOut(targetColor = veilColor, matchParentSize = matchSize),
+                                    )
+                                },
+                                popTransitionSpec = {
+                                    ContentTransform(
+                                        fadeIn()
+                                                + unveilIn(initialColor = veilColor, matchParentSize = matchSize),
+                                        fadeOut()
+                                    )
+                                },
+                                predictivePopTransitionSpec = {
+                                    ContentTransform(
+                                        fadeIn(
+                                            spring(
+                                                dampingRatio = 1.0f,
+                                                stiffness = 1600.0f,
+                                            )
+                                        ) + unveilIn(initialColor = veilColor, matchParentSize =  matchSize),
+                                        scaleOut(targetScale = 0.7f),
+                                    )
+                                },
                                 sceneStrategy = sceneStrategy,
                                 onBack = { backStack.pop() },
                                 entryDecorators = listOf(

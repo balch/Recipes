@@ -27,6 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -204,14 +205,20 @@ private fun AgentLayout(
                 reverseLayout = true,
                 enabled = showCondensedTokenUsage,
                 revealContent = {
-                    TelemetryWidget(
-                        sessionUsage = sessionUsage,
-                        isLoading = isLoading,
+                    Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
-                            .padding(vertical = 8.dp)
-                    )
+                            .padding(8.dp),
+                        tonalElevation = 4.dp,
+                        shadowElevation = 2.dp,
+                        color = colorScheme.surface.copy(alpha = .80f)
+                    ) {
+                        TelemetryWidget(
+                            sessionUsage = sessionUsage,
+                            isLoading = isLoading,
+                            containerColor = Color.Transparent
+                        )
+                    }
                 }
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
