@@ -98,15 +98,11 @@ private fun AgentLayout(
 
     var containerSize by remember { mutableStateOf(IntSize.Zero) }
     val density = LocalDensity.current
-    val isCompactHeight by remember(containerSize, density) {
-        derivedStateOf {
-            with(density) { containerSize.height.toDp() < 400.dp }
-        }
+    val isCompactHeight = remember(containerSize, density) {
+        with(density) { containerSize.height.toDp() < 400.dp }
     }
-    val isLoading by remember(messages) {
-        derivedStateOf {
-            messages.lastOrNull()?.type == ChatMessageType.Loading
-        }
+    val isLoading = remember(messages) {
+        messages.lastOrNull()?.type == ChatMessageType.Loading
     }
 
     val showCondensedTokenUsage by remember {
@@ -181,9 +177,9 @@ private fun AgentLayout(
                         )
                     }
                     items(messages, key = { it.id }) { message ->
-                        val shouldAnimate =
-                            message.type == ChatMessageType.Agent &&
-                                    messages.size == 1
+                        val shouldAnimate = remember(message.id, messages.size) {
+                            message.type == ChatMessageType.Agent && messages.size == 1
+                        }
                         ChatMessageBubble(
                             message = message,
                             animateTypewriter = shouldAnimate,
