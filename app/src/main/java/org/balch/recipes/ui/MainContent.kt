@@ -199,7 +199,6 @@ fun MainContent(
 
     LaunchedEffect(Unit) {
         navigationRouter.navigationRoute.collect { navInfo ->
-            // TODO - fix this for non compact screens
             backStack.push(navInfo.recipeRoute)
         }
     }
@@ -209,7 +208,6 @@ fun MainContent(
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides appGraph.metroViewModelFactory,
     ) {
-        // Now metroViewModel() can access the factory
         val agentViewModel: AgentViewModel = metroViewModel()
 
         RecipesTheme {
@@ -246,68 +244,77 @@ fun MainContent(
                             )
                         }
                     ) {
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .bottomNavNestedScroll(
-                                visible = bottomNavVisible,
-                                onShow = { bottomNavVisible = true },
-                                onHide = { bottomNavVisible = false },
-                            )
-                    ) {
-                        SharedTransitionLayout {
-                            val veilColor = MaterialTheme.colorScheme.surface
-                            val matchSize = true
-                            NavDisplay(
-                                modifier = Modifier
-                                    .hazeSource(hazeState)
-                                    .imePadding(),
-                                backStack = backStack,
-                                transitionSpec = {
-                                    ContentTransform(
-                                        fadeIn(),
-                                        fadeOut()
-                                                + veilOut(targetColor = veilColor, matchParentSize = matchSize),
-                                    )
-                                },
-                                popTransitionSpec = {
-                                    ContentTransform(
-                                        fadeIn()
-                                                + unveilIn(initialColor = veilColor, matchParentSize = matchSize),
-                                        fadeOut()
-                                    )
-                                },
-                                predictivePopTransitionSpec = {
-                                    ContentTransform(
-                                        fadeIn(
-                                            spring(
-                                                dampingRatio = 1.0f,
-                                                stiffness = 1600.0f,
-                                            )
-                                        ) + unveilIn(initialColor = veilColor, matchParentSize =  matchSize),
-                                        scaleOut(targetScale = 0.7f),
-                                    )
-                                },
-                                sceneStrategy = sceneStrategy,
-                                onBack = { backStack.pop() },
-                                entryDecorators = listOf(
-                                    rememberSaveableStateHolderNavEntryDecorator(),
-                                    rememberViewModelStoreRecipeRouteDecorator(
-                                        createChildViewModel = { key -> !key.isTopLevelRouteKey() }
+                        Box(
+                            Modifier
+                                .fillMaxSize()
+                                .bottomNavNestedScroll(
+                                    visible = bottomNavVisible,
+                                    onShow = { bottomNavVisible = true },
+                                    onHide = { bottomNavVisible = false },
+                                )
+                        ) {
+                            SharedTransitionLayout {
+                                val veilColor = MaterialTheme.colorScheme.surface
+                                val matchSize = true
+                                NavDisplay(
+                                    modifier = Modifier
+                                        .hazeSource(hazeState)
+                                        .imePadding(),
+                                    backStack = backStack,
+                                    transitionSpec = {
+                                        ContentTransform(
+                                            fadeIn(),
+                                            fadeOut()
+                                                    + veilOut(
+                                                targetColor = veilColor,
+                                                matchParentSize = matchSize
+                                            ),
+                                        )
+                                    },
+                                    popTransitionSpec = {
+                                        ContentTransform(
+                                            fadeIn()
+                                                    + unveilIn(
+                                                initialColor = veilColor,
+                                                matchParentSize = matchSize
+                                            ),
+                                            fadeOut()
+                                        )
+                                    },
+                                    predictivePopTransitionSpec = {
+                                        ContentTransform(
+                                            fadeIn(
+                                                spring(
+                                                    dampingRatio = 1.0f,
+                                                    stiffness = 1600.0f,
+                                                )
+                                            ) + unveilIn(
+                                                initialColor = veilColor,
+                                                matchParentSize = matchSize
+                                            ),
+                                            scaleOut(targetScale = 0.7f),
+                                        )
+                                    },
+                                    sceneStrategy = sceneStrategy,
+                                    onBack = { backStack.pop() },
+                                    entryDecorators = listOf(
+                                        rememberSaveableStateHolderNavEntryDecorator(),
+                                        rememberViewModelStoreRecipeRouteDecorator(
+                                            createChildViewModel = { key -> !key.isTopLevelRouteKey() }
+                                        ),
+                                        rememberSharedTransitionDecorator()
                                     ),
-                                    rememberSharedTransitionDecorator()
-                                ),
-                                entryProvider =
-                                    entryProviderRouter(
-                                        agentViewModel = agentViewModel,
-                                        navigationRouter = navigationRouter,
-                                        isCompact = windowInfo.isCompact()
-                                    )
-                            )
+                                    entryProvider =
+                                        entryProviderRouter(
+                                            agentViewModel = agentViewModel,
+                                            navigationRouter = navigationRouter,
+                                            isCompact = windowInfo.isCompact()
+                                        )
+                                )
+                            }
                         }
                     }
                 }
-            }
             }
         }
     }
