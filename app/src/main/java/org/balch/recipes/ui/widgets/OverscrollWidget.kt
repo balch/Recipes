@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -54,6 +56,7 @@ fun OverscrollRevealBox(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     revealThresholdFraction: Float = 0.32f,
+    revealFraction: ((Float) -> Unit)? = null,
     revealContent: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -67,6 +70,16 @@ fun OverscrollRevealBox(
     
     // Sensitivity multiplier: lower threshold = higher sensitivity
     val sensitivityMultiplier = 1f / revealThresholdFraction.coerceIn(0.1f, 1f)
+    
+    // Notify parent of reveal progress for parallax effects
+    LaunchedEffect(revealFraction, revealHeightPx) {
+        if (revealFraction == null || revealHeightPx <= 0) return@LaunchedEffect
+        snapshotFlow { revealAmount.value }
+            .collect { amount ->
+                val fraction = (amount / revealHeightPx).coerceIn(0f, 1f)
+                revealFraction(fraction)
+            }
+    }
     
     val nestedScrollConnection = remember(enabled, sensitivityMultiplier) {
         object : NestedScrollConnection {

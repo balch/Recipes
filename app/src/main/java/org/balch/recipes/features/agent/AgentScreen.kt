@@ -23,7 +23,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -93,7 +92,10 @@ private fun AgentLayout(
     modifier: Modifier = Modifier,
     moodTintColor: Color? = null,
 ) {
-    val listState = rememberLazyListState()
+    // Start scrolled to the last message (+1 for tokenUsage item at index 0)
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = (messages.size).coerceAtLeast(0)
+    )
     val hazeState = rememberHazeState()
 
     var containerSize by remember { mutableStateOf(IntSize.Zero) }
@@ -136,27 +138,43 @@ private fun AgentLayout(
             )
         }
     ) { innerPadding ->
+        // Track reveal fraction for bottom parallax effect (opposite of top)
+        var bottomRevealFraction by remember { mutableStateOf(0f) }
+
+        // Animate the bottom reveal for smoother transitions
+        val animatedBottomReveal by animateFloatAsState(
+            targetValue = bottomRevealFraction,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioNoBouncy,
+                stiffness = Spring.StiffnessLow
+            ),
+            label = "bottomParallax"
+        )
+
         // OverscrollRevealBox wraps everything to intercept scroll events
         OverscrollRevealBox(
             modifier = modifier
                 .fillMaxSize()
                 .imePadding(),
             enabled = showCondensedTokenUsage,
+            revealFraction = { fraction -> bottomRevealFraction = fraction },
             revealContent = {
-                Surface(
+                // Match the top TelemetryWidget's styling with opposite parallax
+                TelemetryWidget(
+                    sessionUsage = sessionUsage,
+                    isLoading = isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
-                    tonalElevation = 4.dp,
-                    shadowElevation = 2.dp,
-                    color = colorScheme.surface.copy(alpha = .80f)
-                ) {
-                    TelemetryWidget(
-                        sessionUsage = sessionUsage,
-                        isLoading = isLoading,
-                        containerColor = Color.Transparent
-                    )
-                }
+                        .padding(horizontal = 16.dp)
+                        .graphicsLayer {
+                            alpha = animatedBottomReveal
+                            // Opposite scale effect: grow from 85% to 100% as it appears
+                            scaleX = 0.85f + (0.15f * animatedBottomReveal)
+                            scaleY = 0.85f + (0.15f * animatedBottomReveal)
+                            // Opposite translation: move upward from +30 to 0 as it appears
+                            translationY = (1f - animatedBottomReveal) * 30f
+                        }
+                )
             }
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
