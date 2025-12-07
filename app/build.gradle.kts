@@ -76,6 +76,12 @@ android {
         }
     }
 
+    lint {
+        // Metro DI handles activity instantiation via AppComponentFactory,
+        // so activities don't need a default constructor
+        disable += "Instantiatable"
+    }
+
     packaging {
         resources {
             excludes += "META-INF/INDEX.LIST"
