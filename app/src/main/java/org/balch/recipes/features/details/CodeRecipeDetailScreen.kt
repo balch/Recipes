@@ -35,7 +35,7 @@ fun CodeDetailItem(
     modifier: Modifier = Modifier,
     codeRecipe: CodeRecipe,
     onTittleVisible: (Boolean) -> Unit,
-    hazeState: HazeState,
+    topBarHazeState: HazeState,
 ) {
     Column(
         modifier = modifier
@@ -43,7 +43,9 @@ fun CodeDetailItem(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .hazeSource(topBarHazeState),
             colors = CardDefaults.cardColors(
                 containerColor = codeRecipe.area.color().copy(alpha = 0.1f)
             )
@@ -52,7 +54,6 @@ fun CodeDetailItem(
                 codeRecipe = codeRecipe,
                 largeFont = true,
                 modifier = Modifier
-                    .hazeSource(hazeState)
                     .padding(start = 12.dp, top = 16.dp),
             )
 
@@ -92,7 +93,7 @@ private fun CodeRecipeDetailScreenPreview(
             CodeDetailItem(
                 codeRecipe = uiState.codeRecipe,
                 onTittleVisible = {},
-                hazeState = HazeState()
+                topBarHazeState = HazeState()
             )
         }
     }

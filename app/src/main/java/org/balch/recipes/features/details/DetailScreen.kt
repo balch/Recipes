@@ -4,11 +4,13 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -211,7 +214,8 @@ fun DetailLayout(
     uiState: UiState,
     modifier: Modifier = Modifier,
 ) {
-    val hazeState = rememberHazeState()
+    val topBarHazeState = rememberHazeState()
+    val ingredientsHazeState = rememberHazeState()
     val detailState = rememberDetailScreenState(
         animatedVisibilityScope = LocalSharedTransition.current.animatedVisibilityScope,
         uiState = uiState,
@@ -232,7 +236,7 @@ fun DetailLayout(
         topBar = {
             TopBar(
                 modifier = modifier
-                    .hazeEffect(state = hazeState, style = LocalHazeStyle.current) {
+                    .hazeEffect(state = topBarHazeState, style = LocalHazeStyle.current) {
                         HazeProgressive.verticalGradient(
                             startIntensity = 1f,
                             endIntensity = 0f,
@@ -246,7 +250,9 @@ fun DetailLayout(
             if (detailState.detailViewMode.showSteps) {
                 Column {
                     RecipeInstructionsHeader(
-                        modifier = modifier,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
                         onDetailViewModeChange = { detailState.setDetailViewMode(it) },
                         detailViewMode = detailState.detailViewMode,
                     )
@@ -268,7 +274,7 @@ fun DetailLayout(
             when (uiState) {
                 is UiState.ShowCodeRecipe -> {
                     CodeDetailItem(
-                        hazeState = hazeState,
+                        topBarHazeState = topBarHazeState,
                         codeRecipe = uiState.codeRecipe,
                         onTittleVisible = { detailState.setShowCodeRecipeTitle(!it) },
                     )
@@ -276,7 +282,8 @@ fun DetailLayout(
 
                 is UiState.ShowMeal -> {
                     MealDetailItem(
-                        hazeState = hazeState,
+                        topBarHazeState = topBarHazeState,
+                        ingredientsHazeState = ingredientsHazeState,
                         meal = uiState.meal,
                         detailViewMode = detailState.detailViewMode,
                         instructionSteps = instructionSteps,
@@ -328,7 +335,8 @@ fun MealDetailItem(
     instructionSteps: List<String>,
     onDetailViewModeChange: (DetailViewMode) -> Unit,
     listState: LazyListState,
-    hazeState: HazeState,
+    topBarHazeState: HazeState,
+    ingredientsHazeState: HazeState,
 ) {
     val playerState = rememberYouTubePlayer(
         key = meal.id,
@@ -348,8 +356,7 @@ fun MealDetailItem(
     }
 
     LazyColumn(
-        modifier = modifier.fillMaxSize()
-                .hazeSource(hazeState),
+        modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         state = listState,
     ) {
@@ -360,6 +367,8 @@ fun MealDetailItem(
                     playerStatus = playerStatus,
                     instructionSteps = instructionSteps,
                     showCompactIngredients = true,
+                    topBarHazeState = topBarHazeState,
+                    ingredientsHazeState = ingredientsHazeState,
                     onPlayVideo = {
                         playerState.play()
                         onDetailViewModeChange(DetailViewMode.Video)
@@ -400,13 +409,21 @@ private fun LazyListScope.videoViewItems(
         )
     }
     item {
-        CrossfadeIngredients(modifier, meal, false)
-        RecipeInstructionsHeader(modifier, { }, DetailViewMode.Video)
-        Spacer(modifier = modifier.height(16.dp))
+        IngredientsInstructionsCard(
+            modifier = modifier,
+            meal = meal,
+            showCompactIngredients = false,
+            detailViewMode = DetailViewMode.Video,
+            onDetailViewModeChange = { },
+        )
     }
 
     itemsIndexed(instructionSteps) { index, step ->
-        RecipeInstructionListStepCard(modifier, step, index)
+        RecipeInstructionListStepCard(
+            modifier = modifier,
+            step = step,
+            index = index
+        )
     }
 }
 
@@ -414,7 +431,17 @@ private fun LazyListScope.stepByStepViewItems(
     meal: Meal,
     modifier: Modifier = Modifier,
 ) {
-    item { CrossfadeIngredients(modifier, meal, true) }
+    item {
+        IngredientsInstructionsCard(
+            modifier = modifier,
+            meal = meal,
+            showCompactIngredients = true,
+            detailViewMode = DetailViewMode.StepByStep,
+            onDetailViewModeChange = { },
+            showInstructionsHeader = false,
+            maxIngredientsHeight = true,
+        )
+    }
 }
 
 private fun LazyListScope.listViewItems(
@@ -422,12 +449,16 @@ private fun LazyListScope.listViewItems(
     playerStatus: PlayerStatus,
     instructionSteps: List<String>,
     showCompactIngredients: Boolean,
+    topBarHazeState: HazeState,
+    ingredientsHazeState: HazeState,
     onPlayVideo: () -> Unit,
     onDetailViewModeChange: (DetailViewMode) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     item {
-        Box {
+        Box(
+            modifier = Modifier.hazeSource(topBarHazeState)
+        ) {
             MealImageBadge(
                 meal = meal.toMealSummary(),
                 showBadge = false,
@@ -458,32 +489,50 @@ private fun LazyListScope.listViewItems(
             }
         }
     }
-    item { RecipeInfoCard(modifier, meal) }
+    item {
+        RecipeInfoCard(
+            modifier = modifier.hazeSource(topBarHazeState),
+            meal = meal
+        )
+    }
 
     stickyHeader {
-        Column(
-            modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        // When sticky header is stuck, this background covers the TopBar region
+        // The Card itself flows at its natural position; background extends upward
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
         ) {
             Card(
                 modifier = Modifier.fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 16.dp)
+                    .hazeEffect(state = ingredientsHazeState, style = LocalHazeStyle.current) {
+                        HazeProgressive.verticalGradient(
+                            startIntensity = 1f,
+                            endIntensity = 0f,
+                        )
+                    },
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.background.copy(alpha = .95f),
+                    containerColor = MaterialTheme.colorScheme.background.copy(alpha = .85f),
                 ),
                 elevation = CardDefaults.cardElevation(
                     defaultElevation = 4.dp
                 )
             ) {
-                CrossfadeIngredients(modifier, meal, showCompactIngredients)
-                RecipeInstructionsHeader(modifier, onDetailViewModeChange, DetailViewMode.List)
+                CrossfadeIngredients(meal = meal, showCompactIngredients = showCompactIngredients)
+                RecipeInstructionsHeader(onDetailViewModeChange = onDetailViewModeChange, detailViewMode = DetailViewMode.List)
                 Spacer(modifier = modifier.height(16.dp))
             }
         }
     }
 
     itemsIndexed(instructionSteps) { index, step ->
-        RecipeInstructionListStepCard(modifier, step, index)
+        RecipeInstructionListStepCard(
+            modifier = modifier.hazeSource(ingredientsHazeState),
+            step = step,
+            index = index
+        )
     }
 }
 
@@ -492,6 +541,7 @@ private fun CrossfadeIngredients(
     modifier: Modifier = Modifier,
     meal: Meal,
     showCompactIngredients: Boolean,
+    maxHeight: Boolean = false,
 ) {
     Crossfade(
         targetState = showCompactIngredients,
@@ -501,7 +551,46 @@ private fun CrossfadeIngredients(
             modifier = modifier,
             meal = meal,
             showCompact = isCompact,
+            maxHeight = maxHeight,
         )
+    }
+}
+
+/**
+ * Shared card component for ingredients and optionally instructions header.
+ * Used by List, Video, and StepByStep views for consistent styling.
+ */
+@Composable
+private fun IngredientsInstructionsCard(
+    modifier: Modifier = Modifier,
+    meal: Meal,
+    showCompactIngredients: Boolean,
+    detailViewMode: DetailViewMode,
+    onDetailViewModeChange: (DetailViewMode) -> Unit,
+    showInstructionsHeader: Boolean = true,
+    maxIngredientsHeight: Boolean = false,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background.copy(alpha = .85f),
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp
+        )
+    ) {
+        CrossfadeIngredients(meal = meal, showCompactIngredients = showCompactIngredients, maxHeight = maxIngredientsHeight)
+        if (showInstructionsHeader) {
+            RecipeInstructionsHeader(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                onDetailViewModeChange = onDetailViewModeChange,
+                detailViewMode = detailViewMode,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
     }
 }
 
@@ -518,6 +607,17 @@ private fun TopBar(
 
     // Show meal title when sticky header is stuck, otherwise show default
     val shouldShowOverrideTitle = showTitleInHeader && overrideTitle != null
+    
+    // Animate background when title changes
+    val containerColor by animateColorAsState(
+        targetValue = if (shouldShowOverrideTitle) {
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
+        } else {
+            Color.Transparent
+        },
+        animationSpec = tween(300),
+        label = "TopBar background"
+    )
 
     TopAppBar(
         modifier = modifier,
@@ -535,7 +635,7 @@ private fun TopBar(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
+            containerColor = containerColor,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
         )
     )
@@ -572,6 +672,7 @@ private fun RecipeIngredientsCard(
     meal: Meal,
     modifier: Modifier = Modifier,
     showCompact: Boolean,
+    maxHeight: Boolean = false,
 ) {
     Column (
         modifier = modifier.fillMaxWidth(),
@@ -580,13 +681,22 @@ private fun RecipeIngredientsCard(
             text = "Ingredients",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(vertical = 8.dp)
         )
 
-        RecipeIngredients(
-            meal = meal,
-            showCompact = showCompact
-        )
+        // Apply max height and scroll only to the ingredients list, not the header
+        Box(
+            modifier = if (maxHeight) {
+                Modifier.heightIn(max = 200.dp).verticalScroll(rememberScrollState())
+            } else {
+                Modifier
+            }
+        ) {
+            RecipeIngredients(
+                meal = meal,
+                showCompact = showCompact
+            )
+        }
     }
 }
 
@@ -642,7 +752,7 @@ private fun RecipeIngredients(
 
 @Composable
 private fun RecipeInstructionsHeader(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     onDetailViewModeChange: (DetailViewMode) -> Unit,
     detailViewMode: DetailViewMode,
 ) {
@@ -656,16 +766,14 @@ private fun RecipeInstructionsHeader(
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = modifier.weight(2f))
+        Spacer(modifier = Modifier.weight(1f))
 
         if (detailViewMode == DetailViewMode.StepByStep ||
             detailViewMode == DetailViewMode.List
         ) {
-            SingleChoiceSegmentedButtonRow(
-                modifier = modifier.weight(8f),
-            ) {
+            SingleChoiceSegmentedButtonRow {
                 SegmentedButton(
-                    modifier = modifier.height(50.dp),
+                    modifier = Modifier.height(50.dp),
                     shape = SegmentedButtonDefaults.itemShape(0, 2),
                     onClick = { onDetailViewModeChange(DetailViewMode.List) },
                     selected = detailViewMode == DetailViewMode.List,
@@ -673,11 +781,11 @@ private fun RecipeInstructionsHeader(
                 )
 
                 SegmentedButton(
-                    modifier = modifier.height(50.dp),
+                    modifier = Modifier.height(50.dp),
                     shape = SegmentedButtonDefaults.itemShape(1, 2),
                     onClick = { onDetailViewModeChange(DetailViewMode.StepByStep) },
                     selected = detailViewMode == DetailViewMode.StepByStep,
-                    label = { Text("Steps", maxLines = 1, overflow = TextOverflow.Clip) }
+                    label = { Text("Steps") }
                 )
             }
         }
@@ -718,7 +826,8 @@ private fun RecipeInstructionByStepCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 72.dp), // Avoid FAB overlap
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
@@ -839,6 +948,8 @@ private fun ListViewItemsPreview() {
                 playerStatus = PlayerStatus.LOADED,
                 instructionSteps = meal.instructionSteps,
                 showCompactIngredients = false,
+                topBarHazeState = HazeState(),
+                ingredientsHazeState = HazeState(),
                 onPlayVideo = {},
                 onDetailViewModeChange = {},
                 modifier = Modifier,
