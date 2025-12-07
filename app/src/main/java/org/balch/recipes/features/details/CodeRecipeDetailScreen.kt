@@ -19,6 +19,8 @@ import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.color
 import org.balch.recipes.ui.theme.RecipesTheme
@@ -33,6 +35,7 @@ fun CodeDetailItem(
     modifier: Modifier = Modifier,
     codeRecipe: CodeRecipe,
     onTittleVisible: (Boolean) -> Unit,
+    hazeState: HazeState,
 ) {
     Column(
         modifier = modifier
@@ -48,7 +51,8 @@ fun CodeDetailItem(
             CodeRecipeAreaBadge(
                 codeRecipe = codeRecipe,
                 largeFont = true,
-                modifier = modifier
+                modifier = Modifier
+                    .hazeSource(hazeState)
                     .padding(start = 12.dp, top = 16.dp),
             )
 
@@ -88,6 +92,7 @@ private fun CodeRecipeDetailScreenPreview(
             CodeDetailItem(
                 codeRecipe = uiState.codeRecipe,
                 onTittleVisible = {},
+                hazeState = HazeState()
             )
         }
     }

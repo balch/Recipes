@@ -9,7 +9,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,7 +61,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -72,6 +70,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
 import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
@@ -269,7 +268,7 @@ fun DetailLayout(
             when (uiState) {
                 is UiState.ShowCodeRecipe -> {
                     CodeDetailItem(
-                        modifier = modifier.hazeSource(hazeState),
+                        hazeState = hazeState,
                         codeRecipe = uiState.codeRecipe,
                         onTittleVisible = { detailState.setShowCodeRecipeTitle(!it) },
                     )
@@ -277,7 +276,7 @@ fun DetailLayout(
 
                 is UiState.ShowMeal -> {
                     MealDetailItem(
-                        modifier = modifier.hazeSource(hazeState),
+                        hazeState = hazeState,
                         meal = uiState.meal,
                         detailViewMode = detailState.detailViewMode,
                         instructionSteps = instructionSteps,
@@ -329,8 +328,8 @@ fun MealDetailItem(
     instructionSteps: List<String>,
     onDetailViewModeChange: (DetailViewMode) -> Unit,
     listState: LazyListState,
+    hazeState: HazeState,
 ) {
-
     val playerState = rememberYouTubePlayer(
         key = meal.id,
         allowFullScreen = false,
@@ -349,8 +348,8 @@ fun MealDetailItem(
     }
 
     LazyColumn(
-        modifier = modifier
-            .fillMaxSize(),
+        modifier = modifier.fillMaxSize()
+                .hazeSource(hazeState),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         state = listState,
     ) {
@@ -448,7 +447,7 @@ private fun LazyListScope.listViewItems(
                     modifier = Modifier
                         .width(120.dp)
                         .height(85.dp),
-                    containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                    containerColor = Color.Red.copy(alpha = .7f),
                 ) {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
@@ -463,13 +462,23 @@ private fun LazyListScope.listViewItems(
 
     stickyHeader {
         Column(
-            modifier = modifier
-                .background(Color.Transparent),
+            modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            CrossfadeIngredients(modifier, meal, showCompactIngredients)
-            RecipeInstructionsHeader(modifier, onDetailViewModeChange, DetailViewMode.List)
-            Spacer(modifier = modifier.height(16.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.background.copy(alpha = .95f),
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 4.dp
+                )
+            ) {
+                CrossfadeIngredients(modifier, meal, showCompactIngredients)
+                RecipeInstructionsHeader(modifier, onDetailViewModeChange, DetailViewMode.List)
+                Spacer(modifier = modifier.height(16.dp))
+            }
         }
     }
 
@@ -564,37 +573,20 @@ private fun RecipeIngredientsCard(
     modifier: Modifier = Modifier,
     showCompact: Boolean,
 ) {
-
-    val titleAlpha = if (showCompact) 0f else 1f
-
-    Column(
-        modifier = modifier
-            .padding(horizontal = 16.dp)
+    Column (
+        modifier = modifier.fillMaxWidth(),
     ) {
-        // Title that fades out when collapsing
-        if (titleAlpha > 0f) {
-            Text(
-                text = "Ingredients",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .alpha(titleAlpha)
-            )
-        }
+        Text(
+            text = "Ingredients",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
 
-        Card(
-            modifier = modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            )
-        ) {
-            RecipeIngredients(
-                meal = meal,
-                showCompact = showCompact
-            )
-        }
+        RecipeIngredients(
+            meal = meal,
+            showCompact = showCompact
+        )
     }
 }
 
@@ -654,42 +646,39 @@ private fun RecipeInstructionsHeader(
     onDetailViewModeChange: (DetailViewMode) -> Unit,
     detailViewMode: DetailViewMode,
 ) {
-    Column(
-        modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Text(
+            text = "Instructions",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = modifier.weight(2f))
+
+        if (detailViewMode == DetailViewMode.StepByStep ||
+            detailViewMode == DetailViewMode.List
         ) {
-            Text(
-                text = "Instructions",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = modifier.weight(2f))
+            SingleChoiceSegmentedButtonRow(
+                modifier = modifier.weight(8f),
+            ) {
+                SegmentedButton(
+                    modifier = modifier.height(50.dp),
+                    shape = SegmentedButtonDefaults.itemShape(0, 2),
+                    onClick = { onDetailViewModeChange(DetailViewMode.List) },
+                    selected = detailViewMode == DetailViewMode.List,
+                    label = { Text("List") }
+                )
 
-            if (detailViewMode == DetailViewMode.StepByStep ||
-                detailViewMode == DetailViewMode.List) {
-                SingleChoiceSegmentedButtonRow(
-                    modifier = modifier.weight(8f),
-                ) {
-                    SegmentedButton(
-                        modifier = modifier.height(50.dp),
-                        shape = SegmentedButtonDefaults.itemShape(0, 2),
-                        onClick = { onDetailViewModeChange(DetailViewMode.List) },
-                        selected = detailViewMode == DetailViewMode.List,
-                        label = { Text("List") }
-                    )
-
-                    SegmentedButton(
-                        modifier = modifier.height(50.dp),
-                        shape = SegmentedButtonDefaults.itemShape(1, 2),
-                        onClick = { onDetailViewModeChange(DetailViewMode.StepByStep) },
-                        selected = detailViewMode == DetailViewMode.StepByStep,
-                        label = { Text("Steps", maxLines = 1, overflow = TextOverflow.Clip) }
-                    )
-                }
+                SegmentedButton(
+                    modifier = modifier.height(50.dp),
+                    shape = SegmentedButtonDefaults.itemShape(1, 2),
+                    onClick = { onDetailViewModeChange(DetailViewMode.StepByStep) },
+                    selected = detailViewMode == DetailViewMode.StepByStep,
+                    label = { Text("Steps", maxLines = 1, overflow = TextOverflow.Clip) }
+                )
             }
         }
     }
