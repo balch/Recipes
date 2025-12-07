@@ -2,16 +2,16 @@ package org.balch.recipes.features.agent.tools.meals
 
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.core.tools.annotations.LLMDescription
+import dev.zacsweers.metro.Inject
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import org.balch.recipes.core.models.Category
 import org.balch.recipes.core.repository.RecipeRepository
-import javax.inject.Inject
 
 /**
  * Tool for returning all recipe categories from TheMealDB via the repository
  */
-class MealCategoryListTool @Inject internal constructor(
+class MealCategoryListTool @Inject constructor(
     private val recipeRepository: RecipeRepository,
 ) : Tool<MealCategoryListTool.Args, MealCategoryListTool.Result>() {
 

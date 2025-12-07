@@ -3,6 +3,7 @@ package org.balch.recipes.features.details
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diamondedge.logging.logging
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject
@@ -23,7 +24,6 @@ import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.random.RandomProvider
 import org.balch.recipes.core.repository.RecipeRepository
-import org.balch.recipes.di.AppScope
 import org.balch.recipes.features.CodeRecipeRepository
 import kotlin.time.Duration.Companion.seconds
 
@@ -44,7 +44,8 @@ import kotlin.time.Duration.Companion.seconds
  * @property mealRepository Provides access to data sources for fetching meals and related details.
  * @property uiState Represents the current UI state as a `StateFlow` that can emit loading, success, or error states.
  */
-class DetailsViewModel @AssistedInject constructor(
+@AssistedInject
+class DetailsViewModel(
     @Assisted val detailType: DetailType,
     private val mealRepository: RecipeRepository,
     private val codeRecipeRepository: CodeRecipeRepository,

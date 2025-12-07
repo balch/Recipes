@@ -1,6 +1,8 @@
 package org.balch.recipes.core.repository
 
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import org.balch.recipes.core.models.Area
 import org.balch.recipes.core.models.Category
@@ -8,8 +10,6 @@ import org.balch.recipes.core.models.Ingredient
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.network.TheMealDbApi
-import org.balch.recipes.di.AppScope
-import javax.inject.Inject
 
 /**
  * Repository interface for accessing recipes data.

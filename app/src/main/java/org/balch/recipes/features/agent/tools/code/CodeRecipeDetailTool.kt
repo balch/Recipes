@@ -2,18 +2,18 @@ package org.balch.recipes.features.agent.tools.code
 
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.core.tools.annotations.LLMDescription
+import dev.zacsweers.metro.Inject
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import org.balch.recipes.DetailRoute
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.navigation.NavigationRouter
-import javax.inject.Inject
 
 /**
  * Tool for Routine to a CodeRecipe or CodeRecipeSummary
  */
-class CodeRecipeDetailTool @Inject internal constructor(
+class CodeRecipeDetailTool @Inject constructor(
     private val navigationRouter: NavigationRouter,
 ) : Tool<CodeRecipeDetailTool.Args, CodeRecipeDetailTool.Result>() {
 

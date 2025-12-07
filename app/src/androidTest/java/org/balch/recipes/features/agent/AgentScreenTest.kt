@@ -24,11 +24,6 @@ class AgentScreenTest {
         // Get the Metro graph from the application
         val app = InstrumentationRegistry.getInstrumentation()
             .targetContext.applicationContext as RecipesApplication
-        val graph = app.graph
-        
-        // For tests, we can create ViewModels directly with dependencies from the graph
-        // Note: This test creates its own ViewModel instance for isolation
-        // For more complex tests, you'd expose dependencies through the graph
     }
 
     @SuppressLint("UnusedContentLambdaTargetStateParameter")

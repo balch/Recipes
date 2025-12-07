@@ -1,13 +1,13 @@
 package org.balch.recipes.core.network
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import org.balch.recipes.core.models.AreasResponse
 import org.balch.recipes.core.models.CategoriesResponse
 import org.balch.recipes.core.models.IngredientsResponse
 import org.balch.recipes.core.models.MealResponse
 import org.balch.recipes.core.models.MealSummaryResponse
-import org.balch.recipes.di.AppScope
-import javax.inject.Inject
 
 /**
  * API service interface for TheMealDb API.

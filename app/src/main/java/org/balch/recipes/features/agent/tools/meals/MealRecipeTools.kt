@@ -1,9 +1,9 @@
 package org.balch.recipes.features.agent.tools.meals
 
 import ai.koog.agents.core.tools.Tool
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
-import org.balch.recipes.di.AppScope
-import javax.inject.Inject
 
 
 /**

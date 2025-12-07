@@ -2,16 +2,16 @@ package org.balch.recipes.features.agent.tools.code
 
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.core.tools.annotations.LLMDescription
+import dev.zacsweers.metro.Inject
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.features.CodeRecipeRepository
-import javax.inject.Inject
 
 /**
  * Tool for searching for app code recipes.
  */
-class CodeRecipeSearchTool @Inject internal constructor(
+class CodeRecipeSearchTool @Inject constructor(
     private val codeRecipeRepository: CodeRecipeRepository
 ) : Tool<CodeRecipeSearchTool.Args, CodeRecipeSearchTool.Result>() {
     @Serializable

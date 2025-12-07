@@ -11,19 +11,19 @@ import coil3.util.Logger
 import com.diamondedge.logging.KmLogging
 import com.diamondedge.logging.LogLevel
 import dev.zacsweers.metro.createGraphFactory
+import dev.zacsweers.metrox.android.MetroAppComponentProviders
+import dev.zacsweers.metrox.android.MetroApplication
 import org.balch.recipes.di.AppGraph
 
-class RecipesApplication : Application(), SingletonImageLoader.Factory {
+class RecipesApplication : Application(), MetroApplication, SingletonImageLoader.Factory {
 
-    lateinit var graph: AppGraph
-        private set
+    private val appGraph by lazy { createGraphFactory<AppGraph.Factory>().create(this) }
+
+    override val appComponentProviders: MetroAppComponentProviders
+        get() = appGraph
 
     override fun onCreate() {
         super.onCreate()
-        
-        // Create the Metro dependency graph
-        graph = createGraphFactory<AppGraph.Factory>().create(this)
-        
         KmLogging.setLogLevel(if (BuildConfig.DEBUG) LogLevel.Debug else LogLevel.Off)
     }
 
@@ -35,6 +35,5 @@ class RecipesApplication : Application(), SingletonImageLoader.Factory {
             .logger(DebugLogger(Logger.Level.Info))
             .crossfade(true)
             .build()
-
     }
 }

@@ -1,11 +1,11 @@
 package org.balch.recipes.core.coroutines
 
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import org.balch.recipes.di.AppScope
-import javax.inject.Inject
 
 /**
  * Provides default implementations of [DispatcherProvider] to supply coroutine dispatchers.

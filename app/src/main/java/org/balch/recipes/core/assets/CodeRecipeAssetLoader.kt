@@ -2,6 +2,8 @@ package org.balch.recipes.core.assets
 
 import android.content.Context
 import com.diamondedge.logging.logging
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -11,11 +13,10 @@ import org.balch.recipes.core.coroutines.DispatcherProvider
 import org.balch.recipes.core.models.CodeArea
 import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.CodeRecipeSummary
-import org.balch.recipes.di.AppScope
-import javax.inject.Inject
 
 @SingleIn(AppScope::class)
-class CodeRecipeAssetLoader @Inject constructor(
+@Inject
+class CodeRecipeAssetLoader(
     private val context: Context,
     private val json: Json,
     private val dispatcherProvider: DispatcherProvider,
@@ -65,7 +66,8 @@ class CodeRecipeAssetLoader @Inject constructor(
                 toCodeRecipe(index + 1, description, codeSnippet)
             }
 
-    suspend fun loadRecipeContent(bodyMarkdown: String): Pair<String, String> = withContext(Dispatchers.IO) {
+    suspend fun loadRecipeContent(bodyMarkdown: String): Pair<String, String> = withContext(
+        Dispatchers.IO) {
         try {
             val content = context.assets.open("code-recipes/$bodyMarkdown")
                 .bufferedReader()

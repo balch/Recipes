@@ -6,9 +6,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("kotlin-parcelize")
     alias(libs.plugins.jetbrains.kotlin.serialization)
     alias(libs.plugins.metro)
+    id("kotlin-parcelize")
 }
 
 // Load local.properties
@@ -25,7 +25,7 @@ android {
 
     defaultConfig {
         applicationId = "org.balch.recipes"
-        minSdk = 26
+        minSdk = 28
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -89,12 +89,6 @@ android {
     }
 }
 
-metro {
-    interop {
-        includeDagger() // Allows reusing Dagger's @Inject, @Provides, etc.
-    }
-}
-
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -127,6 +121,7 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.navigation3.adaptive.layout)
 
+    implementation(libs.metro.android)
     implementation(libs.metro.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.material.icons.extended)
@@ -135,7 +130,6 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.adaptive.navigation3)
-    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.0.0")
 
     implementation(libs.markdown.m3)
     implementation(libs.markdown.android)

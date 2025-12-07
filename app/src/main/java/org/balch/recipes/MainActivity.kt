@@ -1,34 +1,37 @@
 package org.balch.recipes
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.binding
+import dev.zacsweers.metrox.android.ActivityKey
+import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 import org.balch.recipes.core.ai.GeminiKeyProvider
 import org.balch.recipes.core.navigation.NavigationRouter
 import org.balch.recipes.ui.MainContent
 import org.balch.recipes.ui.utils.setEdgeToEdgeConfig
-import javax.inject.Inject
 
-class MainActivity : ComponentActivity() {
+@ContributesIntoMap(AppScope::class, binding<Activity>())
+@ActivityKey(MainActivity::class)
+@Inject
+class MainActivity(
+    private val metroVmf: MetroViewModelFactory,
+    private val geminiKeyProvider: GeminiKeyProvider,
+    private val navigationRouter: NavigationRouter
+) : ComponentActivity() {
 
-    @Inject
-    lateinit var geminiKeyProvider: GeminiKeyProvider
-
-    @Inject
-    lateinit var navigationRouter: NavigationRouter
-
-    @OptIn(ExperimentalMaterial3AdaptiveApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Inject dependencies via Metro graph
-        (application as RecipesApplication).graph.inject(this)
-        
         setEdgeToEdgeConfig()
         super.onCreate(savedInstanceState)
         setContent {
             MainContent(
+                metroVmf = metroVmf,
                 isAgentEnabled = geminiKeyProvider.isApiKeySet,
-                navigationRouter = navigationRouter
+                navigationRouter = navigationRouter,
             )
         }
     }

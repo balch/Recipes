@@ -3,6 +3,7 @@ package org.balch.recipes.features.agent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diamondedge.logging.logging
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
@@ -13,14 +14,12 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.balch.recipes.core.coroutines.DispatcherProvider
-import org.balch.recipes.di.AppScope
 import org.balch.recipes.features.agent.chat.ChatMessage
 import org.balch.recipes.features.agent.session.SessionUsage
 
-@Inject
 @ViewModelKey(AgentViewModel::class)
 @ContributesIntoMap(AppScope::class)
-class AgentViewModel(
+class AgentViewModel @Inject constructor(
     private val agent: RecipeMaestroAgent,
     dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {

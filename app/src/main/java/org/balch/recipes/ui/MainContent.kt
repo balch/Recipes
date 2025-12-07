@@ -68,6 +68,7 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.rememberHazeState
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import org.balch.recipes.AiChatScreen
@@ -89,7 +90,6 @@ import org.balch.recipes.core.navigation.peek
 import org.balch.recipes.core.navigation.pop
 import org.balch.recipes.core.navigation.popTo
 import org.balch.recipes.core.navigation.push
-import org.balch.recipes.di.rememberAppGraph
 import org.balch.recipes.features.agent.AgentScreen
 import org.balch.recipes.features.agent.AgentViewModel
 import org.balch.recipes.features.details.DetailScreen
@@ -118,10 +118,10 @@ private fun String.toTopLevelRoutKey() = TOP_LEVEL_ROUTE_KEY_PREFIX + this
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainContent(
+    metroVmf: MetroViewModelFactory,
     isAgentEnabled: Boolean,
     navigationRouter: NavigationRouter,
 ) {
-
     val windowInfo = currentWindowAdaptiveInfo()
     val aiChatAvailableAsTopLevelRoute = isAgentEnabled && !windowInfo.isCompact()
 
@@ -203,11 +203,7 @@ fun MainContent(
         }
     }
 
-    val appGraph = rememberAppGraph()
-
-    CompositionLocalProvider(
-        LocalMetroViewModelFactory provides appGraph.metroViewModelFactory,
-    ) {
+    CompositionLocalProvider(LocalMetroViewModelFactory provides metroVmf) {
         val agentViewModel: AgentViewModel = metroViewModel()
 
         RecipesTheme {
@@ -221,7 +217,8 @@ fun MainContent(
                                 hazeState = hazeState,
                                 bottomNavVisible = bottomNavVisible,
                                 aiToolbarVisible = aiToolbarVisible,
-                                moodTintColor = agentViewModel.moodTintColor ?: Color.Transparent,
+                                moodTintColor = agentViewModel.moodTintColor
+                                    ?: Color.Transparent,
                                 onNavigateTo = { route, isFromAgent ->
                                     navigationRouter.navigateTo(route, isFromAgent)
                                 }

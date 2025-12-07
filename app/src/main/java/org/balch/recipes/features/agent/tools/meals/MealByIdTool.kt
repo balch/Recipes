@@ -2,16 +2,16 @@ package org.balch.recipes.features.agent.tools.meals
 
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.core.tools.annotations.LLMDescription
+import dev.zacsweers.metro.Inject
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.repository.RecipeRepository
-import javax.inject.Inject
 
 /**
  * Tool for retrieving a full Meal by its id using RecipeRepository
  */
-class MealByIdTool @Inject internal constructor(
+class MealByIdTool @Inject constructor(
     private val recipeRepository: RecipeRepository,
 ) : Tool<MealByIdTool.Args, MealByIdTool.Result>() {
 

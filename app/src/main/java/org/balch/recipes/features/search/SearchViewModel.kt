@@ -3,6 +3,7 @@ package org.balch.recipes.features.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diamondedge.logging.logging
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject
@@ -35,7 +36,6 @@ import org.balch.recipes.core.models.CodeRecipe
 import org.balch.recipes.core.models.MealSummary
 import org.balch.recipes.core.models.SearchType
 import org.balch.recipes.core.repository.RecipeRepository
-import org.balch.recipes.di.AppScope
 import org.balch.recipes.features.CodeRecipeRepository
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.milliseconds

@@ -14,6 +14,8 @@ import ai.koog.agents.ext.tool.ExitTool
 import ai.koog.prompt.executor.clients.google.GoogleModels
 import androidx.compose.ui.graphics.Color
 import androidx.navigation3.runtime.NavKey
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import org.balch.recipes.AiChatScreen
 import org.balch.recipes.DetailRoute
@@ -25,10 +27,8 @@ import org.balch.recipes.core.ai.tools.TimeTools
 import org.balch.recipes.core.models.DetailType
 import org.balch.recipes.core.models.Meal
 import org.balch.recipes.core.models.SearchType
-import org.balch.recipes.di.AppScope
 import org.balch.recipes.features.agent.tools.code.CodeRecipeTools
 import org.balch.recipes.features.agent.tools.meals.MealRecipeTools
-import javax.inject.Inject
 import kotlin.time.ExperimentalTime
 
 @SingleIn(AppScope::class)

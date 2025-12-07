@@ -2,11 +2,11 @@ package org.balch.recipes.features
 
 import androidx.annotation.VisibleForTesting
 import com.diamondedge.logging.logging
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import org.balch.recipes.core.assets.CodeRecipeAssetLoader
 import org.balch.recipes.core.models.CodeRecipe
-import org.balch.recipes.di.AppScope
-import javax.inject.Inject
 
 @SingleIn(AppScope::class)
 class CodeRecipeRepository @Inject constructor(

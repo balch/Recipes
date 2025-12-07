@@ -1,9 +1,9 @@
 package org.balch.recipes.core.ai
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import org.balch.recipes.BuildConfig
-import org.balch.recipes.di.AppScope
-import javax.inject.Inject
 
 
 interface KeyProvider {

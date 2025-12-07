@@ -1,6 +1,8 @@
 package org.balch.recipes.core.network
 
 import com.diamondedge.logging.logging
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -11,8 +13,6 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import org.balch.recipes.core.coroutines.DispatcherProvider
-import org.balch.recipes.di.AppScope
-import javax.inject.Inject
 
 /**
  * Service class for making HTTP requests using Ktor.

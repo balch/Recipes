@@ -2,19 +2,19 @@ package org.balch.recipes.features.agent.tools.code
 
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.core.tools.annotations.LLMDescription
+import dev.zacsweers.metro.Inject
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import org.balch.recipes.core.models.CodeArea
 import org.balch.recipes.core.models.CodeRecipe
-import javax.inject.Inject
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 /**
  * Reinforcement tool to remind the AI to create unique code recipes.
  */
-class CodeRecipeCreateTool @Inject internal constructor(
-) : Tool<CodeRecipeCreateTool.Args, CodeRecipeCreateTool.Result>() {
+@Inject
+class CodeRecipeCreateTool() : Tool<CodeRecipeCreateTool.Args, CodeRecipeCreateTool.Result>() {
     @Serializable
     data class Args(
         @property:LLMDescription("Optional contextual information from the calling agent.")

@@ -12,8 +12,9 @@ import ai.koog.prompt.executor.llms.SingleLLMPromptExecutor
 import ai.koog.prompt.tokenizer.Tokenizer
 import androidx.annotation.VisibleForTesting
 import com.diamondedge.logging.logging
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
-import jakarta.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -33,7 +34,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import org.balch.recipes.core.ai.GeminiKeyProvider
 import org.balch.recipes.core.coroutines.DispatcherProvider
-import org.balch.recipes.di.AppScope
 import org.balch.recipes.features.agent.chat.ChatMessage
 import org.balch.recipes.features.agent.chat.ChatMessageType
 import org.balch.recipes.features.agent.session.AgentSessionStats
