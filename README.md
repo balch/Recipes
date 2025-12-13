@@ -62,15 +62,11 @@ Another reason this app came together so nicely is due to the plethora of free a
 
 
 ### Koog AI Agent Integration
-This app integrates [Koog AI Agents](https://github.com/koog-ai/koog-agents) to provide an intelligent cooking assistant powered by Google's Gemini models. The AI agent can help users with recipe suggestions, cooking tips, and navigation through the app.
+**Recipe Maestro** is the in-app chatbot that answers questions about meal and coding recipes. The agent configuration provides **randomized mood** prompts for more **intesting engagement**.
 
-#### Features
-- **AI-Powered Chat**: Interactive cooking assistant that understands recipe-related queries
-- **Multi-Model Support**: Supports Gemini 2.5 Pro, Flash, and Flash Lite models
-- **Tool Integration**: AI agent can execute tools and provide contextual responses
-- **Function Calling**: Advanced agentic behavior with tool registry support
+The agent was built using **[Koog](https://github.com/koog-ai/koog-agents)** and integrates with the **Gemini** models. Multiple **tools** were created to provide access to remote and local data sources and allow for AI **recipe creation** and **navigation**. The Agent Screen also displays token and tool usage metrics.
 
-#### API Key Configuration
+### API Key Configuration
 To use the AI features, you need a Google Gemini API key:
 
 1. Obtain a Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
