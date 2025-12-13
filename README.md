@@ -25,9 +25,11 @@ The goal was to brush up on the the latest **Android** tech stack components and
 Another reason this app came together so nicely is due to the plethora of free and easy to use **Android Tools and Libraries** supplied by both _Big-Biz_ (hello _GOOGLE_ and _JETBRAINS_), and the **Android Community ICs** toiling away on GitHub and Medium. The ***Code Recipes*** mostly originate from these sources and describe the wiring and plumbing used to create a visually compelling **Android Application**.
 
 ### 😋🌮 Bon App...😋🌮
-|                                           Dark Mode                                           |                                          Light Mode                                           |
-|:---------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------:|
-| <video src="https://github.com/user-attachments/assets/4723386b-970f-4c90-8d60-919193125c62"> | <video src="https://github.com/user-attachments/assets/82fb3350-ffc5-48bd-8030-16ff4972f4b3"> |
+
+| Mobile | Tablet | 
+|:---:|:---:|
+| <img width="1080" height="2092" alt="recipes_category" src="https://github.com/user-attachments/assets/1346f62c-ea71-42f8-9b3a-b2bdf0a244bd" /> | <img width="2208" height="1840" alt="recipes_code" src="https://github.com/user-attachments/assets/28d63008-0f4e-4dcb-94bd-03042cbc30bc" /> 
+| <img width="1080" height="2092" alt="recipe_agent" src="https://github.com/user-attachments/assets/d91789ec-c89c-4638-acac-25647ff43e9b" /> | <img width="2208" height="1840" alt="recipes_detail" src="https://github.com/user-attachments/assets/8e4d319b-1e50-495d-98ab-117941a80c20" /> |
 
 <details>
 <summary><b>Meal Recipes</b></summary>
