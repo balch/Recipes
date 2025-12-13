@@ -52,8 +52,10 @@ fun AiFloatingToolbar(
                 )
             ) {
                 RecipeMaestroWidget(
-                    modifier = Modifier.align(Alignment.CenterVertically),
-                    fontSize = 42.sp,
+                    modifier = Modifier
+                        .padding(start = 2.dp)
+                        .align(Alignment.CenterVertically),
+                    fontSize = 24.sp,
                 )
             }
         },

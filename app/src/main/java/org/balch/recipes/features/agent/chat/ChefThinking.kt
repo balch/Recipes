@@ -33,7 +33,7 @@ fun ChefThinkingAnimation() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         RecipeMaestroWidget(
-            fontSize = 32.sp,
+            fontSize = 16.sp,
         )
 
         // Pulsing dots

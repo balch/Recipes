@@ -68,7 +68,7 @@ internal fun ChatMessageBubble(
                                     when (message.type) {
                                         ChatMessageType.Agent -> {
                                             RecipeMaestroWidget(
-                                                fontSize = 24.sp,
+                                                fontSize = 16.sp,
                                                 modifier = Modifier.padding(end = 4.dp)
                                             )
                                             Text(
