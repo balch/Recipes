@@ -28,8 +28,8 @@ Another reason this app came together so nicely is due to the plethora of free a
 
 | Mobile | Tablet | 
 |:---:|:---:|
-| <img width="1080" height="2092" alt="recipes_category" src="https://github.com/user-attachments/assets/1346f62c-ea71-42f8-9b3a-b2bdf0a244bd" /> | <img width="2208" height="1840" alt="recipes_code" src="https://github.com/user-attachments/assets/28d63008-0f4e-4dcb-94bd-03042cbc30bc" /> 
-| <img width="1080" height="2092" alt="recipe_agent" src="https://github.com/user-attachments/assets/d91789ec-c89c-4638-acac-25647ff43e9b" /> | <img width="2208" height="1840" alt="recipes_detail" src="https://github.com/user-attachments/assets/8e4d319b-1e50-495d-98ab-117941a80c20" /> |
+| <img width="1080" height="2092" alt="recipes_category" src="https://github.com/user-attachments/assets/228415b9-04c1-4569-8d00-657b3f2ae79a" /> |<img width="2208" height="1840" alt="recipes_code" src="https://github.com/user-attachments/assets/8117b986-511a-4cfa-8ba3-034e87584756" /> |
+| <img width="1080" height="2092" alt="recipes_agent" src="https://github.com/user-attachments/assets/3c99547b-9a9e-4b7f-b287-fb97ed319751" /> |<img width="2208" height="1840" alt="recipes_detail" src="https://github.com/user-attachments/assets/c4cd2220-f673-445e-9a77-12852b0b7d38" /> |
 
 <details>
 <summary><b>Meal Recipes</b></summary>
