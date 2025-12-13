@@ -31,36 +31,6 @@ Another reason this app came together so nicely is due to the plethora of free a
 | <img width="1080" height="2092" alt="recipes_category" src="https://github.com/user-attachments/assets/228415b9-04c1-4569-8d00-657b3f2ae79a" /> |<img width="2208" height="1840" alt="recipes_code" src="https://github.com/user-attachments/assets/8117b986-511a-4cfa-8ba3-034e87584756" /> |
 | <img width="1080" height="2092" alt="recipes_agent" src="https://github.com/user-attachments/assets/3c99547b-9a9e-4b7f-b287-fb97ed319751" /> |<img width="2208" height="1840" alt="recipes_detail" src="https://github.com/user-attachments/assets/c4cd2220-f673-445e-9a77-12852b0b7d38" /> |
 
-<details>
-<summary><b>Meal Recipes</b></summary>
-
-|                                      Categories                                      |                                       Cuisine                                       |                                        Detail List                                         |                                        Detail Step By Step                                         |
-|:------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------:|
-|  <img src="screenshots/darkmode-category.png" width="200" alt="Dark Mode Category">  |  <img src="screenshots/darkmode-cuisine.png" width="200" alt="Dark Mode Cuisine">   |  <img src="screenshots/darkmode-detail-list.png" width="200" alt="Dark Mode Detail List">  |  <img src="screenshots/darkmode-detail-step.png" width="200" alt="Dark Mode Detail Step By Step">  |
-| <img src="screenshots/lightmode-category.png" width="200" alt="Light Mode Category"> | <img src="screenshots/lightmode-cuisine.png" width="200" alt="Light Mode Category"> | <img src="screenshots/lightmode-detail-list.png" width="200" alt="Light Mode Detail List"> | <img src="screenshots/lightmode-detail-step.png" width="200" alt="Light Mode Detail Step By Step"> |
-
-</details>
-
-<details>
-<summary><b>Code Recipes</b></summary>
-
-|                                    Code Recipes                                    |                                        Code Recipe Detail                                         |
-|:----------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------:|
-| <img src="screenshots/darkmode-code.png" width="200" alt="Dark Mode Code Recipes"> |  <img src="screenshots/darkmode-code-detail.png" width="200" alt="Dark Mode Code Recipe Detail">  |
-|  <img src="screenshots/lightmode-code.png" width="200" alt="Light Mode Recipes">   | <img src="screenshots/lightmode-code-detail.png" width="200" alt="Light Mode Code Recipe Detail"> |
-
-</details>
-
-<details>
-<summary><b>Detail Screens</b></summary>
-  
-|                                           Dark Mode                                           |                                          Light Mode                                           | 
-|:---------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------:|
-| <video src="https://github.com/user-attachments/assets/36a5b9b5-0a16-4ec8-b9d1-a13194ce5234"> | <video src="https://github.com/user-attachments/assets/4efd0269-0229-47d3-9796-2cfd27a65303"> |
-
-</details>
-
-
 ### Koog AI Agent Integration
 **Recipe Maestro** is the in-app chatbot that answers questions about meal and coding recipes. The agent configuration provides **randomized mood** prompts for more **intesting engagement**.
 
