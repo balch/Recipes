@@ -2,6 +2,7 @@ package org.balch.recipes.features.agent.chat
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,6 +23,7 @@ import com.mikepenz.markdown.model.DefaultMarkdownColors
 import com.mikepenz.markdown.model.DefaultMarkdownTypography
 import org.balch.recipes.ui.theme.RecipesTheme
 import org.balch.recipes.ui.theme.ThemePreview
+import org.balch.recipes.ui.widgets.RecipeMaestroWidget
 import org.balch.recipes.ui.widgets.TypewriterText
 
 @Composable
@@ -59,17 +61,34 @@ internal fun ChatMessageBubble(
                     else -> {
                         Column {
                             if (message.type != ChatMessageType.User) {
-                                Text(
-                                    text = when (message.type) {
-                                        ChatMessageType.Agent -> "👨‍🍳 Maestro"
-                                        ChatMessageType.Error -> "⚠️ Error"
-                                        else -> ""
-                                    },
-                                    style = typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = message.type.textColor().copy(alpha = 0.8f),
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.padding(bottom = 4.dp)
-                                )
+                                ) {
+                                    when (message.type) {
+                                        ChatMessageType.Agent -> {
+                                            RecipeMaestroWidget(
+                                                fontSize = 24.sp,
+                                                modifier = Modifier.padding(end = 4.dp)
+                                            )
+                                            Text(
+                                                text = "Maestro",
+                                                style = typography.labelMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = message.type.textColor().copy(alpha = 0.8f)
+                                            )
+                                        }
+                                        ChatMessageType.Error -> {
+                                            Text(
+                                                text = "⚠️ Error",
+                                                style = typography.labelMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = message.type.textColor().copy(alpha = 0.8f)
+                                            )
+                                        }
+                                        else -> {}
+                                    }
+                                }
                             }
 
                             TypewriterText(

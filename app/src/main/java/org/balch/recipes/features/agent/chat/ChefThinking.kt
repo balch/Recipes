@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -23,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.balch.recipes.ui.theme.RecipesTheme
+import org.balch.recipes.ui.widgets.RecipeMaestroWidget
 
 @Composable
 fun ChefThinkingAnimation() {
@@ -32,9 +32,8 @@ fun ChefThinkingAnimation() {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "👨‍🍳",
-            fontSize = 24.sp
+        RecipeMaestroWidget(
+            fontSize = 32.sp,
         )
 
         // Pulsing dots

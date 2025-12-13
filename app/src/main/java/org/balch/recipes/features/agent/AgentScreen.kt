@@ -304,38 +304,39 @@ internal fun TopBar(
     TopAppBar(
         modifier = modifier.fillMaxWidth(),
         title = {
-            Crossfade(isCompactHeight) { isCompact ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    RecipeMaestroWidget(
-                        fontSize = if (isCompact) 24.sp else 32.sp,
-                        iconTint = moodTintColor,
-                    )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                RecipeMaestroWidget(
+                    fontSize = if (isCompactHeight) 24.sp else 30.sp,
+                    iconTint = moodTintColor,
+                )
 
-                    Column {
-                        Text(
-                            text = "Recipe Maestro",
-                            style = if (isCompact) typography.titleMedium else typography.titleLarge,
-                            fontWeight = if (isCompact) FontWeight.SemiBold else FontWeight.Bold
-                        )
-                        Crossfade(targetState = showCondensedTokenUsage, label = "subtitle") { showCondensed ->
-                            if (showCondensed) {
+                Column {
+                    Text(
+                        text = "Recipe Maestro",
+                        style = if (isCompactHeight) typography.titleMedium else typography.titleLarge,
+                        fontWeight = if (isCompactHeight) FontWeight.SemiBold else FontWeight.Bold
+                    )
+                    Crossfade(
+                        targetState = showCondensedTokenUsage,
+                        label = "subtitle"
+                    ) { showCondensed ->
+                        if (showCondensed) {
+                            Text(
+                                text = "In: ${sessionUsage.inputTokens} | Out: ${sessionUsage.outputTokens} | Tools: ${sessionUsage.toolCalls}",
+                                style = typography.labelMedium,
+                                color = colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                        } else {
+                            if (!isCompactHeight) {
                                 Text(
-                                    text = "In: ${sessionUsage.inputTokens} | Out: ${sessionUsage.outputTokens} | Tools: ${sessionUsage.toolCalls}",
+                                    text = "Your culinary—coding companion",
                                     style = typography.labelMedium,
                                     color = colorScheme.onSurface.copy(alpha = 0.7f)
                                 )
-                            } else {
-                                if (!isCompact) {
-                                    Text(
-                                        text = "Your culinary—coding companion",
-                                        style = typography.labelMedium,
-                                        color = colorScheme.onSurface.copy(alpha = 0.7f)
-                                    )
-                                }
                             }
                         }
                     }
