@@ -2,7 +2,6 @@ package org.balch.recipes.ui.widgets
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,15 +28,11 @@ fun TypewriterText(
     // Track if animation has completed for this text
     var animationCompleted by remember(textId) { mutableStateOf(!animate) }
 
-    // The text we actually render - only complete lines during animation
-    val renderedText by remember(text) {
-        derivedStateOf {
-            if (currentCharIndex >= text.length) {
-                text
-            } else {
-                findSafeLineBreakpoint(text.take(currentCharIndex))
-            }
-        }
+    // The text we actually render
+    val renderedText = if (currentCharIndex >= text.length) {
+        text
+    } else {
+        text.take(currentCharIndex)
     }
 
     val breakIterator = remember { BreakIterator.getCharacterInstance() }
@@ -63,19 +58,4 @@ fun TypewriterText(
     }
 
     content(renderedText)
-}
-
-private fun findSafeLineBreakpoint(partialText: String): String {
-    if (partialText.isEmpty()) return ""
-    
-    // Find the last newline
-    val lastNewline = partialText.lastIndexOf('\n')
-    
-    return if (lastNewline >= 0) {
-        val completeLines = partialText.take(lastNewline + 1)
-        val trailingPartial = partialText.drop(lastNewline + 1)
-        completeLines + trailingPartial
-    } else {
-        partialText
-    }
 }
