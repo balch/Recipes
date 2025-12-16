@@ -2,7 +2,10 @@ package org.balch.recipes.features.agent.tools.meals
 
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.core.tools.annotations.LLMDescription
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.binding
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import org.balch.recipes.core.models.Meal
@@ -12,7 +15,10 @@ import org.balch.recipes.core.repository.RecipeRepository
 /**
  * Tool for returning a full Meal from a MealSummary (by id)
  */
-class MealLookupTool @Inject constructor(
+@MealTool
+@ContributesIntoSet(AppScope::class, binding<Tool<*, *>>())
+@Inject
+class MealLookupTool(
     private val recipeRepository: RecipeRepository,
 ) : Tool<MealLookupTool.Args, MealLookupTool.Result>() {
 

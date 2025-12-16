@@ -2,7 +2,10 @@ package org.balch.recipes.features.agent.tools.code
 
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.core.tools.annotations.LLMDescription
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.binding
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import org.balch.recipes.core.models.CodeRecipe
@@ -11,7 +14,10 @@ import org.balch.recipes.features.CodeRecipeRepository
 /**
  * Tool for searching for app code recipes.
  */
-class CodeRecipeSearchTool @Inject constructor(
+@CodeRecipeTool
+@ContributesIntoSet(AppScope::class, binding<Tool<*, *>>())
+@Inject
+class CodeRecipeSearchTool(
     private val codeRecipeRepository: CodeRecipeRepository
 ) : Tool<CodeRecipeSearchTool.Args, CodeRecipeSearchTool.Result>() {
     @Serializable

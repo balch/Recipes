@@ -2,7 +2,10 @@ package org.balch.recipes.features.agent.tools.code
 
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.core.tools.annotations.LLMDescription
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.binding
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import org.balch.recipes.DetailRoute
@@ -13,7 +16,10 @@ import org.balch.recipes.core.navigation.NavigationRouter
 /**
  * Tool for Routine to a CodeRecipe or CodeRecipeSummary
  */
-class CodeRecipeDetailTool @Inject constructor(
+@CodeRecipeTool
+@ContributesIntoSet(AppScope::class, binding<Tool<*, *>>())
+@Inject
+class CodeRecipeDetailTool(
     private val navigationRouter: NavigationRouter,
 ) : Tool<CodeRecipeDetailTool.Args, CodeRecipeDetailTool.Result>() {
 

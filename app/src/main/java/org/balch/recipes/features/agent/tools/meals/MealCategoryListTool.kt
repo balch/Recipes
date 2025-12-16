@@ -2,7 +2,10 @@ package org.balch.recipes.features.agent.tools.meals
 
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.core.tools.annotations.LLMDescription
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.binding
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import org.balch.recipes.core.models.Category
@@ -11,7 +14,10 @@ import org.balch.recipes.core.repository.RecipeRepository
 /**
  * Tool for returning all recipe categories from TheMealDB via the repository
  */
-class MealCategoryListTool @Inject constructor(
+@MealTool
+@ContributesIntoSet(AppScope::class, binding<Tool<*, *>>())
+@Inject
+class MealCategoryListTool(
     private val recipeRepository: RecipeRepository,
 ) : Tool<MealCategoryListTool.Args, MealCategoryListTool.Result>() {
 

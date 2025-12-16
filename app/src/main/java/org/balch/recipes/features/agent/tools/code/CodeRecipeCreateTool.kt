@@ -2,7 +2,10 @@ package org.balch.recipes.features.agent.tools.code
 
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.core.tools.annotations.LLMDescription
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.binding
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import org.balch.recipes.core.models.CodeArea
@@ -13,6 +16,8 @@ import kotlin.time.ExperimentalTime
 /**
  * Reinforcement tool to remind the AI to create unique code recipes.
  */
+@CodeRecipeTool
+@ContributesIntoSet(AppScope::class, binding<Tool<*, *>>())
 @Inject
 class CodeRecipeCreateTool() : Tool<CodeRecipeCreateTool.Args, CodeRecipeCreateTool.Result>() {
     @Serializable

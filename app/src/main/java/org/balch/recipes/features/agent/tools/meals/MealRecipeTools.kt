@@ -3,40 +3,21 @@ package org.balch.recipes.features.agent.tools.meals
 import ai.koog.agents.core.tools.Tool
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.Qualifier
 import dev.zacsweers.metro.SingleIn
 
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class MealTool
 
 /**
  * Provides access to the CodeRecipe tools.
  */
 @SingleIn(AppScope::class)
-class MealRecipeTools @Inject internal constructor(
-    mealRecipeCreateTool: MealRecipeCreateTool,
-    mealRecipeDetailTool: MealRecipeDetailTool,
-    mealAreaListTool: MealAreaListTool,
-    mealCategoryListTool: MealCategoryListTool,
-    mealIngredientListTool: MealIngredientListTool,
-    mealSearchTool: MealSearchTool,
-    mealsByCategoryTool: MealsByCategoryTool,
-    mealsByAreaTool: MealsByAreaTool,
-    mealsByIngredientTool: MealsByIngredientTool,
-    mealByIdTool: MealByIdTool,
-    mealRandomTool: MealRandomTool,
-    mealLookupTool: MealLookupTool,
+@Inject
+class MealRecipeTools(
+    @param:MealTool
+    private val toolSet: Set<Tool<*, *>>
 ) {
-    val tools: List<Tool<*, *>> = listOf(
-        mealAreaListTool,
-        mealCategoryListTool,
-        mealIngredientListTool,
-        mealSearchTool,
-        mealsByCategoryTool,
-        mealsByAreaTool,
-        mealsByIngredientTool,
-        mealByIdTool,
-        mealRandomTool,
-        mealLookupTool,
-        mealRecipeDetailTool,
-        mealRecipeCreateTool,
-    )
+    val tools: List<Tool<*, *>> = toolSet.toList()
 }
-
