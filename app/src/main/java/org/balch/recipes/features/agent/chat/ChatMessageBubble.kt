@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextLinkStyles
@@ -113,36 +114,48 @@ internal fun ChatMessageBubble(
 }
 
 @Composable
-private fun ChatMessage.markdownColors() = DefaultMarkdownColors(
-    text = type.textColor(),
-    codeBackground = type.containerColor(),
-    inlineCodeBackground = type.containerColor(),
-    dividerColor = type.textColor().copy(alpha = 0.2f),
-    tableBackground = type.containerColor(),
-)
+private fun ChatMessage.markdownColors(): DefaultMarkdownColors {
+    val textColor = type.textColor()
+    val containerColor = type.containerColor()
+    return remember(textColor, containerColor) {
+        DefaultMarkdownColors(
+            text = textColor,
+            codeBackground = containerColor,
+            inlineCodeBackground = containerColor,
+            dividerColor = textColor.copy(alpha = 0.2f),
+            tableBackground = containerColor,
+        )
+    }
+}
 
 @Composable
-private fun ChatMessage.markdownTypography() = DefaultMarkdownTypography(
-    h1 = typography.headlineLarge.copy(fontSize = 24.sp),
-    h2 = typography.headlineMedium.copy(fontSize = 20.sp),
-    h3 = typography.headlineSmall.copy(fontSize = 18.sp),
-    h4 = typography.titleLarge.copy(fontSize = 16.sp),
-    h5 = typography.titleMedium.copy(fontSize = 14.sp),
-    h6 = typography.titleSmall.copy(fontSize = 12.sp),
-    text = typography.bodyLarge.copy(fontSize = 16.sp),
-    code = typography.bodyMedium.copy(
-        fontSize = 14.sp,
-        background = type.containerColor(),
-    ),
-    inlineCode = typography.bodyMedium,
-    paragraph = typography.bodyMedium.copy(fontSize = 16.sp),
-    ordered = typography.bodyMedium.copy(fontSize = 16.sp),
-    bullet = typography.bodyMedium.copy(fontSize = 16.sp),
-    list = typography.bodyMedium.copy(fontSize = 16.sp),
-    quote = typography.bodyMedium.copy(fontSize = 16.sp),
-    table = typography.bodyMedium.copy(fontSize = 16.sp),
-    textLink = TextLinkStyles()
-)
+private fun ChatMessage.markdownTypography(): DefaultMarkdownTypography {
+    val currentTypography = typography
+    val containerColor = type.containerColor()
+    return remember(currentTypography, containerColor) {
+        DefaultMarkdownTypography(
+            h1 = currentTypography.headlineLarge.copy(fontSize = 24.sp),
+            h2 = currentTypography.headlineMedium.copy(fontSize = 20.sp),
+            h3 = currentTypography.headlineSmall.copy(fontSize = 18.sp),
+            h4 = currentTypography.titleLarge.copy(fontSize = 16.sp),
+            h5 = currentTypography.titleMedium.copy(fontSize = 14.sp),
+            h6 = currentTypography.titleSmall.copy(fontSize = 12.sp),
+            text = currentTypography.bodyLarge.copy(fontSize = 16.sp),
+            code = currentTypography.bodyMedium.copy(
+                fontSize = 14.sp,
+                background = containerColor,
+            ),
+            inlineCode = currentTypography.bodyMedium,
+            paragraph = currentTypography.bodyMedium.copy(fontSize = 16.sp),
+            ordered = currentTypography.bodyMedium.copy(fontSize = 16.sp),
+            bullet = currentTypography.bodyMedium.copy(fontSize = 16.sp),
+            list = currentTypography.bodyMedium.copy(fontSize = 16.sp),
+            quote = currentTypography.bodyMedium.copy(fontSize = 16.sp),
+            table = currentTypography.bodyMedium.copy(fontSize = 16.sp),
+            textLink = TextLinkStyles()
+        )
+    }
+}
 
 @ThemePreview
 @Composable

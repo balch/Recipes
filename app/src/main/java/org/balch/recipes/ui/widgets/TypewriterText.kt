@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameMillis
 import kotlinx.coroutines.delay
 import java.text.BreakIterator
 import java.text.StringCharacterIterator
@@ -42,10 +43,20 @@ fun TypewriterText(
             val targetText = text
             breakIterator.text = StringCharacterIterator(targetText)
 
-            var nextIndex = breakIterator.following(currentCharIndex)
+            // Ensure index is within bounds of the potentially changed text
+            val safeIndex = currentCharIndex.coerceAtMost(targetText.length)
+            var nextIndex = if (safeIndex < targetText.length) {
+                breakIterator.following(safeIndex)
+            } else {
+                BreakIterator.DONE
+            }
+
             while (nextIndex != BreakIterator.DONE) {
                 currentCharIndex = nextIndex
-                delay(18)
+                // Wait for a frame to ensure composition/draw can happen
+                withFrameMillis { }
+                // Then add a small delay for the typewriter effect
+                delay(30)
                 nextIndex = breakIterator.next()
             }
             // Ensure we show the complete text at the end
