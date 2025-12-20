@@ -9,7 +9,7 @@ import ai.koog.agents.features.tokenizer.feature.MessageTokenizer
 import ai.koog.prompt.dsl.prompt
 import ai.koog.prompt.executor.clients.google.GoogleLLMClient
 import ai.koog.prompt.executor.llms.SingleLLMPromptExecutor
-import ai.koog.prompt.tokenizer.Tokenizer
+import ai.koog.prompt.tokenizer.SimpleRegexBasedTokenizer
 import androidx.annotation.VisibleForTesting
 import com.diamondedge.logging.logging
 import dev.zacsweers.metro.AppScope
@@ -71,16 +71,9 @@ class RecipeMaestroAgent @Inject constructor(
     private val _sessionUsage = MutableStateFlow(SessionUsage.EMPTY)
     val sessionUsage: StateFlow<SessionUsage> = _sessionUsage.asStateFlow()
 
-    // Current roundtrip stats being accumulated
     private var currentAgentSessionStats = AgentSessionStats()
 
-    // Simple tokenizer that estimates tokens (~4 characters per token for English text)
-    private val simpleTokenizer = object : Tokenizer {
-        override fun countTokens(text: String): Int {
-            // Approximation: ~4 characters per token for GPT-like models
-            return (text.length / 4).coerceAtLeast(1)
-        }
-    }
+    private val simpleTokenizer = SimpleRegexBasedTokenizer()
 
     private fun trackInputTokens(text: String) {
         val tokens = simpleTokenizer.countTokens(text)
@@ -108,7 +101,7 @@ class RecipeMaestroAgent @Inject constructor(
         logger.d { "Tool call tracked. Total tool calls: ${_sessionUsage.value.toolCalls}" }
     }
 
-    private fun finalizeRoundtrip() {
+    private fun finalizeRoundTrip() {
         if (currentAgentSessionStats.inputTokens > 0 || currentAgentSessionStats.outputTokens > 0) {
             _sessionUsage.update { current ->
                 current.copy(
@@ -235,7 +228,7 @@ class RecipeMaestroAgent @Inject constructor(
 
     private fun agentMessageToState(message: String): AgentState {
         trackOutputTokens(message)
-        finalizeRoundtrip()
+        finalizeRoundTrip()
         addOrReplaceMessage(ChatMessage(text = message, type = ChatMessageType.Agent))
         return AgentState.Chatting(messages.toList())
     }
