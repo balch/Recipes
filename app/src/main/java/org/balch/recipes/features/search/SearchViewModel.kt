@@ -13,7 +13,6 @@ import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactoryKey
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -166,26 +165,26 @@ class SearchViewModel @AssistedInject constructor(
 
 
     private suspend fun searchMealsAndCode(query: String): SearchUiState {
-        val meals = repository.searchMeals(query)
-            .getOrElse { emptyList() }
-        val items = coroutineScope {
-            listOf(
-                async {
-                    meals.map { it.toMealSummary().toItemType() }
-                },
-                async {
-                    codeRecipeRepository.searchRecipes(query)
-                        .map { it.toItemType() }
-                }
-            ).awaitAll()
-                .flatten()
-                .sortedBy {
-                    when (it) {
-                        is ItemType.MealType -> it.meal.name
-                        is ItemType.CodeRecipeType -> it.codeRecipe.title
-                    }
-                }
+        val (meals, codeRecipes) = coroutineScope {
+            val mealsDeferred = async {
+                repository.searchMeals(query)
+                    .getOrElse { emptyList() }
+            }
+            val codeRecipesDeferred = async {
+                codeRecipeRepository.searchRecipes(query)
+            }
+            mealsDeferred.await() to codeRecipesDeferred.await()
         }
+        val items = listOf(
+            meals.map { it.toMealSummary().toItemType() },
+            codeRecipes.map { it.toItemType() }
+        ).flatten()
+            .sortedBy {
+                when (it) {
+                    is ItemType.MealType -> it.meal.name
+                    is ItemType.CodeRecipeType -> it.codeRecipe.title
+                }
+            }
 
         return SearchUiState.Show(
             searchType = SearchType.Search(query),

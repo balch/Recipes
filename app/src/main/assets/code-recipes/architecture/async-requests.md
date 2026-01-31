@@ -26,7 +26,7 @@ class IdeasViewModel @Inject constructor(
         .catch { e ->
             emit(IdeasUiState.Error(e.message ?: "Unknown error occurred"))
         }
-        .onEach { logger.d { "UIState: ${it.javaClass.simpleName} } }
+        .onEach { logger.d { "UIState: ${it.javaClass.simpleName}" } }
         .flowOn(dispatcherProvider.default)
         .stateIn(
             scope = viewModelScope,
@@ -41,11 +41,12 @@ class IdeasViewModel @Inject constructor(
                 coroutineScope {
                     val areasJob = async { mealRepository.getAreas() }
                     val randomMealJob = async { mealRepository.getRandomMeal() }
+                    val codeRecipesJob = async { codeRecipeRepository.getRandomRecipes(3) }
 
                     IdeasUiState.Areas(
                         areas = areasJob.await().getOrThrow(),
                         imageUrl = randomMealJob.await().getOrNull()?.thumbnail,
-                        codeRecipes = randomCodeRecipes
+                        codeRecipes = codeRecipesJob.await()
                     )
                 }
             }

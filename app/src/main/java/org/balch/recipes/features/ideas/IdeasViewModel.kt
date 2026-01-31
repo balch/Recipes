@@ -89,28 +89,29 @@ class IdeasViewModel @AssistedInject constructor(
         )
 
     private suspend fun deriveState(browsableType: BrowsableType): IdeasUiState {
-
-        // Randomly select 1 or 3 CodeRecipes to sprinkle into the grid
-        val randomCodeRecipes = codeRecipeRepository.getRandomRecipes(3)
-
         return when (browsableType) {
             BrowsableType.Category -> {
-                val categories = mealRepository.getCategories()
-                IdeasUiState.Categories(
-                    categories = categories.getOrThrow(),
-                    codeRecipes = randomCodeRecipes
-                )
+                coroutineScope {
+                    val categoriesJob = async { mealRepository.getCategories() }
+                    val codeRecipesJob = async { codeRecipeRepository.getRandomRecipes(3) }
+
+                    IdeasUiState.Categories(
+                        categories = categoriesJob.await().getOrThrow(),
+                        codeRecipes = codeRecipesJob.await()
+                    )
+                }
             }
 
             BrowsableType.Area -> {
                 coroutineScope {
                     val areasJob = async { mealRepository.getAreas() }
                     val randomMealJob = async { mealRepository.getRandomMeal() }
+                    val codeRecipesJob = async { codeRecipeRepository.getRandomRecipes(3) }
 
                     IdeasUiState.Areas(
                         areas = areasJob.await().getOrThrow(),
                         imageUrl = randomMealJob.await().getOrNull()?.thumbnail,
-                        codeRecipes = randomCodeRecipes
+                        codeRecipes = codeRecipesJob.await()
                     )
                 }
             }
@@ -119,11 +120,12 @@ class IdeasViewModel @AssistedInject constructor(
                 coroutineScope {
                     val ingredientsJob = async { mealRepository.getIngredients() }
                     val randomMealJob = async { mealRepository.getRandomMeal() }
+                    val codeRecipesJob = async { codeRecipeRepository.getRandomRecipes(3) }
 
                     IdeasUiState.Ingredients(
                         ingredients = ingredientsJob.await().getOrThrow(),
                         imageUrl = randomMealJob.await().getOrNull()?.thumbnail,
-                        codeRecipes = randomCodeRecipes
+                        codeRecipes = codeRecipesJob.await()
                     )
                 }
             }
